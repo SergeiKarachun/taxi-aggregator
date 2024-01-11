@@ -5,6 +5,7 @@ import by.sergo.passengerservice.domain.dto.response.PassengerListResponseDto;
 import by.sergo.passengerservice.domain.dto.response.PassengerResponseDto;
 import by.sergo.passengerservice.domain.dto.response.StringResponse;
 import by.sergo.passengerservice.service.PassengerService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -20,13 +21,13 @@ public class PassengerController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<PassengerResponseDto> create(@RequestBody PassengerCreateUpdateRequestDto dto) {
+    public ResponseEntity<PassengerResponseDto> create(@RequestBody @Valid PassengerCreateUpdateRequestDto dto) {
         var passengerResponseDto = passengerService.create(dto);
         return ResponseEntity.ok(passengerResponseDto);
     }
 
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<PassengerResponseDto> update(@RequestBody PassengerCreateUpdateRequestDto dto,
+    public ResponseEntity<PassengerResponseDto> update(@RequestBody @Valid PassengerCreateUpdateRequestDto dto,
                                                        @PathVariable("id") Long id) {
         var passengerResponseDto = passengerService.update(id, dto);
         return ResponseEntity.ok(passengerResponseDto);
@@ -48,9 +49,9 @@ public class PassengerController {
     }
 
     @GetMapping
-    public ResponseEntity<PassengerListResponseDto> getAll(@RequestParam(required = false, defaultValue = "1") Integer page,
-                                                           @RequestParam(required = false, defaultValue = "10") Integer size,
-                                                           @RequestParam(required = false) String orderBy) {
+    public ResponseEntity<PassengerListResponseDto> getAll(@RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
+                                                           @RequestParam(value = "size", required = false, defaultValue = "10") Integer size,
+                                                           @RequestParam(value = "orderBy", required = false) String orderBy) {
         var passengerListResponseDto = passengerService.getAll(page, size, orderBy);
         return ResponseEntity.ok(passengerListResponseDto);
     }

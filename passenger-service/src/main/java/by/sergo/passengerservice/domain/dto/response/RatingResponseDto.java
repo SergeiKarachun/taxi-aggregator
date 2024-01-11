@@ -1,14 +1,19 @@
 package by.sergo.passengerservice.domain.dto.response;
 
 
-import lombok.Builder;
-import lombok.Value;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.FieldDefaults;
 
-@Value
-@Builder
+
+
+@Getter
+@Setter
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class RatingResponseDto {
-    Long id;
-    Integer grade;
-    Long passengerId;
-    Long driverId;
+    private Long id;
+    private Integer grade;
+    private Long passengerId;
+    private Long driverId;
 }

@@ -1,3 +1,5 @@
+server:
+  port: 9001
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5433/passenger
@@ -7,3 +9,5 @@ spring:
   liquibase:
     enabled: true
     change-log: db.changelog/db.changelog-master.yaml
+  jpa:
+    show-sql: true

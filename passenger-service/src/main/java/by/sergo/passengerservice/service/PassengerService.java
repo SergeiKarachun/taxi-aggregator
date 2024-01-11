@@ -15,6 +15,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.lang.reflect.Field;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -46,12 +49,10 @@ public class PassengerService {
     }
 
     @Transactional
-    public boolean delete(Long id) {
+    public void delete(Long id) {
         if (passengerRepository.existsById(id)) {
             passengerRepository.deleteById(id);
-            return true;
-        }
-        return false;
+        } else throw new NotFoundException(ExceptionMessageUtil.getNotFoundMessage("Passenger", "id", id));
     }
 
     public PassengerResponseDto getById(Long id) {
@@ -85,7 +86,8 @@ public class PassengerService {
                 .map(this::mapToDto);
         return PassengerListResponseDto.builder()
                 .passengers(responsePage.getContent())
-                .page(responsePage.getPageable().getPageNumber())
+                .page(responsePage.getPageable().getPageNumber() + 1)
+                .totalPages(responsePage.getTotalPages())
                 .size(responsePage.getContent().size())
                 .total((int) responsePage.getTotalElements())
                 .sortedByField(field)
@@ -93,21 +95,37 @@ public class PassengerService {
     }
 
     private PageRequest getPageRequest(Integer page, Integer size, String field) {
+        if  (page < 1 || size < 1) {
+            throw new BadRequestException(ExceptionMessageUtil.getInvalidRequestMessage(page, size));
+        }
 
-        if (page >= 1 && size >= 1 && field != null)
-            return PageRequest.of(page - 1, size).withSort(Sort.by(field));
-        if (page >= 1 && size >= 1 && field == null)
+        if (field != null) {
+            List<String> declaredFields = Arrays.stream(PassengerResponseDto.class.getDeclaredFields())
+                    .map(Field::getName)
+                    .toList();
+            if (!declaredFields.contains(field.toLowerCase())) {
+                throw new BadRequestException(ExceptionMessageUtil.getInvalidSortingParamRequestMessage(field));
+            }
+            return PageRequest.of(page - 1, size).withSort(Sort.by(Sort.Order.asc(field.toLowerCase())));
+        }
+        if (field == null) {
             return PageRequest.of(page - 1, size);
+        }
         else return PageRequest.of(0, 10);
     }
 
     private void checkIsPassengerForUpdateUnique(PassengerCreateUpdateRequestDto dto, Passenger entity) {
+        var errors = new HashMap<String, String>();
         if (!Objects.equals(dto.getEmail(), entity.getEmail())) {
-            checkEmailIsUnique(dto);
+            checkEmailIsUnique(dto, errors);
         }
 
         if (!Objects.equals(dto.getPhone(), entity.getPhone())) {
-            checkPhoneIsUnique(dto);
+            checkPhoneIsUnique(dto, errors);
+        }
+
+        if (!errors.isEmpty()) {
+            throw new BadRequestException(ExceptionMessageUtil.getAlreadyExistMapMessage(errors));
         }
     }
 
@@ -119,30 +137,33 @@ public class PassengerService {
     }
 
     private void checkIsPassengerUnique(PassengerCreateUpdateRequestDto dto) {
-        checkEmailIsUnique(dto);
-        checkPhoneIsUnique(dto);
-    }
+        var errors = new HashMap<String, String>();
 
-    private void checkPhoneIsUnique(PassengerCreateUpdateRequestDto dto) {
-        if (passengerRepository.existsByPhone(dto.getPhone())) {
-            throw new BadRequestException(
-                    ExceptionMessageUtil.getAlreadyExistMessage("Passenger", "phone", dto.getPhone()));
+        checkEmailIsUnique(dto, errors);
+        checkPhoneIsUnique(dto, errors);
+
+        if (!errors.isEmpty()) {
+            throw new BadRequestException(ExceptionMessageUtil.getAlreadyExistMapMessage(errors));
         }
     }
 
-    private void checkEmailIsUnique(PassengerCreateUpdateRequestDto dto) {
+    private void checkPhoneIsUnique(PassengerCreateUpdateRequestDto dto, HashMap<String, String> errors) {
+        if (passengerRepository.existsByPhone(dto.getPhone())) {
+            errors.put("phone", ExceptionMessageUtil.getAlreadyExistMessage("Passenger", "phone", dto.getPhone()));
+        }
+    }
+
+    private void checkEmailIsUnique(PassengerCreateUpdateRequestDto dto, HashMap<String, String> errors) {
         if (passengerRepository.existsByEmail(dto.getEmail())) {
-            throw new BadRequestException(
-                    ExceptionMessageUtil.getAlreadyExistMessage("Passenger", "email", dto.getEmail()));
+            errors.put("email", ExceptionMessageUtil.getAlreadyExistMessage("Passenger", "email", dto.getEmail()));
         }
     }
 
     private Passenger mapToEntity(PassengerCreateUpdateRequestDto passengerResponseDto) {
-        return modelMapper.map(passengerRepository, Passenger.class);
+        return modelMapper.map(passengerResponseDto, Passenger.class);
     }
 
     private PassengerResponseDto mapToDto(Passenger passenger) {
         return modelMapper.map(passenger, PassengerResponseDto.class);
     }
-
 }

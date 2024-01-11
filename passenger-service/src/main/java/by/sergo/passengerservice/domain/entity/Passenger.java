@@ -30,5 +30,6 @@ public class Passenger {
     @Column(nullable = false, unique = true)
     private String phone;
 
+    @Builder.Default
     private Double rating = 5.0;
 }
