@@ -1,0 +1,12 @@
+
+spring:
+  data:
+    mongodb:
+      authentication-database: admin
+      username: root
+      password: example
+      database: ridedb
+      port: 27017
+      host: localhost
+server:
+  port: 9003
