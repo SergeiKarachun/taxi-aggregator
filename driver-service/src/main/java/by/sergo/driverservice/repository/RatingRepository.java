@@ -9,15 +9,11 @@ import java.util.Optional;
 
 @Repository
 public interface RatingRepository extends JpaRepository<Rating, Long> {
-
-    /*select avg(dt.vix)
-from
-(select vix from my_table order by date desc limit 3) dt*/
     @Query(value = "SELECT AVG(rt.grade) " +
                    "FROM (SELECT grade FROM rating " +
+                   "WHERE driver_id = :driverId " +
                    "ORDER BY id DESC LIMIT 5) rt",
-    nativeQuery = true)
+            nativeQuery = true)
     Optional<Double> getRatingsByDriverId(Long driverId);
-
     Boolean existsByRideId(Long rideId);
 }
