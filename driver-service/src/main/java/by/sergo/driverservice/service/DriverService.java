@@ -33,6 +33,7 @@ public class DriverService {
 
     @Transactional
     public DriverResponseDto create(DriverCreateUpdateRequestDto dto) {
+        checkIsDriverUnique(dto);
         return Optional.of(mapToEntity(dto))
                 .map(driverRepository::saveAndFlush)
                 .map(this::mapToDto)
@@ -46,7 +47,7 @@ public class DriverService {
         checkIsDriverForUpdateUnique(dto, existDriver);
 
         var driverToSave = mapToEntity(dto);
-        driverToSave.setId(driverToSave.getId());
+        driverToSave.setId(id);
 
         return Optional.of(driverToSave)
                 .map(driverRepository::saveAndFlush)
@@ -67,7 +68,7 @@ public class DriverService {
         return mapToDto(driver);
     }
 
-    public DriverListResponseDto getAll(Integer page, Integer size, String orderBy) {
+    public DriverListResponseDto getAvailableDrivers(Integer page, Integer size, String orderBy) {
         PageRequest pageRequest = getPageRequest(page, size, orderBy);
         var responsePage = driverRepository.getAllByStatus(Status.AVAILABLE, pageRequest)
                 .map(this::mapToDto);
@@ -81,7 +82,7 @@ public class DriverService {
                 .build();
     }
 
-    public DriverListResponseDto getAvailableDrivers(Integer page, Integer size, String orderBy) {
+    public DriverListResponseDto getAll(Integer page, Integer size, String orderBy) {
         PageRequest pageRequest = getPageRequest(page, size, orderBy);
         var responsePage = driverRepository.findAll(pageRequest)
                 .map(this::mapToDto);
@@ -115,7 +116,7 @@ public class DriverService {
     }
 
     private PageRequest getPageRequest(Integer page, Integer size, String orderBy) {
-        if (page < 0 || size < 0) {
+        if (page < 1 || size < 1) {
             throw new BadRequestException(
                     ExceptionMessageUtil.getInvaLidRequestMessage(page, size));
         }

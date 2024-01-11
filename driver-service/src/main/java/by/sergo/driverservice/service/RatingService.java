@@ -47,7 +47,7 @@ public class RatingService {
 
         return DriverRatingResponseDto.builder()
                 .driverId(driverId)
-                .rating(driverRating)
+                .rating(Math.floor(driverRating*100)/100)
                 .build();
     }
 
