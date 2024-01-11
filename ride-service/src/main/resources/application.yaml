@@ -1,4 +1,3 @@
-
 spring:
   data:
     mongodb:
@@ -8,5 +7,8 @@ spring:
       database: ridedb
       port: 27017
       host: localhost
+      auto-index-creation: true
+mongock:
+  migration-scan-package: by.sergo.rideservice.config
 server:
   port: 9003
