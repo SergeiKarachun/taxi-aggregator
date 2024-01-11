@@ -13,5 +13,5 @@ public class DriverResponseDto {
     private String email;
     private String status;
     private Double rating;
-
+    private CarResponseDto car;
 }

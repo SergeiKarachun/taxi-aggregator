@@ -19,12 +19,12 @@ CREATE TABLE IF NOT EXISTS rating
 (
     id           BIGSERIAL PRIMARY KEY,
     grade        INT    NOT NULL,
-    driver_id    BIGINT NOT NULL,
+    driver_id    BIGINT,
     passenger_id BIGINT NOT NULL,
     CONSTRAINT rating_driver_fk
         FOREIGN KEY (driver_id) REFERENCES driver (id)
             ON UPDATE CASCADE
-            ON DELETE SET NULL
+            ON DELETE CASCADE
 );
 -- rollback drop table rating cascade;
 

@@ -30,7 +30,9 @@ public class RatingService {
 
         var rating = mapToEntity(dto);
         rating.setDriver(driver);
-        var savedRating = ratingRepository.save(rating);
+        var savedRating = ratingRepository.saveAndFlush(rating);
+        driver.setRating(Math.floor(getAverageRating(driverId) * 100) / 100);
+        driverRepository.save(driver);
         return mapToDto(savedRating);
     }
 
@@ -39,11 +41,7 @@ public class RatingService {
                 ExceptionMessageUtil.getNotFoundMessage("Driver", "id", driverId)
         ));
 
-        var driverRating = ratingRepository.getRatingsByDriverId(driverId)
-                .stream()
-                .mapToDouble(Rating::getGrade)
-                .average()
-                .orElse(5.0);
+        double driverRating = getAverageRating(driverId);
 
         return DriverRatingResponseDto.builder()
                 .driverId(driverId)
@@ -51,6 +49,14 @@ public class RatingService {
                 .build();
     }
 
+    private double getAverageRating(Long driverId) {
+        var driverRating = ratingRepository.getRatingsByDriverId(driverId)
+                .stream()
+                .mapToDouble(Rating::getGrade)
+                .average()
+                .orElse(5.0);
+        return driverRating;
+    }
 
 
     public RatingResponseDto mapToDto(Rating rating){

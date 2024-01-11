@@ -14,8 +14,10 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.rmi.ServerException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 
 @Slf4j
 @RestControllerAdvice(basePackages = {"by.sergo.driverservice.controller"})
@@ -33,7 +35,14 @@ public class RestControllerExceptionHandler {
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<RestErrorResponse> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
-        return createResponse(ex, HttpStatus.BAD_REQUEST);
+        List<String> messages = new ArrayList<>();
+        messages.add("Not valid structure of JSON");
+        messages.addAll(Collections.singletonList(ex.getMessage()));
+        return new ResponseEntity<>(RestErrorResponse.builder()
+                .messages(messages)
+                .status(HttpStatus.BAD_REQUEST)
+                .time(LocalDateTime.now())
+                .build(), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

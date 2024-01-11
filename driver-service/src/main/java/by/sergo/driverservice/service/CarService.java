@@ -4,7 +4,6 @@ import by.sergo.driverservice.domain.dto.request.CarCreateUpdateRequestDto;
 import by.sergo.driverservice.domain.dto.response.CarListResponseDto;
 import by.sergo.driverservice.domain.dto.response.CarResponseDto;
 import by.sergo.driverservice.domain.entity.Car;
-import by.sergo.driverservice.domain.entity.Driver;
 import by.sergo.driverservice.repository.CarRepository;
 import by.sergo.driverservice.repository.DriverRepository;
 import by.sergo.driverservice.service.exception.BadRequestException;
@@ -19,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Field;
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -38,6 +38,7 @@ public class CarService {
         checkCarIsUnique(dto);
         checkDriverIsExist(dto.getDriverId());
         checkDriverHasCar(dto.getDriverId());
+        checkDate(dto.getYearOfManufacture());
         return Optional.of(mapToEntity(dto))
                 .map(carRepository::saveAndFlush)
                 .map(this::mapToDto)
@@ -100,7 +101,7 @@ public class CarService {
         }
 
         if (orderBy != null) {
-            List<String> declaredFields = Arrays.stream(Driver.class.getDeclaredFields())
+            List<String> declaredFields = Arrays.stream(Car.class.getDeclaredFields())
                     .map(Field::getName)
                     .toList();
             if (!declaredFields.contains(orderBy.toLowerCase())){
@@ -126,7 +127,14 @@ public class CarService {
         }
 
         checkDriverIsExist(dto.getDriverId());
-        checkDriverHasCar(dto.getDriverId());
+        //  checkDriverHasCar(dto.getDriverId());
+        checkDate(dto.getYearOfManufacture());
+    }
+
+    private void checkDate(Integer yearOfManufacture) {
+        if (yearOfManufacture > LocalDate.now().getYear()) {
+            throw new BadRequestException(HttpStatus.BAD_REQUEST, "The year of manufacture should be no more than now.");
+        }
     }
 
     private void checkDriverIsExist(Long driverId) {

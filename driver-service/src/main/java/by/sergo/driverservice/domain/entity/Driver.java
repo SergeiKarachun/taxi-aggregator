@@ -29,4 +29,6 @@ public class Driver {
     private Status status = Status.AVAILABLE;
     @Builder.Default
     private Double rating = 5.0;
+    @OneToOne(mappedBy = "driver", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    private Car car;
 }

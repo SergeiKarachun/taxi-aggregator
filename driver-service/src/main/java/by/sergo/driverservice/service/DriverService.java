@@ -18,10 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Field;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -137,12 +134,17 @@ public class DriverService {
     }
 
     private void checkIsDriverForUpdateUnique(DriverCreateUpdateRequestDto dto, Driver existDriver) {
+        var errors = new HashMap<String, String>();
         if (!Objects.equals(dto.getEmail(), existDriver.getEmail())) {
-            checkIsEmailUnique(dto.getEmail());
+            checkIsEmailUnique(dto.getEmail(), errors);
         }
 
         if (!Objects.equals(dto.getPhone(), existDriver.getPhone())) {
-            checkIsPhoneUnique(dto.getPhone());
+            checkIsPhoneUnique(dto.getPhone(), errors);
+        }
+
+        if (!errors.isEmpty()) {
+            throw new BadRequestException(ExceptionMessageUtil.getAlreadyExistMapMessage(errors));
         }
     }
 
@@ -152,21 +154,24 @@ public class DriverService {
     }
 
     private void checkIsDriverUnique(DriverCreateUpdateRequestDto dto) {
-        checkIsEmailUnique(dto.getEmail());
-        checkIsPhoneUnique(dto.getPhone());
-    }
+        var errors = new HashMap<String, String>();
+        checkIsEmailUnique(dto.getEmail(), errors);
+        checkIsPhoneUnique(dto.getPhone(), errors);
 
-    private void checkIsPhoneUnique(String phone) {
-        if (driverRepository.existsByPhone(phone)) {
-            throw new BadRequestException(
-                    ExceptionMessageUtil.getAlreadyExistMessage("Driver", "phone", phone));
+        if (!errors.isEmpty()) {
+            throw new BadRequestException(ExceptionMessageUtil.getAlreadyExistMapMessage(errors));
         }
     }
 
-    private void checkIsEmailUnique(String email) {
+    private void checkIsPhoneUnique(String phone, HashMap<String, String> errors) {
+        if (driverRepository.existsByPhone(phone)) {
+            errors.put("phone", ExceptionMessageUtil.getAlreadyExistMessage("Driver", "phone", phone));
+        }
+    }
+
+    private void checkIsEmailUnique(String email, HashMap<String, String> errors) {
         if (driverRepository.existsByEmail(email)) {
-            throw new BadRequestException(
-                    ExceptionMessageUtil.getAlreadyExistMessage("Driver", "email", email));
+            errors.put("email", ExceptionMessageUtil.getAlreadyExistMessage("Driver", "email", email));
         }
     }
 
