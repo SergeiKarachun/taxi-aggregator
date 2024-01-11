@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS driver
     status  varchar(255) NOT NULL,
     rating  DECIMAL
 );
--- rollback drop table driver;
+-- rollback drop table driver cascade;
 
 --Rating
 CREATE TABLE IF NOT EXISTS rating
@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS rating
             ON UPDATE CASCADE
             ON DELETE SET NULL
 );
--- rollback drop table rating;
+-- rollback drop table rating cascade;
 
 
 
