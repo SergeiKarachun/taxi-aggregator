@@ -13,7 +13,6 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,29 +26,24 @@ public class DriverService {
     private final ModelMapper modelMapper;
     private final DriverRepository driverRepository;
 
-
     @Transactional
     public DriverResponseDto create(DriverCreateUpdateRequestDto dto) {
         checkIsDriverUnique(dto);
         return Optional.of(mapToEntity(dto))
                 .map(driverRepository::saveAndFlush)
                 .map(this::mapToDto)
-                .orElseThrow(() -> new BadRequestException(HttpStatus.BAD_REQUEST, "Can't create new driver, please check input parameters"));
+                .orElseThrow(() -> new BadRequestException("Can't create new driver, please check input parameters"));
     }
 
     @Transactional
     public DriverResponseDto update(Long id, DriverCreateUpdateRequestDto dto) {
         var existDriver = getByIdOrElseThrow(id);
-
         checkIsDriverForUpdateUnique(dto, existDriver);
-
-        var driverToSave = mapToEntity(dto);
-        driverToSave.setId(id);
-
-        return Optional.of(driverToSave)
-                .map(driverRepository::saveAndFlush)
-                .map(this::mapToDto)
-                .orElseThrow(() -> new BadRequestException(HttpStatus.BAD_REQUEST, "Can't update driver, please check input parameters"));
+        existDriver.setName(dto.getName());
+        existDriver.setSurname(dto.getSurname());
+        existDriver.setEmail(dto.getEmail());
+        existDriver.setPhone(dto.getPhone());
+        return mapToDto(driverRepository.save(existDriver));
     }
 
     @Transactional
@@ -99,17 +93,7 @@ public class DriverService {
         if (driver.getStatus().equals(Status.AVAILABLE)) {
             driver.setStatus(Status.UNAVAILABLE);
         } else driver.setStatus(Status.AVAILABLE);
-
         driverRepository.save(driver);
-    }
-
-    @Transactional
-    public DriverResponseDto editRating(Integer grade, Long id) {
-        var driver = getByIdOrElseThrow(id);
-        driver.setRating((driver.getRating() + grade)/2);
-        return Optional.of(driverRepository.save(driver))
-                .map(this::mapToDto)
-                .orElseThrow(() -> new BadRequestException(HttpStatus.BAD_REQUEST, "Can't update rating, please check input parameters"));
     }
 
     private PageRequest getPageRequest(Integer page, Integer size, String orderBy) {

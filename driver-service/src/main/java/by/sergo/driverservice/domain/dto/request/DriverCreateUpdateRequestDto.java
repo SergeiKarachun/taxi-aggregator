@@ -25,7 +25,7 @@ public class DriverCreateUpdateRequestDto {
     @Email(message = "Email pattern is example@gmail.com")
     String email;
     @NotBlank(message = "Phone is required")
-    @Pattern(regexp = "^\\+375(9|33|44|25)(\\d{7})$", message = "Phone pattern is +375331234567. Valid operator codes 25,29,33,44")
+    @Pattern(regexp = "^\\+375(29|33|44|25)(\\d{7})$", message = "Phone pattern is +375331234567. Valid operator codes 25,29,33,44")
     String phone;
 
 }

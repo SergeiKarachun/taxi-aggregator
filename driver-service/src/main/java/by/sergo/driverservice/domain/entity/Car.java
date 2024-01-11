@@ -2,19 +2,17 @@ package by.sergo.driverservice.domain.entity;
 
 import by.sergo.driverservice.domain.enums.Color;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@EqualsAndHashCode(exclude = "driver")
+@ToString(exclude = "driver")
 @Entity
 @Table(name = "car")
 public class Car {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

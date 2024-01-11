@@ -13,7 +13,6 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,27 +36,24 @@ public class CarService {
     public CarResponseDto create(CarCreateUpdateRequestDto dto) {
         checkCarIsUnique(dto);
         checkDriverIsExist(dto.getDriverId());
-        checkDriverHasCar(dto.getDriverId());
+        checkDriverAlreadyHasCar(dto.getDriverId());
         checkDate(dto.getYearOfManufacture());
         return Optional.of(mapToEntity(dto))
                 .map(carRepository::saveAndFlush)
                 .map(this::mapToDto)
-                .orElseThrow(() -> new BadRequestException(HttpStatus.BAD_REQUEST, "Can't create new car, please check input parameters"));
+                .orElseThrow(() -> new BadRequestException("Can't create new car, please check input parameters"));
     }
 
     @Transactional
     public CarResponseDto update(Long id, CarCreateUpdateRequestDto dto) {
         var existCar = getByIdOrElseThrow(id);
-
         checkCarForUpdate(dto, existCar);
-
         var carToSave = mapToEntity(dto);
         carToSave.setId(id);
-
         return Optional.of(carToSave)
                 .map(carRepository::saveAndFlush)
                 .map(this::mapToDto)
-                .orElseThrow(() -> new BadRequestException(HttpStatus.BAD_REQUEST, "Can't update car, please check input parameters"));
+                .orElseThrow(() -> new BadRequestException("Can't update car, please check input parameters"));
     }
 
     @Transactional
@@ -115,9 +111,10 @@ public class CarService {
         else return PageRequest.of(0, 10);
     }
 
-    private void checkDriverHasCar(Long driverId) {
+    private void checkDriverAlreadyHasCar(Long driverId) {
         if (carRepository.existsByDriverId(driverId)) {
-            throw new BadRequestException(HttpStatus.BAD_REQUEST, "Driver with id=" + driverId + " already has car!");
+            throw new BadRequestException(ExceptionMessageUtil
+                    .getAlreadyExistMessage("Car", "driverId", driverId.toString()));
         }
     }
 
@@ -125,21 +122,24 @@ public class CarService {
         if (!Objects.equals(dto.getNumber(), existCar.getNumber())) {
             checkCarIsUnique(dto);
         }
-
         checkDriverIsExist(dto.getDriverId());
-        //  checkDriverHasCar(dto.getDriverId());
+
+        if (!existCar.getDriver().getId().equals(dto.getDriverId())){
+            checkDriverAlreadyHasCar(dto.getDriverId());
+        }
         checkDate(dto.getYearOfManufacture());
     }
 
     private void checkDate(Integer yearOfManufacture) {
         if (yearOfManufacture > LocalDate.now().getYear()) {
-            throw new BadRequestException(HttpStatus.BAD_REQUEST, "The year of manufacture should be no more than now.");
+            throw new BadRequestException("The year of manufacture should be no more than now.");
         }
     }
 
     private void checkDriverIsExist(Long driverId) {
         if (!driverRepository.existsById(driverId)) {
-            throw new BadRequestException(HttpStatus.BAD_REQUEST, "Can't create new car, driver with id" + driverId + " doesn't exist.");
+            throw new BadRequestException(ExceptionMessageUtil
+                    .getNotFoundMessage("Driver", "driverId", driverId));
         }
     }
 
