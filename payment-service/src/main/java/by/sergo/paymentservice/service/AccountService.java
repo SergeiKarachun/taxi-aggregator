@@ -83,7 +83,7 @@ public class AccountService {
     }
 
     private CreditCard getByUserIdAndUserTypeOrElseThrow(Long driverId) {
-        return creditCardRepository.findByUserIdAndAndUserType(driverId, DRIVER)
+        return creditCardRepository.findByUserIdAndUserType(driverId, DRIVER)
                 .orElseThrow(() -> new BadRequestException(
                         ExceptionMessageUtil.getNotFoundMessage("CreditCard", "driverId", driverId)));
     }

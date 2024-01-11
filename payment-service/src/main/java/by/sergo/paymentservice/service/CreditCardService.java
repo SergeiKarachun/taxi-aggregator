@@ -1,6 +1,7 @@
 package by.sergo.paymentservice.service;
 
 import by.sergo.paymentservice.domain.dto.request.CreditCardCreateUpdateDto;
+import by.sergo.paymentservice.domain.dto.request.PaymentRequestDto;
 import by.sergo.paymentservice.domain.dto.response.CreditCardResponseDto;
 import by.sergo.paymentservice.domain.entity.CreditCard;
 import by.sergo.paymentservice.domain.entity.TransactionStore;
@@ -16,11 +17,10 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-import static by.sergo.paymentservice.domain.enums.Operation.WITHDRAWAL;
+import static by.sergo.paymentservice.domain.enums.Operation.PAYMENT;
 
 @Service
 @RequiredArgsConstructor
@@ -35,7 +35,10 @@ public class CreditCardService {
     public CreditCardResponseDto addCard(CreditCardCreateUpdateDto dto) {
         checkUniqueCreditCard(dto);
         checkExpirationDate(dto);
-        var creditCard = creditCardRepository.save(mapToEntity(dto));
+        var entity = mapToEntity(dto);
+        entity.setId(null);
+        var creditCard = creditCardRepository.save(entity);
+        creditCardRepository.flush();
         return mapToDto(creditCard);
     }
 
@@ -56,7 +59,7 @@ public class CreditCardService {
     }
 
     public CreditCardResponseDto getDriverCard(Long driverId) {
-        var creditCard = creditCardRepository.findByUserIdAndAndUserType(driverId, UserType.DRIVER)
+        var creditCard = creditCardRepository.findByUserIdAndUserType(driverId, UserType.DRIVER)
                 .orElseThrow(() -> new NotFoundException(
                         ExceptionMessageUtil.getNotFoundMessage("Credit card with type driver", "userId", driverId)
                 ));
@@ -69,26 +72,26 @@ public class CreditCardService {
     }
 
     @Transactional
-    public CreditCardResponseDto makePayment(Long driverId, Long passengerId, BigDecimal sum) {
-        var passengerCreditCard = getPassengerCreditCard(passengerId);
-        var driverAccount = accountRepository.findByDriverId(driverId).orElseThrow(() -> new NotFoundException(
-                ExceptionMessageUtil.getNotFoundMessage("Account", "driverId", driverId)));
-        if (passengerCreditCard.getBalance().compareTo(sum) >= 0) {
-            passengerCreditCard.setBalance(passengerCreditCard.getBalance().subtract(sum));
+    public CreditCardResponseDto makePayment(PaymentRequestDto payment) {
+        var passengerCreditCard = getPassengerCreditCard(payment.getPassengerId());
+        var driverAccount = accountRepository.findByDriverId(payment.getDriverId()).orElseThrow(() -> new NotFoundException(
+                ExceptionMessageUtil.getNotFoundMessage("Account", "driverId", payment.getDriverId())));
+        if (passengerCreditCard.getBalance().compareTo(payment.getSum()) >= 0) {
+            passengerCreditCard.setBalance(passengerCreditCard.getBalance().subtract(payment.getSum()));
         } else {
             throw new BadRequestException(
                     ExceptionMessageUtil
-                            .getWithdrawalExceptionMessage("Credit card", "passengerId", passengerId.toString(), passengerCreditCard.getBalance().toString()));
+                            .getWithdrawalExceptionMessage("Credit card", "passengerId", payment.getPassengerId().toString(), passengerCreditCard.getBalance().toString()));
         }
         var savedCreditCard = creditCardRepository.save(passengerCreditCard);
-        driverAccount.setBalance(driverAccount.getBalance().add(sum));
+        driverAccount.setBalance(driverAccount.getBalance().add(payment.getSum()));
         accountRepository.save(driverAccount);
         var transaction = TransactionStore.builder()
                 .accountNumber(driverAccount.getAccountNumber())
                 .creditCardNumber(savedCreditCard.getCreditCardNumber())
-                .value(sum)
+                .value(payment.getSum())
                 .operationDate(LocalDateTime.now())
-                .operation(WITHDRAWAL)
+                .operation(PAYMENT)
                 .build();
         transactionStoreRepository.save(transaction);
         return mapToDto(savedCreditCard);
@@ -102,7 +105,7 @@ public class CreditCardService {
     }
 
     private CreditCard getPassengerCreditCard(Long passengerId) {
-        var creditCard = creditCardRepository.findByUserIdAndAndUserType(passengerId, UserType.PASSENGER)
+        var creditCard = creditCardRepository.findByUserIdAndUserType(passengerId, UserType.PASSENGER)
                 .orElseThrow(() -> new NotFoundException(
                         ExceptionMessageUtil.getNotFoundMessage("Credit card with type passenger", "userId", passengerId)
                 ));

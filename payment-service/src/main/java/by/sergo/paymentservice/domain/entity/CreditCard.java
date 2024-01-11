@@ -2,10 +2,7 @@ package by.sergo.paymentservice.domain.entity;
 
 import by.sergo.paymentservice.domain.enums.UserType;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -16,6 +13,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @Builder
 @Table(name = "credit_card")
+@EqualsAndHashCode(exclude = {"userId", "userType"})
 public class CreditCard {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

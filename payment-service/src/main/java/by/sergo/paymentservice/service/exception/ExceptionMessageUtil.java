@@ -36,7 +36,7 @@ public class ExceptionMessageUtil {
 
     public static String getAlreadyExistMapMessage(HashMap<String, String> errors) {
         StringBuilder message = new StringBuilder();
-        errors.values().forEach(str -> message.append(str).append(0xA));
+        errors.values().forEach(str -> message.append(str));
         return message.toString();
     }
 }
