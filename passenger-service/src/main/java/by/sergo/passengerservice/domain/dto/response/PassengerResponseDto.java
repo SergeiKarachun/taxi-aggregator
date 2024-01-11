@@ -1,4 +1,4 @@
-package by.sergo.passengerservice.domain.dto;
+package by.sergo.passengerservice.domain.dto.response;
 
 import lombok.Builder;
 import lombok.Value;

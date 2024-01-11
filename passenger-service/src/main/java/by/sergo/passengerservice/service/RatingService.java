@@ -1,13 +1,13 @@
 package by.sergo.passengerservice.service;
 
-import by.sergo.cab.passengerservice.domain.dto.PassengerRatingResponseDto;
-import by.sergo.cab.passengerservice.domain.dto.RatingCreateRequestDto;
-import by.sergo.cab.passengerservice.domain.dto.RatingResponseDto;
-import by.sergo.cab.passengerservice.domain.entity.Rating;
-import by.sergo.cab.passengerservice.repository.PassengerRepository;
-import by.sergo.cab.passengerservice.repository.RatingRepository;
-import by.sergo.cab.passengerservice.service.exception.ExceptionMessageUtil;
-import by.sergo.cab.passengerservice.service.exception.NotFoundException;
+import by.sergo.passengerservice.domain.dto.request.RatingCreateRequestDto;
+import by.sergo.passengerservice.domain.dto.response.PassengerRatingResponseDto;
+import by.sergo.passengerservice.domain.dto.response.RatingResponseDto;
+import by.sergo.passengerservice.domain.entity.Rating;
+import by.sergo.passengerservice.repository.PassengerRepository;
+import by.sergo.passengerservice.repository.RatingRepository;
+import by.sergo.passengerservice.service.exception.ExceptionMessageUtil;
+import by.sergo.passengerservice.service.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
