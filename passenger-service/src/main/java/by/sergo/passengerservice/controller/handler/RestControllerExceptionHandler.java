@@ -18,7 +18,7 @@ import java.util.HashMap;
 
 
 @Slf4j
-@RestControllerAdvice(basePackages = {"by.sergo.cab.passengerservice.controller"})
+@RestControllerAdvice(basePackages = {"by.sergo.passengerservice.controller"})
 public class RestControllerExceptionHandler {
 
     @ExceptionHandler(NotFoundException.class)

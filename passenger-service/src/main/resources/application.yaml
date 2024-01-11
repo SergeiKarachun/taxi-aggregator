@@ -8,6 +8,6 @@ spring:
     driver-class-name: org.postgresql.Driver
   liquibase:
     enabled: true
-    change-log: db.changelog/db.changelog-master.yaml
+    change-log: db/changelog/db.changelog-master.xml
   jpa:
     show-sql: true

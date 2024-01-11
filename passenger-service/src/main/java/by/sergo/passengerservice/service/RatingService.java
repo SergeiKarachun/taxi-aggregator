@@ -6,6 +6,7 @@ import by.sergo.passengerservice.domain.dto.response.RatingResponseDto;
 import by.sergo.passengerservice.domain.entity.Rating;
 import by.sergo.passengerservice.repository.PassengerRepository;
 import by.sergo.passengerservice.repository.RatingRepository;
+import by.sergo.passengerservice.service.exception.BadRequestException;
 import by.sergo.passengerservice.service.exception.ExceptionMessageUtil;
 import by.sergo.passengerservice.service.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -27,13 +28,17 @@ public class RatingService {
         var passenger = passengerRepository.findById(passengerId).orElseThrow(() -> new NotFoundException(
                 ExceptionMessageUtil.getNotFoundMessage("Passenger", "passengerId", passengerId)
         ));
+        if (ratingRepository.existsByRideId(dto.getRideId())) {
+            throw new BadRequestException(
+                    ExceptionMessageUtil.getAlreadyExistMessage("Rating", "rideId", dto.getRideId().toString()));
+        }
+
         var newRating = mapToEntity(dto);
         newRating.setPassenger(passenger);
-        var save = ratingRepository.saveAndFlush(newRating);
-        var ratingResponseDto = mapToDto(save);
-        passenger.setRating(getAverageRating(passengerId));
+        var savedRating = ratingRepository.saveAndFlush(newRating);
+        passenger.setRating(Math.floor(getAverageRating(passengerId) * 100) / 100);
         passengerRepository.save(passenger);
-        return ratingResponseDto;
+        return mapToDto(savedRating);
     }
 
     public PassengerRatingResponseDto getPassengerRating(Long passengerId) {
@@ -48,13 +53,8 @@ public class RatingService {
                 .build();
     }
 
-    private double getAverageRating(Long passengerId) {
-        var passengerRating = ratingRepository.getRatingsByPassengerId(passengerId)
-                .stream()
-                .mapToDouble(Rating::getGrade)
-                .average()
-                .orElse(5.0);
-        return passengerRating;
+    private Double getAverageRating(Long passengerId) {
+        return ratingRepository.getRatingsByPassengerId(passengerId).orElse(5.0);
     }
 
     public RatingResponseDto mapToDto(Rating rating){
@@ -62,6 +62,7 @@ public class RatingService {
     }
 
     public Rating mapToEntity(RatingCreateRequestDto dto) {
+        modelMapper.getConfiguration().setAmbiguityIgnored(true);
         return modelMapper.map(dto, Rating.class);
     }
 }

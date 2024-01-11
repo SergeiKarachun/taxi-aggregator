@@ -19,4 +19,7 @@ public class RatingCreateRequestDto {
     @NotNull
     @Min(value = 1, message = "Min value is 1")
     Long driverId;
+    @NotNull
+    @Min(value = 1, message = "Min value is 1")
+    Long rideId;
 }

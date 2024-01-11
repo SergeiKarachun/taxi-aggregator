@@ -18,7 +18,6 @@ public class RatingController {
 
     private final RatingService ratingService;
 
-
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<RatingResponseDto> createRateOfPassenger(@RequestBody @Valid RatingCreateRequestDto dto,
@@ -31,5 +30,4 @@ public class RatingController {
     public ResponseEntity<PassengerRatingResponseDto> getPassengerRating(@PathVariable("id") Long passengerId) {
         return ResponseEntity.ok(ratingService.getPassengerRating(passengerId));
     }
-
 }
