@@ -1,6 +1,7 @@
 package by.sergo.rideservice.service;
 
 import by.sergo.rideservice.domain.Ride;
+import by.sergo.rideservice.domain.dto.request.DriverRequestDto;
 import by.sergo.rideservice.domain.dto.request.RideCreateUpdateRequestDto;
 import by.sergo.rideservice.domain.dto.response.RideListResponseDto;
 import by.sergo.rideservice.domain.dto.response.RideResponseDto;
@@ -63,10 +64,14 @@ public class RideService {
     }
 
     @Transactional
-    public RideResponseDto setDriverAndAcceptRide(RideResponseDto dto, Long driverId) {
-        var ride = getByIdOrElseThrow(dto.getId());
-        ride.setDriverId(driverId);
-        ride.setStatus(ACCEPTED);
+    public RideResponseDto setDriverAndAcceptRide(DriverRequestDto dto, String rideId) {
+        var ride = getByIdOrElseThrow(rideId);
+        if (ride.getStatus().equals(CREATED) && ride.getDriverId() == null) {
+            ride.setDriverId(dto.getDriverId());
+            ride.setStatus(ACCEPTED);
+        } else throw new BadRequestException(
+                ExceptionMessageUtil
+                        .alreadyHasDriver(rideId));
         var savedRide = rideRepository.save(modelMapper.map(ride, Ride.class));
         return modelMapper.map(savedRide, RideResponseDto.class);
     }
@@ -74,23 +79,37 @@ public class RideService {
     @Transactional
     public void rejectRide(String rideId) {
         var ride = getByIdOrElseThrow(rideId);
-        ride.setStatus(REJECTED);
+        if (ride.getStatus().equals(CREATED)) {
+            ride.setStatus(REJECTED);
+        } else throw new BadRequestException(
+                ExceptionMessageUtil
+                        .canNotChangeStatusMessage(REJECTED.toString(), ride.getStatus().toString(), CREATED.toString()));
         rideRepository.save(ride);
     }
 
     @Transactional
     public void startRide(String rideId) {
         var ride = getByIdOrElseThrow(rideId);
-        ride.setStatus(TRANSPORT);
-        ride.setStartTime(LocalDateTime.now());
+
+        if (ride.getStatus().equals(ACCEPTED)) {
+            ride.setStatus(TRANSPORT);
+            ride.setStartTime(LocalDateTime.now());
+        } else throw new BadRequestException(
+                ExceptionMessageUtil
+                        .canNotChangeStatusMessage(TRANSPORT.toString(), ride.getStatus().toString(), ACCEPTED.toString()));
         rideRepository.save(ride);
     }
 
     @Transactional
     public void endRide(String rideId) {
         var ride = getByIdOrElseThrow(rideId);
-        ride.setStatus(FINISHED);
-        ride.setEndTime(LocalDateTime.now());
+
+        if (ride.getStatus().equals(TRANSPORT)) {
+            ride.setStatus(FINISHED);
+            ride.setEndTime(LocalDateTime.now());
+        } else throw new BadRequestException(
+                ExceptionMessageUtil
+                        .canNotChangeStatusMessage(FINISHED.toString(), ride.getStatus().toString(), TRANSPORT.toString()));
         rideRepository.save(ride);
     }
 
@@ -101,7 +120,7 @@ public class RideService {
             throw new BadRequestException(ExceptionMessageUtil.getInvalidStatusMessage(status));
         }
 
-        var responsePage = rideRepository.findAllByPassengerIdAndStatus(passengerId, Status.valueOf(status), pageRequest)
+        var responsePage = rideRepository.findAllByPassengerIdAndStatus(passengerId, Status.valueOf(status.toUpperCase()), pageRequest)
                 .map(ride -> modelMapper.map(ride, RideResponseDto.class));
         return RideListResponseDto.builder()
                 .rides(responsePage.getContent())
@@ -120,7 +139,7 @@ public class RideService {
             throw new BadRequestException(ExceptionMessageUtil.getInvalidStatusMessage(status));
         }
 
-        var responsePage = rideRepository.findAllByDriverIdAndStatus(driverId, Status.valueOf(status), pageRequest)
+        var responsePage = rideRepository.findAllByDriverIdAndStatus(driverId, Status.valueOf(status.toUpperCase()), pageRequest)
                 .map(ride -> modelMapper.map(ride, RideResponseDto.class));
         return RideListResponseDto.builder()
                 .rides(responsePage.getContent())

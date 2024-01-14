@@ -14,7 +14,6 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RestErrorResponse {
-
     private List<String> messages;
     private HttpStatus status;
     private LocalDateTime time;

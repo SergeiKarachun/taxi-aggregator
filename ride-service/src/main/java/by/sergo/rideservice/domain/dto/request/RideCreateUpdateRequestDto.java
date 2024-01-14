@@ -12,11 +12,11 @@ import lombok.Setter;
 public class RideCreateUpdateRequestDto {
     @NotBlank(message = "Pick up address is required")
     @Size(min = 2, message = "Pick up address should have at least 4 characters")
-    String pickUpAddress;
+    private String pickUpAddress;
     @NotBlank(message = "Destination address is required")
     @Size(min = 2, message = "Destination address should have at least 4 characters")
-    String destinationAddress;
+    private String destinationAddress;
     @NotNull
     @Min(value = 1, message = "Min value is 1")
-    Long passengerId;
+    private Long passengerId;
 }

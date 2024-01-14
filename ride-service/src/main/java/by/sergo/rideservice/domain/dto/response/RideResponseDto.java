@@ -11,16 +11,16 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 public class RideResponseDto {
-    String id;
-    String pickUpAddress;
-    String destinationAddress;
-    Double price;
-    Long passengerId;
+    private String id;
+    private String pickUpAddress;
+    private String destinationAddress;
+    private Double price;
+    private Long passengerId;
     @NotNull
     @Min(value = 1, message = "Min value is 1")
-    Long driverId;
-    LocalDateTime creatingTime;
-    LocalDateTime startTime;
-    LocalDateTime endTime;
-    Status status;
+    private Long driverId;
+    private LocalDateTime creatingTime;
+    private LocalDateTime startTime;
+    private LocalDateTime endTime;
+    private Status status;
 }

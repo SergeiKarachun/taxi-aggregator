@@ -35,5 +35,4 @@ public class Ride {
     LocalDateTime startTime;
     LocalDateTime endTime;
     Status status = Status.CREATED;
-
 }

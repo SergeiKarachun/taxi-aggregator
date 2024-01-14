@@ -1,5 +1,6 @@
 package by.sergo.rideservice.controller;
 
+import by.sergo.rideservice.domain.dto.request.DriverRequestDto;
 import by.sergo.rideservice.domain.dto.request.RideCreateUpdateRequestDto;
 import by.sergo.rideservice.domain.dto.response.RideListResponseDto;
 import by.sergo.rideservice.domain.dto.response.RideResponseDto;
@@ -27,11 +28,11 @@ public class RideController {
         return ResponseEntity.ok(rideService.create(dto));
     }
 
-    @PutMapping(value = "/set-driver/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(value = "/{id}/set-driver", consumes = MediaType.APPLICATION_JSON_VALUE)
     @Operation(description = "Accept a ride and assign a driver.")
-    public ResponseEntity<RideResponseDto> setDriverAndAcceptRide(@RequestBody @Valid RideResponseDto dto,
-                                                     @PathVariable("id") Long driverId) {
-        return ResponseEntity.ok(rideService.setDriverAndAcceptRide(dto, driverId));
+    public ResponseEntity<RideResponseDto> setDriverAndAcceptRide(@RequestBody @Valid DriverRequestDto dto,
+                                                     @PathVariable("id") String rideId) {
+        return ResponseEntity.ok(rideService.setDriverAndAcceptRide(dto, rideId));
     }
 
     @PutMapping("/{id}/reject")

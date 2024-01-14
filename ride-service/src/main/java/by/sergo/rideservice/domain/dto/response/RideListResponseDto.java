@@ -10,10 +10,10 @@ import java.util.List;
 @Setter
 @Builder
 public class RideListResponseDto {
-    Integer page;
-    Integer totalPages;
-    Integer size;
-    Integer total;
-    String sortedByField;
+    private  Integer page;
+    private Integer totalPages;
+    private Integer size;
+    private Integer total;
+    private String sortedByField;
     private List<RideResponseDto> rides;
 }

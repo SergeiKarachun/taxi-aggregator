@@ -12,8 +12,6 @@ import java.util.List;
 @Repository
 public interface RideRepository extends MongoRepository<Ride, String> {
     List<Ride> findByStatus(Status status);
-
     Page<Ride> findAllByPassengerIdAndStatus(long passengerId, Status status, PageRequest pageRequest);
-
     Page<Ride> findAllByDriverIdAndStatus(long driverId, Status status, PageRequest pageRequest);
 }
