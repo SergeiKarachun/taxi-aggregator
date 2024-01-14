@@ -74,14 +74,14 @@ public class CreditCardService {
     @Transactional
     public CreditCardResponseDto makePayment(PaymentRequestDto payment) {
         var passengerCreditCard = getPassengerCreditCard(payment.getPassengerId());
-        var driverAccount = accountRepository.findByDriverId(payment.getDriverId()).orElseThrow(() -> new NotFoundException(
-                ExceptionMessageUtil.getNotFoundMessage("Account", "driverId", payment.getDriverId())));
+        var driverAccount = accountRepository.findByDriverId(payment.getDriverId())
+                .orElseThrow(() -> new NotFoundException(ExceptionMessageUtil
+                        .getNotFoundMessage("Account", "driverId", payment.getDriverId())));
         if (passengerCreditCard.getBalance().compareTo(payment.getSum()) >= 0) {
             passengerCreditCard.setBalance(passengerCreditCard.getBalance().subtract(payment.getSum()));
         } else {
-            throw new BadRequestException(
-                    ExceptionMessageUtil
-                            .getWithdrawalExceptionMessage("Credit card", "passengerId", payment.getPassengerId().toString(), passengerCreditCard.getBalance().toString()));
+            throw new BadRequestException(ExceptionMessageUtil
+                    .getWithdrawalExceptionMessage("Credit card", "passengerId", payment.getPassengerId().toString(), passengerCreditCard.getBalance().toString()));
         }
         var savedCreditCard = creditCardRepository.save(passengerCreditCard);
         driverAccount.setBalance(driverAccount.getBalance().add(payment.getSum()));
@@ -99,41 +99,41 @@ public class CreditCardService {
 
     private CreditCard getByIdOrElseThrow(Long id) {
         return creditCardRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException(
-                        ExceptionMessageUtil.getNotFoundMessage("Credit card", "id", id)
-                ));
+                .orElseThrow(() -> new NotFoundException(ExceptionMessageUtil
+                                .getNotFoundMessage("Credit card", "id", id)));
     }
 
     private CreditCard getPassengerCreditCard(Long passengerId) {
         var creditCard = creditCardRepository.findByUserIdAndUserType(passengerId, UserType.PASSENGER)
-                .orElseThrow(() -> new NotFoundException(
-                        ExceptionMessageUtil.getNotFoundMessage("Credit card with type passenger", "userId", passengerId)
-                ));
+                .orElseThrow(() -> new NotFoundException(ExceptionMessageUtil
+                        .getNotFoundMessage("Credit card with type passenger", "userId", passengerId)));
         return creditCard;
     }
 
     private void checkCardIsUniqueForUpdate(CreditCardCreateUpdateDto dto, Long id) {
         getByIdOrElseThrow(id);
         checkUniqueCreditCard(dto);
+        if (creditCardRepository.existsByUserIdAndUserType(dto.getUserId(), UserType.valueOf(dto.getUserType()))){
+            throw new BadRequestException(ExceptionMessageUtil
+                    .getAlreadyExistMessage("Credit Card", "userId", dto.getUserId(), "userType", dto.getUserType()));
+        }
         if (dto.getExpDate().isBefore(LocalDate.now())) {
-            throw new BadRequestException(
-                    ExceptionMessageUtil
+            throw new BadRequestException(ExceptionMessageUtil
                             .getExpirationCardExceptionMessage("Credit card", "expiration date", dto.getExpDate().toString()));
         }
     }
 
     private static void checkExpirationDate(CreditCardCreateUpdateDto dto) {
         if (dto.getExpDate().isBefore(LocalDate.now())) {
-            throw new BadRequestException(
-                    ExceptionMessageUtil
+            throw new BadRequestException(ExceptionMessageUtil
                             .getExpirationCardExceptionMessage("Credit card", "expiration date", dto.getExpDate().toString()));
         }
     }
 
     private void checkUniqueCreditCard(CreditCardCreateUpdateDto dto) {
         if (creditCardRepository.existsByCreditCardNumber(dto.getCreditCardNumber())) {
-            throw new BadRequestException(
-                    ExceptionMessageUtil.getAlreadyExistMessage("Credit Card", "card number", dto.getCreditCardNumber()));
+            throw new BadRequestException(ExceptionMessageUtil
+                    .getAlreadyExistMessage("Credit Card", "card number", dto.getCreditCardNumber()));
         }
     }
 

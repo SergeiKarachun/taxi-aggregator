@@ -11,6 +11,10 @@ public class ExceptionMessageUtil {
         return className + " with this " + variableName + " " + variableValue + " already exists.";
     }
 
+    public static String getAlreadyExistMessage(String className, String variableName, Long variableValue, String variableNameSecond, String variableValueSecond) {
+        return className + " with " + variableName + " " + variableValue + " and " + variableNameSecond + " " + variableValueSecond + " already exists.";
+    }
+
     public static String getWithdrawalExceptionMessage(String className, String variableName, String variableValue, String balance) {
         return className + " with " + variableName + " " + variableValue + " has insufficient funds for withdrawal. Balance is " + balance;
     }
