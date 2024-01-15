@@ -43,7 +43,7 @@ public class RatingServiceImpl implements RatingService {
 
     @Override
     public PassengerRatingResponse getPassengerRating(Long passengerId) {
-        if (ratingRepository.existsByPassengerId(passengerId)){
+        if (passengerRepository.existsByPassengerId(passengerId)){
             double passengerRating = getAverageRating(passengerId);
             return PassengerRatingResponse.builder()
                     .passengerId(passengerId)
