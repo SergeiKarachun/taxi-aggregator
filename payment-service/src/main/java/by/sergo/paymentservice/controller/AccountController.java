@@ -1,12 +1,12 @@
 package by.sergo.paymentservice.controller;
 
-import by.sergo.paymentservice.domain.dto.request.AccountCreateUpdateRequestDto;
-import by.sergo.paymentservice.domain.dto.response.AccountResponseDto;
-import by.sergo.paymentservice.domain.dto.response.StringResponse;
-import by.sergo.paymentservice.service.AccountService;
+import by.sergo.paymentservice.domain.dto.request.AccountCreateUpdateRequest;
+import by.sergo.paymentservice.domain.dto.response.AccountResponse;
+import by.sergo.paymentservice.service.impl.AccountServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,39 +16,38 @@ import java.math.BigDecimal;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/accounts")
 public class AccountController {
-    private final AccountService accountService;
+    private final AccountServiceImpl accountService;
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Create new account")
-    public ResponseEntity<AccountResponseDto> create(@RequestBody @Valid AccountCreateUpdateRequestDto dto) {
-        return ResponseEntity.ok(accountService.createAccount(dto));
+    public ResponseEntity<AccountResponse> create(@RequestBody @Valid AccountCreateUpdateRequest dto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(accountService.createAccount(dto));
     }
 
     @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Delete account")
-    public ResponseEntity<StringResponse> delete(@PathVariable("id") Long id) {
-        accountService.deleteById(id);
-        return ResponseEntity.ok(StringResponse.builder()
-                .message("Account successfully deleted.")
-                .build());
+    public ResponseEntity<AccountResponse> delete(@PathVariable("id") Long id) {
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(accountService.deleteById(id));
     }
 
     @PutMapping("/driver/{id}")
     @Operation(summary = "Withdrawal money for driver from account to credit card")
-    public ResponseEntity<AccountResponseDto> withdrawalBalance(@PathVariable("id") Long driverId,
-                                                                @RequestParam(value = "sum", required = true) BigDecimal sum) {
+    public ResponseEntity<AccountResponse> withdrawalBalance(@PathVariable("id") Long driverId,
+                                                             @RequestParam(value = "sum", required = true) BigDecimal sum) {
         return ResponseEntity.ok(accountService.withdrawalBalance(driverId, sum));
     }
 
     @GetMapping("/driver/{id}")
     @Operation(summary = "Get account by driverId")
-    public ResponseEntity<AccountResponseDto> getDriverAccount(@PathVariable("id") Long id) {
+    public ResponseEntity<AccountResponse> getDriverAccount(@PathVariable("id") Long id) {
         return ResponseEntity.ok(accountService.getByDriverId(id));
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Get account by id")
-    public ResponseEntity<AccountResponseDto> getById(@PathVariable("id") Long id) {
+    public ResponseEntity<AccountResponse> getById(@PathVariable("id") Long id) {
         return ResponseEntity.ok(accountService.getById(id));
     }
 }

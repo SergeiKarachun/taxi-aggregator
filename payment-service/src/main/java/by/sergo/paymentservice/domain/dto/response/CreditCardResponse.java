@@ -8,7 +8,7 @@ import java.time.LocalDate;
 
 @Getter
 @Setter
-public class CreditCardResponseDto {
+public class CreditCardResponse {
     private Long id;
     private String creditCardNumber;
     private String cvv;

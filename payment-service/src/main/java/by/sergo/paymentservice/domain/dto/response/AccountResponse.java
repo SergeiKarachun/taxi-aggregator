@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 
 @Getter
 @Setter
-public class AccountResponseDto {
+public class AccountResponse {
     private Long id;
     private String accountNumber;
     private Long driverId;

@@ -11,11 +11,17 @@ import java.math.BigDecimal;
 
 @Getter
 @Setter
-public class AccountCreateUpdateRequestDto {
+public class PaymentRequest {
     @NotNull
-    @Min(value = 1, message = "Min value is 1")
+    @Min(value = 1, message = "{min.value}")
     private Long driverId;
-    @DecimalMin(value = "0.0", inclusive = false)
+    @NotNull
+    @Min(value = 1, message = "{min.value}")
+    private Long passengerId;
+    @NotNull
+    @Min(value = 1, message = "{min.value}")
+    private Long rideId;
+    @DecimalMin(value = "2.70", inclusive = false)
     @Digits(integer = 3, fraction = 2)
-    private BigDecimal balance;
+    private BigDecimal sum;
 }

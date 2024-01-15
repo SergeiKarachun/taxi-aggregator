@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @NoArgsConstructor
-public class TransactionStoreResponseDto {
+public class TransactionStoreResponse {
     private Long id;
     private String creditCardNumber;
     private String accountNumber;
