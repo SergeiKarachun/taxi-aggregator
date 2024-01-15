@@ -9,6 +9,7 @@ import lombok.experimental.FieldDefaults;
 @Getter
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class StringResponse {
-    String message;
+public class PassengerRatingResponse {
+    Long passengerId;
+    Double rating;
 }

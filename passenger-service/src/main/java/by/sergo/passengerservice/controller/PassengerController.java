@@ -1,10 +1,9 @@
 package by.sergo.passengerservice.controller;
 
-import by.sergo.passengerservice.domain.dto.request.PassengerCreateUpdateRequestDto;
-import by.sergo.passengerservice.domain.dto.response.PassengerListResponseDto;
-import by.sergo.passengerservice.domain.dto.response.PassengerResponseDto;
-import by.sergo.passengerservice.domain.dto.response.StringResponse;
-import by.sergo.passengerservice.service.PassengerService;
+import by.sergo.passengerservice.domain.dto.request.PassengerCreateUpdateRequest;
+import by.sergo.passengerservice.domain.dto.response.PassengerListResponse;
+import by.sergo.passengerservice.domain.dto.response.PassengerResponse;
+import by.sergo.passengerservice.service.impl.PassengerServiceImpl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,42 +16,38 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class PassengerController {
 
-    private final PassengerService passengerService;
+    private final PassengerServiceImpl passengerServiceImpl;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<PassengerResponseDto> create(@RequestBody @Valid PassengerCreateUpdateRequestDto dto) {
-        var passengerResponseDto = passengerService.create(dto);
-        return ResponseEntity.ok(passengerResponseDto);
+    public ResponseEntity<PassengerResponse> create(@RequestBody @Valid PassengerCreateUpdateRequest dto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(passengerServiceImpl.create(dto));
     }
 
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<PassengerResponseDto> update(@RequestBody @Valid PassengerCreateUpdateRequestDto dto,
-                                                       @PathVariable("id") Long id) {
-        var passengerResponseDto = passengerService.update(id, dto);
+    public ResponseEntity<PassengerResponse> update(@RequestBody @Valid PassengerCreateUpdateRequest dto,
+                                                    @PathVariable("id") Long id) {
+        var passengerResponseDto = passengerServiceImpl.update(id, dto);
         return ResponseEntity.ok(passengerResponseDto);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<PassengerResponseDto> getById(@PathVariable("id") Long id) {
-        var passengerResponseDto = passengerService.getById(id);
+    public ResponseEntity<PassengerResponse> getById(@PathVariable("id") Long id) {
+        var passengerResponseDto = passengerServiceImpl.getById(id);
         return ResponseEntity.ok(passengerResponseDto);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public ResponseEntity<StringResponse> deleteById(@PathVariable("id") Long id) {
-        passengerService.delete(id);
-        return ResponseEntity.ok(StringResponse.builder()
-                .message("Passenger with id" + id + " has been deleted")
-                .build());
+    public ResponseEntity<PassengerResponse> deleteById(@PathVariable("id") Long id) {
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(passengerServiceImpl.delete(id));
     }
 
     @GetMapping
-    public ResponseEntity<PassengerListResponseDto> getAll(@RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
-                                                           @RequestParam(value = "size", required = false, defaultValue = "10") Integer size,
-                                                           @RequestParam(value = "orderBy", required = false) String orderBy) {
-        var passengerListResponseDto = passengerService.getAll(page, size, orderBy);
+    public ResponseEntity<PassengerListResponse> getAll(@RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
+                                                        @RequestParam(value = "size", required = false, defaultValue = "10") Integer size,
+                                                        @RequestParam(value = "orderBy", required = false) String orderBy) {
+        var passengerListResponseDto = passengerServiceImpl.getAll(page, size, orderBy);
         return ResponseEntity.ok(passengerListResponseDto);
     }
 }

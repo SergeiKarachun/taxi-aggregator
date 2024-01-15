@@ -26,13 +26,8 @@ public class RestControllerExceptionHandler {
         return createResponse(ex, HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(BadRequestException.class)
+    @ExceptionHandler({BadRequestException.class, HttpMessageNotReadableException.class})
     public ResponseEntity<RestErrorResponse> handleBadRequestException(BadRequestException ex) {
-        return createResponse(ex, HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<RestErrorResponse> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
         return createResponse(ex, HttpStatus.BAD_REQUEST);
     }
 

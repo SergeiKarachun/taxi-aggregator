@@ -16,4 +16,5 @@ public interface RatingRepository extends JpaRepository<Rating, Long> {
             nativeQuery = true)
     Optional<Double> getRatingsByPassengerId(Long passengerId);
     Boolean existsByRideId(Long rideId);
+    Boolean existsByPassengerId(Long passengerId);
 }

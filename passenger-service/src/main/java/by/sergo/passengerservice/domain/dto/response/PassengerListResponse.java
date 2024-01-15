@@ -12,11 +12,11 @@ import java.util.List;
 @Getter
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class PassengerListResponseDto {
+public class PassengerListResponse {
     Integer page;
     Integer totalPages;
     Integer size;
     Integer total;
     String sortedByField;
-    List<PassengerResponseDto> passengers;
+    List<PassengerResponse> passengers;
 }

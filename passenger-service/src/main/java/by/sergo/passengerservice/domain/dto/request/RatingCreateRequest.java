@@ -11,15 +11,15 @@ import lombok.experimental.FieldDefaults;
 @Getter
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class RatingCreateRequestDto {
+public class RatingCreateRequest {
     @NotNull
-    @Min(value = 1, message = "Min value is 1")
-    @Max(value = 5, message = "Max value is 5")
+    @Min(value = 1, message = "{min.value}")
+    @Max(value = 5, message = "{max.value}")
     Integer grade;
     @NotNull
-    @Min(value = 1, message = "Min value is 1")
+    @Min(value = 1, message = "{min.value}")
     Long driverId;
     @NotNull
-    @Min(value = 1, message = "Min value is 1")
+    @Min(value = 1, message = "{min.value}")
     Long rideId;
 }

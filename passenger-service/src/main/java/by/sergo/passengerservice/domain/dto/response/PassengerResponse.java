@@ -8,7 +8,7 @@ import lombok.experimental.FieldDefaults;
 @Getter
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class PassengerResponseDto {
+public class PassengerResponse {
     private Long id;
     private String name;
     private String surname;
