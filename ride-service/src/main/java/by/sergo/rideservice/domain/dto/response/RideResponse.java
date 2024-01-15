@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
-public class RideResponseDto {
+public class RideResponse {
     private String id;
     private String pickUpAddress;
     private String destinationAddress;

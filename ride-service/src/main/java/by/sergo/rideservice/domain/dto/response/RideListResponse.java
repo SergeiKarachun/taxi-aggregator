@@ -9,11 +9,11 @@ import java.util.List;
 @Getter
 @Setter
 @Builder
-public class RideListResponseDto {
+public class RideListResponse {
     private  Integer page;
     private Integer totalPages;
     private Integer size;
     private Integer total;
     private String sortedByField;
-    private List<RideResponseDto> rides;
+    private List<RideResponse> rides;
 }

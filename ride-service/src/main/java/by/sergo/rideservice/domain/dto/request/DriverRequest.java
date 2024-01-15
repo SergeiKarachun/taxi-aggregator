@@ -7,8 +7,8 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class DriverRequestDto {
+public class DriverRequest {
     @NotNull
-    @Min(value = 1, message = "Min value is 1")
+    @Min(value = 1, message = "{min.value}")
     private Long driverId;
 }
