@@ -5,14 +5,15 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.List;
+
 @Getter
 @Setter
 @Builder
-public class CarListResponseDto {
+public class DriverListResponse {
     private Integer page;
     private Integer totalPages;
     private Integer size;
     private Integer total;
     private String sortedByField;
-    private List<CarResponseDto> cars;
+    private List<DriverResponse> drivers;
 }

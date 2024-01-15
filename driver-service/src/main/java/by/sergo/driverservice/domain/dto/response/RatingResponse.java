@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class RatingResponseDto {
+public class RatingResponse {
     private Long id;
     private Integer grade;
     private Long driverId;

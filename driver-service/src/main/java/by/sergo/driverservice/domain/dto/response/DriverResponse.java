@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class DriverResponseDto {
+public class DriverResponse {
     private Long id;
     private String name;
     private String surname;
@@ -13,5 +13,5 @@ public class DriverResponseDto {
     private String email;
     private String status;
     private Double rating;
-    private CarResponseDto car;
+    private CarResponse car;
 }
