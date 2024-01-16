@@ -21,7 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Random;
 
 import static by.sergo.rideservice.domain.enums.Status.*;
@@ -155,20 +154,17 @@ public class RideServiceImpl implements RideService {
     private PageRequest getPageRequest(Integer page, Integer size, String field) {
         if (page < 1 || size < 1) {
             throw new BadRequestException(ExceptionMessageUtil.getInvalidRequestMessage(page, size));
-        }
-        if (field != null) {
-            List<String> declaredFields = Arrays.stream(RideResponse.class.getDeclaredFields())
+        } else if (field != null) {
+            Arrays.stream(RideResponse.class.getDeclaredFields())
                     .map(Field::getName)
-                    .toList();
-
-            declaredFields.stream()
                     .filter(s -> s.contains(field.toLowerCase()))
                     .findFirst()
                     .orElseThrow(() -> new BadRequestException(ExceptionMessageUtil.getInvalidSortingParamRequestMessage(field)));
 
             return PageRequest.of(page - 1, size).withSort(Sort.by(Sort.Order.asc(field.toLowerCase())));
+        } else {
+            return PageRequest.of(page - 1, size);
         }
-        return PageRequest.of(page - 1, size);
     }
 
     private Double getPrice() {

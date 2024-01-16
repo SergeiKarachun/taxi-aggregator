@@ -21,10 +21,10 @@ public class RideController {
     private final RideServiceImpl rideService;
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseStatus(HttpStatus.CREATED)
     @Operation(description = "Create a ride.")
     public ResponseEntity<RideResponse> create(@RequestBody @Valid RideCreateUpdateRequest dto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(rideService.create(dto));
+        return ResponseEntity.status(HttpStatus.CREATED)
+                             .body(rideService.create(dto));
     }
 
     @PutMapping(value = "/{id}/set-driver", consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -53,11 +53,10 @@ public class RideController {
     }
 
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(description = "Delete a ride by id.")
     public ResponseEntity<RideResponse> deleteById(@PathVariable("id") String id) {
-
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(rideService.deleteById(id));
+        return ResponseEntity.status(HttpStatus.NO_CONTENT)
+                             .body(rideService.deleteById(id));
     }
 
     @GetMapping("/{id}")
