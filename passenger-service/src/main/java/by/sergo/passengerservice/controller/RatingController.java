@@ -19,10 +19,10 @@ public class RatingController {
     private final RatingServiceImpl ratingService;
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<RatingResponse> createRateOfPassenger(@RequestBody @Valid RatingCreateRequest dto,
                                                                 @PathVariable("id") Long passengerId) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(ratingService.createRateOfPassenger(dto, passengerId));
+        return ResponseEntity.status(HttpStatus.CREATED)
+                             .body(ratingService.createRateOfPassenger(dto, passengerId));
     }
 
     @GetMapping

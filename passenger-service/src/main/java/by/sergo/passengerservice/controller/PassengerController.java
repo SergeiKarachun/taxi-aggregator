@@ -19,9 +19,9 @@ public class PassengerController {
     private final PassengerServiceImpl passengerServiceImpl;
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<PassengerResponse> create(@RequestBody @Valid PassengerCreateUpdateRequest dto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(passengerServiceImpl.create(dto));
+        return ResponseEntity.status(HttpStatus.CREATED)
+                             .body(passengerServiceImpl.create(dto));
     }
 
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -38,9 +38,9 @@ public class PassengerController {
     }
 
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
     public ResponseEntity<PassengerResponse> deleteById(@PathVariable("id") Long id) {
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(passengerServiceImpl.delete(id));
+        return ResponseEntity.status(HttpStatus.NO_CONTENT)
+                             .body(passengerServiceImpl.delete(id));
     }
 
     @GetMapping

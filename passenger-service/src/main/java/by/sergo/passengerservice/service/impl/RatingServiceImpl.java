@@ -43,7 +43,7 @@ public class RatingServiceImpl implements RatingService {
 
     @Override
     public PassengerRatingResponse getPassengerRating(Long passengerId) {
-        if (passengerRepository.existsByPassengerId(passengerId)){
+        if (passengerRepository.existsById(passengerId)){
             double passengerRating = getAverageRating(passengerId);
             return PassengerRatingResponse.builder()
                     .passengerId(passengerId)
@@ -51,7 +51,6 @@ public class RatingServiceImpl implements RatingService {
                     .build();
         }
         else throw new NotFoundException(ExceptionMessageUtil.getNotFoundMessage("Passenger", "passengerId", passengerId));
-
     }
 
     private static double floorRating(double passengerRating) {
