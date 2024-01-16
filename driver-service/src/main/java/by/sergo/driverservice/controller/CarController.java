@@ -19,9 +19,9 @@ public class CarController {
     private final CarServiceImpl carService;
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<CarResponse> create(@RequestBody @Valid CarCreateUpdateRequest dto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(carService.create(dto));
+        return ResponseEntity.status(HttpStatus.CREATED)
+                             .body(carService.create(dto));
     }
 
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -31,9 +31,9 @@ public class CarController {
     }
 
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
     public ResponseEntity<CarResponse> delete(@PathVariable("id") Long id) {
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(carService.delete(id));
+        return ResponseEntity.status(HttpStatus.NO_CONTENT)
+                             .body(carService.delete(id));
     }
 
     @GetMapping("/{id}")

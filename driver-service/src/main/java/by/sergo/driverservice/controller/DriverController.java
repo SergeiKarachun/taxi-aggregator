@@ -18,9 +18,9 @@ public class DriverController {
     private final DriverServiceImpl driverService;
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<DriverResponse> create(@RequestBody @Valid DriverCreateUpdateRequest dto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(driverService.create(dto));
+        return ResponseEntity.status(HttpStatus.CREATED)
+                             .body(driverService.create(dto));
     }
 
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -30,9 +30,9 @@ public class DriverController {
     }
 
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
     public ResponseEntity<DriverResponse> delete(@PathVariable("id") Long id) {
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(driverService.delete(id));
+        return ResponseEntity.status(HttpStatus.NO_CONTENT)
+                             .body(driverService.delete(id));
     }
 
     @GetMapping("/{id}")

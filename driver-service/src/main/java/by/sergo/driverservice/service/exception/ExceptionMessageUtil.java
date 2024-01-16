@@ -7,16 +7,28 @@ import java.util.HashMap;
 @UtilityClass
 public class ExceptionMessageUtil {
 
+    public static String getCanNotCreateCarMessage() {
+        return "Can't create new car, please check input parameters";
+    }
+
+    public static String getCanNotUpdateCarMessage() {
+        return "Can't update new car, please check input parameters";
+    }
+
+    public static String getYearShouldBeMessageMessage() {
+        return "The year of manufacture should be no more than now.";
+    }
+
     public static String getAlreadyExistMessage(String className, String variableName, String variableValue) {
         return "%s with this %s %s already exists.".formatted(className, variableName, variableValue);
     }
 
     public static String getNotFoundMessage(String className, String variableName, Long variableValue) {
-        return "%s with %s=%ddoesn't exist.".formatted(className, variableName, variableValue);
+        return "%s with %s=%d doesn't exist.".formatted(className, variableName, variableValue);
     }
 
 
-    public static String getInvaLidRequestMessage(Integer page, Integer size) {
+    public static String getInvalidRequestMessage(Integer page, Integer size) {
         return "Request parameters must be greater than 0, your parameters page=%d size=%d.".formatted(page, size);
 
     }

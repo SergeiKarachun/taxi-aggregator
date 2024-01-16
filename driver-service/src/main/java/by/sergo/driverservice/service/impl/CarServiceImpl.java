@@ -20,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -32,9 +31,7 @@ public class CarServiceImpl implements CarService {
     private final CarRepository carRepository;
     private final DriverRepository driverRepository;
     private final ModelMapper modelMapper;
-    private static final String CAN_NOT_CREATE_CAR = "Can't create new car, please check input parameters";
-    private static final String CAN_NOT_UPDATE_CAR = "Can't update new car, please check input parameters";
-    private static final String YEAR_SHOULD_BE = "The year of manufacture should be no more than now.";
+
 
     @Override
     @Transactional
@@ -46,7 +43,7 @@ public class CarServiceImpl implements CarService {
         return Optional.of(mapToEntity(dto))
                 .map(carRepository::save)
                 .map(this::mapToDto)
-                .orElseThrow(() -> new BadRequestException(CAN_NOT_CREATE_CAR));
+                .orElseThrow(() -> new BadRequestException(ExceptionMessageUtil.getCanNotCreateCarMessage()));
     }
 
     @Override
@@ -57,9 +54,9 @@ public class CarServiceImpl implements CarService {
         var carToSave = mapToEntity(dto);
         carToSave.setId(id);
         return Optional.of(carToSave)
-                .map(carRepository::saveAndFlush)
+                .map(carRepository::save)
                 .map(this::mapToDto)
-                .orElseThrow(() -> new BadRequestException(CAN_NOT_UPDATE_CAR));
+                .orElseThrow(() -> new BadRequestException(ExceptionMessageUtil.getCanNotUpdateCarMessage()));
     }
 
     @Override
@@ -101,20 +98,17 @@ public class CarServiceImpl implements CarService {
 
     private PageRequest getPageRequest(Integer page, Integer size, String orderBy) {
         if (page < 1 || size < 1) {
-            throw new BadRequestException(ExceptionMessageUtil.getInvaLidRequestMessage(page, size));
-        }
-        if (orderBy != null) {
-            List<String> declaredFields = Arrays.stream(Car.class.getDeclaredFields())
+            throw new BadRequestException(ExceptionMessageUtil.getInvalidRequestMessage(page, size));
+        } else if (orderBy != null) {
+            Arrays.stream(Car.class.getDeclaredFields())
                     .map(Field::getName)
-                    .toList();
-
-            declaredFields.stream()
                     .filter(s -> s.contains(orderBy.toLowerCase()))
                     .findFirst()
                     .orElseThrow(() -> new BadRequestException(ExceptionMessageUtil.getInvalidSortingParamRequestMessage(orderBy)));
             return PageRequest.of(page - 1, size).withSort(Sort.by(Sort.Order.asc(orderBy.toLowerCase())));
+        } else {
+            return PageRequest.of(page - 1, size);
         }
-        return PageRequest.of(page - 1, size);
     }
 
     private void checkDriverAlreadyHasCar(Long driverId) {
@@ -137,7 +131,7 @@ public class CarServiceImpl implements CarService {
 
     private void checkDate(Integer yearOfManufacture) {
         if (yearOfManufacture > LocalDate.now().getYear()) {
-            throw new BadRequestException(YEAR_SHOULD_BE);
+            throw new BadRequestException(ExceptionMessageUtil.getYearShouldBeMessageMessage());
         }
     }
 

@@ -18,5 +18,4 @@ public interface DriverRepository extends JpaRepository<Driver, Long> {
     Page<Driver> getAllByStatus(Status status, PageRequest pageRequest);
     @EntityGraph(type = EntityGraph.EntityGraphType.FETCH, attributePaths = "car")
     Page<Driver> findAll(Pageable pageable);
-    boolean existsById(Long driverId);
 }

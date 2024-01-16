@@ -33,7 +33,7 @@ public class DriverServiceImpl implements DriverService {
     public DriverResponse create(DriverCreateUpdateRequest dto) {
         checkIsDriverUnique(dto);
         return Optional.of(mapToEntity(dto))
-                .map(driverRepository::saveAndFlush)
+                .map(driverRepository::save)
                 .map(this::mapToDto)
                 .orElseThrow(() -> new BadRequestException(CAN_NOT_CREATE_DRIVER));
     }
@@ -43,10 +43,8 @@ public class DriverServiceImpl implements DriverService {
     public DriverResponse update(Long id, DriverCreateUpdateRequest dto) {
         var existDriver = getByIdOrElseThrow(id);
         checkIsDriverForUpdateUnique(dto, existDriver);
-        existDriver.setName(dto.getName());
-        existDriver.setSurname(dto.getSurname());
-        existDriver.setEmail(dto.getEmail());
-        existDriver.setPhone(dto.getPhone());
+        var driverToSave = mapToEntity(dto);
+        driverToSave.setId(id);
         return mapToDto(driverRepository.save(existDriver));
     }
 
@@ -107,20 +105,17 @@ public class DriverServiceImpl implements DriverService {
     private PageRequest getPageRequest(Integer page, Integer size, String orderBy) {
         if (page < 1 || size < 1) {
             throw new BadRequestException(
-                    ExceptionMessageUtil.getInvaLidRequestMessage(page, size));
-        }
-        if (orderBy != null) {
-            List<String> declaredFields = Arrays.stream(DriverResponse.class.getDeclaredFields())
+                    ExceptionMessageUtil.getInvalidRequestMessage(page, size));
+        } else if (orderBy != null) {
+            Arrays.stream(DriverResponse.class.getDeclaredFields())
                     .map(Field::getName)
-                    .toList();
-
-            declaredFields.stream()
                     .filter(s -> s.contains(orderBy.toLowerCase()))
                     .findFirst()
                     .orElseThrow(() -> new BadRequestException(ExceptionMessageUtil.getInvalidSortingParamRequestMessage(orderBy)));
             return PageRequest.of(page - 1, size).withSort(Sort.by(Sort.Order.asc(orderBy.toLowerCase())));
+        } else {
+            return PageRequest.of(page - 1, size);
         }
-        return PageRequest.of(page - 1, size);
     }
 
     private void checkIsDriverForUpdateUnique(DriverCreateUpdateRequest dto, Driver existDriver) {

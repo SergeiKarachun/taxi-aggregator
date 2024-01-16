@@ -3,23 +3,20 @@ package by.sergo.driverservice.domain.dto.request;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.experimental.FieldDefaults;
 
 @Getter
 @Setter
-@FieldDefaults(level = AccessLevel.PRIVATE)
 public class RatingCreateRequest {
     @NotNull
     @Min(value = 1, message = "{min.value}")
     @Max(value = 5, message = "{max.value}")
-    Integer grade;
+    private Integer grade;
     @NotNull
     @Min(value = 1, message = "{min.value}")
-    Long passengerId;
+    private Long passengerId;
     @NotNull
     @Min(value = 1, message = "{min.value}")
-    Long rideId;
+    private Long rideId;
 }

@@ -15,7 +15,6 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -29,8 +28,8 @@ public class RatingServiceImpl implements RatingService {
     @Transactional
     public RatingResponse createRateOfDriver(RatingCreateRequest dto, Long driverId) {
         var driver = driverRepository.findById(driverId)
-                .orElseThrow(() -> new NotFoundException(ExceptionMessageUtil.getNotFoundMessage("Driver", "id", driverId)
-        ));
+                .orElseThrow(() -> new NotFoundException(ExceptionMessageUtil.getNotFoundMessage("Driver", "id", driverId)));
+
         if (ratingRepository.existsByRideId(dto.getRideId())) {
             throw new BadRequestException(ExceptionMessageUtil.getAlreadyExistMessage("Rating", "rideId", dto.getRideId().toString()));
         }

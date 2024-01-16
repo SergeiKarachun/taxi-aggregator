@@ -4,11 +4,12 @@ import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import static by.sergo.driverservice.domain.dto.ConstantUtil.COLOR_PATTERN;
+import static by.sergo.driverservice.domain.dto.ConstantUtil.NUMBER_PATTERN;
+
 @Getter
 @Setter
 public class CarCreateUpdateRequest {
-    private static final String NUMBER_PATTERN = "^\\d{4} [A-Z]{2}-\\d{1}$";
-    private static final String COLOR_PATTERN = "^(RED|BLACK|WHITE|BLUE|SILVER|YELLOW|GREEN)$";
     @NotBlank(message = "{model.not.blank}")
     @Size(min = 2, message = "{model.min.value}")
     private String model;
