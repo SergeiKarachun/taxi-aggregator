@@ -7,12 +7,12 @@ import lombok.Setter;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+import static by.sergo.paymentservice.domain.dto.ConstantUtils.*;
+
 @Getter
 @Setter
 public class CreditCardCreateUpdate {
-    private static final String CREDIT_CARD_NUMBER_PATTERN = "^\\d{16}$";
-    private static final String CVV_PATTERN = "^\\d{3}$";
-    private static final String USER_TYPE_PATTERN = "^DRIVER|PASSENGER$";
+
     @NotBlank(message = "{credit.card.not.blank}")
     @Pattern(regexp = CREDIT_CARD_NUMBER_PATTERN, message = "{credit.card.number.pattern}")
     private String creditCardNumber;

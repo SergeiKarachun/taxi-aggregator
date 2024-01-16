@@ -69,7 +69,6 @@ public class TransactionStoreServiceImpl implements TransactionStoreService {
     private PageRequest getPageRequest(Integer page, Integer size) {
         if (page < 1 || size < 1) {
             throw new BadRequestException(ExceptionMessageUtil.getInvalidRequestMessage(page, size));
-        }
-        return PageRequest.of(page - 1, size).withSort(Sort.by(Sort.Order.asc("operationDate")));
+        } else return PageRequest.of(page - 1, size).withSort(Sort.by(Sort.Order.asc("operationDate")));
     }
 }

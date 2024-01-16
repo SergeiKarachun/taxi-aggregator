@@ -19,17 +19,17 @@ public class AccountController {
     private final AccountServiceImpl accountService;
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Create new account")
     public ResponseEntity<AccountResponse> create(@RequestBody @Valid AccountCreateUpdateRequest dto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(accountService.createAccount(dto));
+        return ResponseEntity.status(HttpStatus.CREATED)
+                             .body(accountService.createAccount(dto));
     }
 
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Delete account")
     public ResponseEntity<AccountResponse> delete(@PathVariable("id") Long id) {
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(accountService.deleteById(id));
+        return ResponseEntity.status(HttpStatus.NO_CONTENT)
+                             .body(accountService.deleteById(id));
     }
 
     @PutMapping("/driver/{id}")

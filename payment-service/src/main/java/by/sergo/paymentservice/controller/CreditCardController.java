@@ -18,10 +18,10 @@ public class CreditCardController {
     private final CreditCardServiceImpl creditCardService;
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Add credit card")
     public ResponseEntity<CreditCardResponse> addCard(@RequestBody @Valid CreditCardCreateUpdate dto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(creditCardService.addCard(dto));
+        return ResponseEntity.status(HttpStatus.CREATED)
+                             .body(creditCardService.addCard(dto));
     }
 
     @PutMapping("/{id}")
@@ -32,10 +32,10 @@ public class CreditCardController {
     }
 
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Delete credit card")
     public ResponseEntity<CreditCardResponse> deleteBard(@PathVariable("id") Long id) {
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(creditCardService.deleteById(id));
+        return ResponseEntity.status(HttpStatus.NO_CONTENT)
+                             .body(creditCardService.deleteById(id));
     }
 
     @GetMapping("/passenger/{id}")

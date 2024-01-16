@@ -80,11 +80,13 @@ public class CreditCardServiceImpl implements CreditCardService {
         var passengerCreditCard = getPassengerCreditCard(payment.getPassengerId());
         var driverAccount = accountRepository.findByDriverId(payment.getDriverId())
                 .orElseThrow(() -> new NotFoundException(ExceptionMessageUtil.getNotFoundMessage("Account", "driverId", payment.getDriverId())));
+
         if (passengerCreditCard.getBalance().compareTo(payment.getSum()) >= 0) {
             passengerCreditCard.setBalance(passengerCreditCard.getBalance().subtract(payment.getSum()));
         } else {
             throw new BadRequestException(ExceptionMessageUtil.getWithdrawalExceptionMessage("Credit card", "passengerId", payment.getPassengerId().toString(), passengerCreditCard.getBalance().toString()));
         }
+
         var savedCreditCard = creditCardRepository.save(passengerCreditCard);
         driverAccount.setBalance(driverAccount.getBalance().add(payment.getSum()));
         accountRepository.save(driverAccount);
@@ -112,6 +114,7 @@ public class CreditCardServiceImpl implements CreditCardService {
     private void checkCardIsUniqueForUpdate(CreditCardCreateUpdate dto, Long id) {
         getByIdOrElseThrow(id);
         checkUniqueCreditCard(dto);
+
         if (creditCardRepository.existsByUserIdAndUserType(dto.getUserId(), UserType.valueOf(dto.getUserType()))){
             throw new BadRequestException(ExceptionMessageUtil.getAlreadyExistMessage("Credit Card", "userId", dto.getUserId(), "userType", dto.getUserType()));
         }

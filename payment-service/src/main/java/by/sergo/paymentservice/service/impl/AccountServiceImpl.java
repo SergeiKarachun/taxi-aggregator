@@ -56,11 +56,13 @@ public class AccountServiceImpl implements AccountService {
     public AccountResponse withdrawalBalance(Long driverId, BigDecimal sum) {
         var account = getByDriverIdOrElseThrow(driverId);
         var creditCard = getByUserIdAndUserTypeOrElseThrow(driverId);
+
         if (account.getBalance().compareTo(sum) >= 0) {
             account.setBalance(account.getBalance().subtract(sum));
         } else {
             throw new BadRequestException(ExceptionMessageUtil.getWithdrawalExceptionMessage("Account", "driverId", driverId.toString(), account.getBalance().toString()));
         }
+
         creditCard.setBalance(creditCard.getBalance().add(sum));
         creditCardRepository.save(creditCard);
         var transaction = TransactionStore.builder()
@@ -85,15 +87,18 @@ public class AccountServiceImpl implements AccountService {
     }
 
     private CreditCard getByUserIdAndUserTypeOrElseThrow(Long driverId) {
-        return creditCardRepository.findByUserIdAndUserType(driverId, DRIVER).orElseThrow(() -> new BadRequestException(ExceptionMessageUtil.getNotFoundMessage("CreditCard", "driverId", driverId)));
+        return creditCardRepository.findByUserIdAndUserType(driverId, DRIVER)
+                .orElseThrow(() -> new BadRequestException(ExceptionMessageUtil.getNotFoundMessage("CreditCard", "driverId", driverId)));
     }
 
     private Account getByIdOrElseThrow(Long id) {
-        return accountRepository.findById(id).orElseThrow(() -> new BadRequestException(ExceptionMessageUtil.getNotFoundMessage("Account", "id", id)));
+        return accountRepository.findById(id)
+                .orElseThrow(() -> new BadRequestException(ExceptionMessageUtil.getNotFoundMessage("Account", "id", id)));
     }
 
     private Account getByDriverIdOrElseThrow(Long driverId) {
-        return accountRepository.findByDriverId(driverId).orElseThrow(() -> new BadRequestException(ExceptionMessageUtil.getNotFoundMessage("Account", "driverId", driverId)));
+        return accountRepository.findByDriverId(driverId)
+                .orElseThrow(() -> new BadRequestException(ExceptionMessageUtil.getNotFoundMessage("Account", "driverId", driverId)));
     }
 
     private Account mapToEntity(AccountCreateUpdateRequest dto) {
