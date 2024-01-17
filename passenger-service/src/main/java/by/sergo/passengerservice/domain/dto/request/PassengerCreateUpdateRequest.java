@@ -1,6 +1,6 @@
 package by.sergo.passengerservice.domain.dto.request;
 
-import by.sergo.passengerservice.domain.dto.ConstantUtil;
+import by.sergo.passengerservice.util.ConstantUtil;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

@@ -4,13 +4,13 @@ import by.sergo.passengerservice.domain.dto.request.PassengerCreateUpdateRequest
 import by.sergo.passengerservice.domain.dto.response.PassengerListResponse;
 import by.sergo.passengerservice.domain.dto.response.PassengerResponse;
 import by.sergo.passengerservice.domain.entity.Passenger;
+import by.sergo.passengerservice.mapper.PassengerMapper;
 import by.sergo.passengerservice.repository.PassengerRepository;
 import by.sergo.passengerservice.service.PassengerService;
 import by.sergo.passengerservice.service.exception.BadRequestException;
-import by.sergo.passengerservice.service.exception.ExceptionMessageUtil;
+import by.sergo.passengerservice.util.ExceptionMessageUtil;
 import by.sergo.passengerservice.service.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -20,20 +20,22 @@ import java.lang.reflect.Field;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static by.sergo.passengerservice.util.ExceptionMessageUtil.*;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class PassengerServiceImpl implements PassengerService {
 
-    private final ModelMapper modelMapper;
+    private final PassengerMapper passengerMapper;
     private final PassengerRepository passengerRepository;
 
     @Override
     @Transactional
     public PassengerResponse create(PassengerCreateUpdateRequest dto) {
         checkIsPassengerUnique(dto);
-        var savedPassenger = passengerRepository.save(mapToEntity(dto));
-        return mapToDto(savedPassenger);
+        var savedPassenger = passengerRepository.save(passengerMapper.mapToEntity(dto));
+        return passengerMapper.mapToDto(savedPassenger);
     }
 
     @Override
@@ -43,9 +45,9 @@ public class PassengerServiceImpl implements PassengerService {
 
         checkIsPassengerForUpdateUnique(dto, passengerToUpdate);
 
-        var passenger = mapToEntity(dto);
+        var passenger = passengerMapper.mapToEntity(dto);
         passenger.setId(passengerToUpdate.getId());
-        return mapToDto(passengerRepository.save(passenger));
+        return passengerMapper.mapToDto(passengerRepository.save(passenger));
     }
 
     @Override
@@ -53,26 +55,26 @@ public class PassengerServiceImpl implements PassengerService {
     public PassengerResponse delete(Long id) {
         var passenger = getByIdOrElseThrow(id);
         passengerRepository.deleteById(id);
-        return mapToDto(passenger);
+        return passengerMapper.mapToDto(passenger);
     }
 
     @Override
     public PassengerResponse getById(Long id) {
         var passenger = getByIdOrElseThrow(id);
-        return mapToDto(passenger);
+        return passengerMapper.mapToDto(passenger);
     }
 
     @Override
     public PassengerResponse getByPhone(String phone) {
         var passenger = passengerRepository.findByPhone(phone)
-                .orElseThrow(() -> new NotFoundException(ExceptionMessageUtil.getNotFoundMessage("Passenger", "phone", phone)));
-        return mapToDto(passenger);
+                .orElseThrow(() -> new NotFoundException(getNotFoundMessage("Passenger", "phone", phone)));
+        return passengerMapper.mapToDto(passenger);
     }
 
     @Override
     public PassengerListResponse getAll() {
         List<PassengerResponse> passengers = passengerRepository.findAll().stream()
-                .map(entity -> mapToDto(entity))
+                .map(passengerMapper::mapToDto)
                 .collect(Collectors.toList());
 
         return PassengerListResponse.builder()
@@ -86,7 +88,7 @@ public class PassengerServiceImpl implements PassengerService {
     public PassengerListResponse getAll(Integer page, Integer size, String field) {
         PageRequest pageRequest = getPageRequest(page, size, field);
         var responsePage = passengerRepository.findAll(pageRequest)
-                .map(this::mapToDto);
+                .map(passengerMapper::mapToDto);
         return PassengerListResponse.builder()
                 .passengers(responsePage.getContent())
                 .page(responsePage.getPageable().getPageNumber() + 1)
@@ -105,7 +107,7 @@ public class PassengerServiceImpl implements PassengerService {
                     .map(Field::getName)
                     .filter(s -> s.contains(field.toLowerCase()))
                     .findFirst()
-                    .orElseThrow(() -> new BadRequestException(ExceptionMessageUtil.getInvalidSortingParamRequestMessage(field)));
+                    .orElseThrow(() -> new BadRequestException(getInvalidSortingParamRequestMessage(field)));
 
             return PageRequest.of(page - 1, size).withSort(Sort.by(Sort.Order.asc(field.toLowerCase())));
         } else {
@@ -124,13 +126,13 @@ public class PassengerServiceImpl implements PassengerService {
         }
 
         if (!errors.isEmpty()) {
-            throw new BadRequestException(ExceptionMessageUtil.getAlreadyExistMapMessage(errors));
+            throw new BadRequestException(getAlreadyExistMapMessage(errors));
         }
     }
 
     private Passenger getByIdOrElseThrow(Long id) {
         return passengerRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException(ExceptionMessageUtil.getNotFoundMessage("Passenger", "id", id)));
+                .orElseThrow(() -> new NotFoundException(getNotFoundMessage("Passenger", "id", id)));
     }
 
     private void checkIsPassengerUnique(PassengerCreateUpdateRequest dto) {
@@ -140,27 +142,19 @@ public class PassengerServiceImpl implements PassengerService {
         checkPhoneIsUnique(dto, errors);
 
         if (!errors.isEmpty()) {
-            throw new BadRequestException(ExceptionMessageUtil.getAlreadyExistMapMessage(errors));
+            throw new BadRequestException(getAlreadyExistMapMessage(errors));
         }
     }
 
     private void checkPhoneIsUnique(PassengerCreateUpdateRequest dto, HashMap<String, String> errors) {
         if (passengerRepository.existsByPhone(dto.getPhone())) {
-            errors.put("phone", ExceptionMessageUtil.getAlreadyExistMessage("Passenger", "phone", dto.getPhone()));
+            errors.put("phone", getAlreadyExistMessage("Passenger", "phone", dto.getPhone()));
         }
     }
 
     private void checkEmailIsUnique(PassengerCreateUpdateRequest dto, HashMap<String, String> errors) {
         if (passengerRepository.existsByEmail(dto.getEmail())) {
-            errors.put("email", ExceptionMessageUtil.getAlreadyExistMessage("Passenger", "email", dto.getEmail()));
+            errors.put("email", getAlreadyExistMessage("Passenger", "email", dto.getEmail()));
         }
-    }
-
-    private Passenger mapToEntity(PassengerCreateUpdateRequest passengerResponseDto) {
-        return modelMapper.map(passengerResponseDto, Passenger.class);
-    }
-
-    private PassengerResponse mapToDto(Passenger passenger) {
-        return modelMapper.map(passenger, PassengerResponse.class);
     }
 }

@@ -4,17 +4,19 @@ import by.sergo.passengerservice.domain.dto.request.RatingCreateRequest;
 import by.sergo.passengerservice.domain.dto.response.PassengerRatingResponse;
 import by.sergo.passengerservice.domain.dto.response.RatingResponse;
 import by.sergo.passengerservice.domain.entity.Passenger;
-import by.sergo.passengerservice.domain.entity.Rating;
+import by.sergo.passengerservice.mapper.RatingMapper;
 import by.sergo.passengerservice.repository.PassengerRepository;
 import by.sergo.passengerservice.repository.RatingRepository;
 import by.sergo.passengerservice.service.RatingService;
 import by.sergo.passengerservice.service.exception.BadRequestException;
-import by.sergo.passengerservice.service.exception.ExceptionMessageUtil;
 import by.sergo.passengerservice.service.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import static by.sergo.passengerservice.util.ConstantUtil.DEFAULT_RATING;
+import static by.sergo.passengerservice.util.ExceptionMessageUtil.getAlreadyExistMessage;
+import static by.sergo.passengerservice.util.ExceptionMessageUtil.getNotFoundMessage;
 
 @Service
 @RequiredArgsConstructor
@@ -23,22 +25,22 @@ public class RatingServiceImpl implements RatingService {
 
     private final RatingRepository ratingRepository;
     private final PassengerRepository passengerRepository;
-    private final ModelMapper modelMapper;
+    private final RatingMapper ratingMapper;
 
     @Override
     @Transactional
     public RatingResponse createRateOfPassenger(RatingCreateRequest dto, Long passengerId) {
         var passenger = getByIdOrElseThrow(passengerId);
         if (ratingRepository.existsByRideId(dto.getRideId())) {
-            throw new BadRequestException(ExceptionMessageUtil.getAlreadyExistMessage("Rating", "rideId", dto.getRideId().toString()));
+            throw new BadRequestException(getAlreadyExistMessage("Rating", "rideId", dto.getRideId()));
         }
 
-        var newRating = mapToEntity(dto);
+        var newRating = ratingMapper.mapToEntity(dto);
         newRating.setPassenger(passenger);
         var savedRating = ratingRepository.save(newRating);
         passenger.setRating(floorRating(getAverageRating(passengerId)));
         passengerRepository.save(passenger);
-        return mapToDto(savedRating);
+        return ratingMapper.mapToDto(savedRating);
     }
 
     @Override
@@ -50,7 +52,7 @@ public class RatingServiceImpl implements RatingService {
                     .rating(floorRating(passengerRating))
                     .build();
         }
-        else throw new NotFoundException(ExceptionMessageUtil.getNotFoundMessage("Passenger", "passengerId", passengerId));
+        else throw new NotFoundException(getNotFoundMessage("Passenger", "passengerId", passengerId));
     }
 
     private static double floorRating(double passengerRating) {
@@ -59,19 +61,11 @@ public class RatingServiceImpl implements RatingService {
 
     private Passenger getByIdOrElseThrow(Long passengerId) {
         return passengerRepository.findById(passengerId)
-                .orElseThrow(() -> new NotFoundException(ExceptionMessageUtil.getNotFoundMessage("Passenger", "passengerId", passengerId)));
+                .orElseThrow(() -> new NotFoundException(getNotFoundMessage("Passenger", "passengerId", passengerId)));
     }
 
     private Double getAverageRating(Long passengerId) {
-        return ratingRepository.getRatingsByPassengerId(passengerId).orElse(5.0);
-    }
-
-    public RatingResponse mapToDto(Rating rating){
-        return modelMapper.map(rating, RatingResponse.class);
-    }
-
-    public Rating mapToEntity(RatingCreateRequest dto) {
-        modelMapper.getConfiguration().setAmbiguityIgnored(true);
-        return modelMapper.map(dto, Rating.class);
+        return ratingRepository.getRatingsByPassengerId(passengerId)
+                .orElse(DEFAULT_RATING);
     }
 }

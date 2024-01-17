@@ -6,5 +6,6 @@ import by.sergo.passengerservice.domain.dto.response.RatingResponse;
 
 public interface RatingService {
     RatingResponse createRateOfPassenger(RatingCreateRequest dto, Long passengerId);
+
     PassengerRatingResponse getPassengerRating(Long passengerId);
 }

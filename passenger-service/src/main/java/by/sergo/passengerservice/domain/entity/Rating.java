@@ -20,5 +20,5 @@ public class Rating {
     @JoinColumn(name = "passenger_id", nullable = false)
     private Passenger passenger;
     private Long driverId;
-    private Long rideId;
+    private String rideId;
 }
