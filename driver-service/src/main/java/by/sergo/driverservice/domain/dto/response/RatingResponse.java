@@ -10,5 +10,5 @@ public class RatingResponse {
     private Integer grade;
     private Long driverId;
     private Long passengerId;
-    private Long rideId;
+    private String rideId;
 }

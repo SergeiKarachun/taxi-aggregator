@@ -37,7 +37,7 @@ public class RestControllerExceptionHandler {
     public ResponseEntity<RestErrorResponse> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
         List<String> messages = new ArrayList<>();
         messages.add("Not valid structure of JSON");
-        messages.addAll(Collections.singletonList(ex.getMessage()));
+        messages.add(ex.getMessage());
         return new ResponseEntity<>(RestErrorResponse.builder()
                 .messages(messages)
                 .status(HttpStatus.BAD_REQUEST)

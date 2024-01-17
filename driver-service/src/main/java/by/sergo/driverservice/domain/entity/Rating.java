@@ -24,5 +24,5 @@ public class Rating {
     @Column(nullable = false)
     private Long passengerId;
     @Column(nullable = false, unique = true)
-    private Long rideId;
+    private String rideId;
 }

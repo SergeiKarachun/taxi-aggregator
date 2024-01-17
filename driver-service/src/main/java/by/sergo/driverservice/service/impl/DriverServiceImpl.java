@@ -5,13 +5,13 @@ import by.sergo.driverservice.domain.dto.response.DriverListResponse;
 import by.sergo.driverservice.domain.dto.response.DriverResponse;
 import by.sergo.driverservice.domain.entity.Driver;
 import by.sergo.driverservice.domain.enums.Status;
+import by.sergo.driverservice.mapper.DriverMapper;
 import by.sergo.driverservice.repository.DriverRepository;
 import by.sergo.driverservice.service.DriverService;
 import by.sergo.driverservice.service.exception.BadRequestException;
-import by.sergo.driverservice.service.exception.ExceptionMessageUtil;
+import by.sergo.driverservice.util.ExceptionMessageUtil;
 import by.sergo.driverservice.service.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -20,22 +20,24 @@ import org.springframework.transaction.annotation.Transactional;
 import java.lang.reflect.Field;
 import java.util.*;
 
+import static by.sergo.driverservice.util.ExceptionMessageUtil.*;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class DriverServiceImpl implements DriverService {
-    private final ModelMapper modelMapper;
+
     private final DriverRepository driverRepository;
-    private final static String CAN_NOT_CREATE_DRIVER = "Can't create new driver, please check input parameters";
+    private final DriverMapper driverMapper;
 
     @Override
     @Transactional
     public DriverResponse create(DriverCreateUpdateRequest dto) {
         checkIsDriverUnique(dto);
-        return Optional.of(mapToEntity(dto))
+        return Optional.of(driverMapper.mapToEntity(dto))
                 .map(driverRepository::save)
-                .map(this::mapToDto)
-                .orElseThrow(() -> new BadRequestException(CAN_NOT_CREATE_DRIVER));
+                .map(driverMapper::mapToDto)
+                .orElseThrow(() -> new BadRequestException(CAN_NOT_CREATE_DRIVER_MESSAGE));
     }
 
     @Override
@@ -43,9 +45,9 @@ public class DriverServiceImpl implements DriverService {
     public DriverResponse update(Long id, DriverCreateUpdateRequest dto) {
         var existDriver = getByIdOrElseThrow(id);
         checkIsDriverForUpdateUnique(dto, existDriver);
-        var driverToSave = mapToEntity(dto);
+        var driverToSave = driverMapper.mapToEntity(dto);
         driverToSave.setId(id);
-        return mapToDto(driverRepository.save(existDriver));
+        return driverMapper.mapToDto(driverRepository.save(existDriver));
     }
 
     @Override
@@ -53,20 +55,20 @@ public class DriverServiceImpl implements DriverService {
     public DriverResponse delete(Long id) {
         var driver = getByIdOrElseThrow(id);
         driverRepository.deleteById(id);
-        return mapToDto(driver);
+        return driverMapper.mapToDto(driver);
     }
 
     @Override
     public DriverResponse getById(Long id) {
         var driver = getByIdOrElseThrow(id);
-        return mapToDto(driver);
+        return driverMapper.mapToDto(driver);
     }
 
     @Override
     public DriverListResponse getAvailableDrivers(Integer page, Integer size, String orderBy) {
-        PageRequest pageRequest = getPageRequest(page, size, orderBy);
+        PageRequest pageRequest = getPageRequest(page, size, orderBy, DriverResponse.class);
         var responsePage = driverRepository.getAllByStatus(Status.AVAILABLE, pageRequest)
-                .map(this::mapToDto);
+                .map(driverMapper::mapToDto);
         return DriverListResponse.builder()
                 .drivers(responsePage.getContent())
                 .page(responsePage.getPageable().getPageNumber() + 1)
@@ -79,9 +81,9 @@ public class DriverServiceImpl implements DriverService {
 
     @Override
     public DriverListResponse getAll(Integer page, Integer size, String orderBy) {
-        PageRequest pageRequest = getPageRequest(page, size, orderBy);
+        PageRequest pageRequest = getPageRequest(page, size, orderBy, DriverResponse.class);
         var responsePage = driverRepository.findAll(pageRequest)
-                .map(this::mapToDto);
+                .map(driverMapper::mapToDto);
         return DriverListResponse.builder()
                 .drivers(responsePage.getContent())
                 .page(responsePage.getPageable().getPageNumber() + 1)
@@ -99,19 +101,18 @@ public class DriverServiceImpl implements DriverService {
         if (driver.getStatus().equals(Status.AVAILABLE)) {
             driver.setStatus(Status.UNAVAILABLE);
         } else driver.setStatus(Status.AVAILABLE);
-        return mapToDto(driverRepository.save(driver));
+        return driverMapper.mapToDto(driverRepository.save(driver));
     }
 
-    private PageRequest getPageRequest(Integer page, Integer size, String orderBy) {
+    private <T> PageRequest getPageRequest(Integer page, Integer size, String orderBy, Class<T> clazz) {
         if (page < 1 || size < 1) {
-            throw new BadRequestException(
-                    ExceptionMessageUtil.getInvalidRequestMessage(page, size));
+            throw new BadRequestException(getInvalidRequestMessage(page, size));
         } else if (orderBy != null) {
-            Arrays.stream(DriverResponse.class.getDeclaredFields())
+            Arrays.stream(clazz.getDeclaredFields())
                     .map(Field::getName)
                     .filter(s -> s.contains(orderBy.toLowerCase()))
                     .findFirst()
-                    .orElseThrow(() -> new BadRequestException(ExceptionMessageUtil.getInvalidSortingParamRequestMessage(orderBy)));
+                    .orElseThrow(() -> new BadRequestException(getInvalidSortingParamRequestMessage(orderBy)));
             return PageRequest.of(page - 1, size).withSort(Sort.by(Sort.Order.asc(orderBy.toLowerCase())));
         } else {
             return PageRequest.of(page - 1, size);
@@ -148,23 +149,15 @@ public class DriverServiceImpl implements DriverService {
         }
     }
 
-    private void checkIsPhoneUnique(String phone, HashMap<String, String> errors) {
+    private void checkIsPhoneUnique(String phone, Map<String, String> errors) {
         if (driverRepository.existsByPhone(phone)) {
             errors.put("phone", ExceptionMessageUtil.getAlreadyExistMessage("Driver", "phone", phone));
         }
     }
 
-    private void checkIsEmailUnique(String email, HashMap<String, String> errors) {
+    private void checkIsEmailUnique(String email, Map<String, String> errors) {
         if (driverRepository.existsByEmail(email)) {
             errors.put("email", ExceptionMessageUtil.getAlreadyExistMessage("Driver", "email", email));
         }
-    }
-
-    private Driver mapToEntity(DriverCreateUpdateRequest requestDto) {
-        return modelMapper.map(requestDto, Driver.class);
-    }
-
-    private DriverResponse mapToDto(Driver driver) {
-        return modelMapper.map(driver, DriverResponse.class);
     }
 }

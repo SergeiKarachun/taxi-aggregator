@@ -6,5 +6,6 @@ import by.sergo.driverservice.domain.dto.response.RatingResponse;
 
 public interface RatingService {
     RatingResponse createRateOfDriver(RatingCreateRequest dto, Long driverId);
+
     DriverRatingResponse getDriverRating(Long driverId);
 }

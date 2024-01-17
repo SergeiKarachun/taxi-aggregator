@@ -1,23 +1,16 @@
-package by.sergo.driverservice.service.exception;
+package by.sergo.driverservice.util;
 
 import lombok.experimental.UtilityClass;
 
-import java.util.HashMap;
+import java.util.Map;
 
 @UtilityClass
 public class ExceptionMessageUtil {
 
-    public static String getCanNotCreateCarMessage() {
-        return "Can't create new car, please check input parameters";
-    }
-
-    public static String getCanNotUpdateCarMessage() {
-        return "Can't update new car, please check input parameters";
-    }
-
-    public static String getYearShouldBeMessageMessage() {
-        return "The year of manufacture should be no more than now.";
-    }
+    public static final String CAN_NOT_CREATE_CAR_MESSAGE = "Can't create new car, please check input parameters.";
+    public static final String CAN_NOT_UPDATE_CAR_MESSAGE = "Can't update new car, please check input parameters.";
+    public static final String YEAR_SHOULD_BE_MESSAGE = "The year of manufacture should be no more than now.";
+    public final static String CAN_NOT_CREATE_DRIVER_MESSAGE = "Can't create new driver, please check input parameters";
 
     public static String getAlreadyExistMessage(String className, String variableName, String variableValue) {
         return "%s with this %s %s already exists.".formatted(className, variableName, variableValue);
@@ -37,9 +30,9 @@ public class ExceptionMessageUtil {
         return "Invalid sorting parameter, can't sort by %s parameter.".formatted(orderBy);
     }
 
-    public static String getAlreadyExistMapMessage(HashMap<String, String> errors) {
+    public static String getAlreadyExistMapMessage(Map<String, String> errors) {
         StringBuilder message = new StringBuilder();
-        errors.values().forEach(str -> message.append(str));
+        errors.values().forEach(message::append);
         return message.toString();
     }
 }

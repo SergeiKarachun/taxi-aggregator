@@ -4,8 +4,8 @@ import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import static by.sergo.driverservice.domain.dto.ConstantUtil.COLOR_PATTERN;
-import static by.sergo.driverservice.domain.dto.ConstantUtil.NUMBER_PATTERN;
+import static by.sergo.driverservice.util.ConstantUtil.COLOR_PATTERN;
+import static by.sergo.driverservice.util.ConstantUtil.NUMBER_PATTERN;
 
 @Getter
 @Setter

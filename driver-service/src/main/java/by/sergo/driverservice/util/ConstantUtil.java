@@ -1,4 +1,4 @@
-package by.sergo.driverservice.domain.dto;
+package by.sergo.driverservice.util;
 
 import lombok.experimental.UtilityClass;
 
@@ -8,4 +8,5 @@ public class ConstantUtil {
     public static final String COLOR_PATTERN = "^(RED|BLACK|WHITE|BLUE|SILVER|YELLOW|GREEN)$";
     public static final String EMAIL_EXAMPLE = "example@gmail.com";
     public static final String PHONE_PATTERN = "^\\+375(29|33|44|25)(\\d{7})$";
+    public static final Double DEFAULT_RATING = 5.0;
 }

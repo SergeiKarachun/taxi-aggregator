@@ -8,8 +8,8 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
-import static by.sergo.driverservice.domain.dto.ConstantUtil.EMAIL_EXAMPLE;
-import static by.sergo.driverservice.domain.dto.ConstantUtil.PHONE_PATTERN;
+import static by.sergo.driverservice.util.ConstantUtil.EMAIL_EXAMPLE;
+import static by.sergo.driverservice.util.ConstantUtil.PHONE_PATTERN;
 
 @Getter
 @Setter

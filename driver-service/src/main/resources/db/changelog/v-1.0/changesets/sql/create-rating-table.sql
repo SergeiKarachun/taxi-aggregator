@@ -4,5 +4,5 @@ CREATE TABLE IF NOT EXISTS rating
     grade        INT    NOT NULL,
     driver_id    BIGINT,
     passenger_id BIGINT NOT NULL,
-    ride_id BIGINT UNIQUE NOT NULL
+    ride_id VARCHAR(255) NOT NULL UNIQUE
 );
