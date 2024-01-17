@@ -3,7 +3,7 @@ spring:
     mongodb:
       authentication-database: admin
       username: root
-      password: example
+      password: ${DB_PASSWORD:example}
       database: ridedb
       port: 27017
       host: localhost

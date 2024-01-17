@@ -1,4 +1,4 @@
-package by.sergo.rideservice.service.exception;
+package by.sergo.rideservice.util;
 
 import lombok.experimental.UtilityClass;
 

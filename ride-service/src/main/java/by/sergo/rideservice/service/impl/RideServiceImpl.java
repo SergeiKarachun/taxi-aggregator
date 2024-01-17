@@ -6,13 +6,13 @@ import by.sergo.rideservice.domain.dto.request.RideCreateUpdateRequest;
 import by.sergo.rideservice.domain.dto.response.RideListResponse;
 import by.sergo.rideservice.domain.dto.response.RideResponse;
 import by.sergo.rideservice.domain.enums.Status;
+import by.sergo.rideservice.mapper.RideMapper;
 import by.sergo.rideservice.repository.RideRepository;
 import by.sergo.rideservice.service.RideService;
 import by.sergo.rideservice.service.exception.BadRequestException;
-import by.sergo.rideservice.service.exception.ExceptionMessageUtil;
+import by.sergo.rideservice.util.ExceptionMessageUtil;
 import by.sergo.rideservice.service.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -24,6 +24,8 @@ import java.util.Arrays;
 import java.util.Random;
 
 import static by.sergo.rideservice.domain.enums.Status.*;
+import static by.sergo.rideservice.util.ConstantUtil.MAX_PRICE;
+import static by.sergo.rideservice.util.ConstantUtil.MIN_PRICE;
 
 @Service
 @RequiredArgsConstructor
@@ -31,21 +33,21 @@ import static by.sergo.rideservice.domain.enums.Status.*;
 public class RideServiceImpl implements RideService {
 
     private final RideRepository rideRepository;
-    private final ModelMapper modelMapper;
+    private final RideMapper rideMapper;
 
     @Override
     @Transactional
     public RideResponse create(RideCreateUpdateRequest dto) {
-        var ride = mapToEntity(dto);
+        var ride = rideMapper.mapToEntity(dto);
         ride.setCreatingTime(LocalDateTime.now());
         ride.setPrice(getPrice());
         var savedRide = rideRepository.save(ride);
-        return mapToDto(savedRide);
+        return rideMapper.mapToDto(savedRide);
     }
 
     @Override
     public RideResponse getById(String id) {
-        return mapToDto(getByIdOrElseThrow(id));
+        return rideMapper.mapToDto(getByIdOrElseThrow(id));
     }
 
     @Override
@@ -53,18 +55,18 @@ public class RideServiceImpl implements RideService {
     public RideResponse deleteById(String id) {
         var ride = getByIdOrElseThrow(id);
         rideRepository.deleteById(id);
-        return mapToDto(ride);
+        return rideMapper.mapToDto(ride);
     }
 
     @Override
     @Transactional
     public RideResponse update(RideCreateUpdateRequest dto, String id) {
         var ride = getByIdOrElseThrow(id);
-        var mappedRide = mapToEntity(dto);
+        var mappedRide = rideMapper.mapToEntity(dto);
         mappedRide.setId(ride.getId());
         mappedRide.setPrice(getPrice());
         var savedRide = rideRepository.save(mappedRide);
-        return mapToDto(savedRide);
+        return rideMapper.mapToDto(savedRide);
     }
 
     @Override
@@ -74,9 +76,11 @@ public class RideServiceImpl implements RideService {
         if (ride.getStatus().equals(CREATED) && ride.getDriverId() == null) {
             ride.setDriverId(dto.getDriverId());
             ride.setStatus(ACCEPTED);
-        } else throw new BadRequestException(ExceptionMessageUtil.alreadyHasDriver(rideId));
+        } else {
+            throw new BadRequestException(ExceptionMessageUtil.alreadyHasDriver(rideId));
+        }
         var savedRide = rideRepository.save(ride);
-        return mapToDto(savedRide);
+        return rideMapper.mapToDto(savedRide);
     }
 
     @Override
@@ -85,8 +89,10 @@ public class RideServiceImpl implements RideService {
         var ride = getByIdOrElseThrow(rideId);
         if (ride.getStatus().equals(CREATED)) {
             ride.setStatus(REJECTED);
-        } else throw new BadRequestException(ExceptionMessageUtil.canNotChangeStatusMessage(REJECTED.toString(), ride.getStatus().toString(), CREATED.toString()));
-        return mapToDto(rideRepository.save(ride));
+        } else {
+            throw new BadRequestException(ExceptionMessageUtil.canNotChangeStatusMessage(REJECTED.toString(), ride.getStatus().toString(), CREATED.toString()));
+        }
+        return rideMapper.mapToDto(rideRepository.save(ride));
     }
 
     @Override
@@ -96,8 +102,10 @@ public class RideServiceImpl implements RideService {
         if (ride.getStatus().equals(ACCEPTED)) {
             ride.setStatus(TRANSPORT);
             ride.setStartTime(LocalDateTime.now());
-        } else throw new BadRequestException(ExceptionMessageUtil.canNotChangeStatusMessage(TRANSPORT.toString(), ride.getStatus().toString(), ACCEPTED.toString()));
-        return mapToDto(rideRepository.save(ride));
+        } else {
+            throw new BadRequestException(ExceptionMessageUtil.canNotChangeStatusMessage(TRANSPORT.toString(), ride.getStatus().toString(), ACCEPTED.toString()));
+        }
+        return rideMapper.mapToDto(rideRepository.save(ride));
     }
 
     @Override
@@ -107,8 +115,10 @@ public class RideServiceImpl implements RideService {
         if (ride.getStatus().equals(TRANSPORT)) {
             ride.setStatus(FINISHED);
             ride.setEndTime(LocalDateTime.now());
-        } else throw new BadRequestException(ExceptionMessageUtil.canNotChangeStatusMessage(FINISHED.toString(), ride.getStatus().toString(), TRANSPORT.toString()));
-        return mapToDto(rideRepository.save(ride));
+        } else {
+            throw new BadRequestException(ExceptionMessageUtil.canNotChangeStatusMessage(FINISHED.toString(), ride.getStatus().toString(), TRANSPORT.toString()));
+        }
+        return rideMapper.mapToDto(rideRepository.save(ride));
     }
 
     @Override
@@ -120,7 +130,7 @@ public class RideServiceImpl implements RideService {
         }
 
         var responsePage = rideRepository.findAllByPassengerIdAndStatus(passengerId, Status.valueOf(status.toUpperCase()), pageRequest)
-                .map(ride -> mapToDto(ride));
+                .map(rideMapper::mapToDto);
         return RideListResponse.builder()
                 .rides(responsePage.getContent())
                 .page(responsePage.getPageable().getPageNumber() + 1)
@@ -140,7 +150,7 @@ public class RideServiceImpl implements RideService {
         }
 
         var responsePage = rideRepository.findAllByDriverIdAndStatus(driverId, Status.valueOf(status.toUpperCase()), pageRequest)
-                .map(ride -> mapToDto(ride));
+                .map(rideMapper::mapToDto);
         return RideListResponse.builder()
                 .rides(responsePage.getContent())
                 .page(responsePage.getPageable().getPageNumber() + 1)
@@ -168,22 +178,12 @@ public class RideServiceImpl implements RideService {
     }
 
     private Double getPrice() {
-        double start = 2.70;
-        double end = 30.00;
         double random = new Random().nextDouble();
-        return Math.floor((start + (random * (end - start)))*100)/100;
+        return Math.floor((MIN_PRICE + (random * (MAX_PRICE - MIN_PRICE))) * 100) / 100;
     }
 
     private Ride getByIdOrElseThrow(String id) {
         return rideRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(ExceptionMessageUtil.getNotFoundMessage("Ride", "id", id)));
-    }
-
-    private RideResponse mapToDto(Ride ride) {
-        return modelMapper.map(ride, RideResponse.class);
-    }
-
-    private Ride mapToEntity(RideCreateUpdateRequest dto) {
-        return modelMapper.map(dto, Ride.class);
     }
 }
