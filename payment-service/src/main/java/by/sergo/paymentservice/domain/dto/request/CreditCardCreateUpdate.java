@@ -7,7 +7,7 @@ import lombok.Setter;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-import static by.sergo.paymentservice.domain.dto.ConstantUtils.*;
+import static by.sergo.paymentservice.util.ConstantUtils.*;
 
 @Getter
 @Setter
@@ -24,7 +24,7 @@ public class CreditCardCreateUpdate {
     @NotNull
     @Min(value = 1, message = "{min.value}")
     private Long userId;
-    @DecimalMin(value = "0.0", inclusive = false)
+    @DecimalMin(value = MIN_BALANCE, inclusive = false)
     @Digits(integer = 3, fraction = 2)
     private BigDecimal balance;
     @NotBlank(message = "{user.type.not.blank}")

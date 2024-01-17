@@ -9,13 +9,15 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 
+import static by.sergo.paymentservice.util.ConstantUtils.MIN_BALANCE;
+
 @Getter
 @Setter
 public class AccountCreateUpdateRequest {
     @NotNull
     @Min(value = 1, message = "{min.value}")
     private Long driverId;
-    @DecimalMin(value = "0.0", inclusive = false)
+    @DecimalMin(value = MIN_BALANCE, inclusive = false)
     @Digits(integer = 3, fraction = 2)
     private BigDecimal balance;
 }

@@ -7,8 +7,12 @@ import java.math.BigDecimal;
 
 public interface AccountService {
     AccountResponse createAccount(AccountCreateUpdateRequest dto);
+
     AccountResponse deleteById(Long id);
+
     AccountResponse withdrawalBalance(Long driverId, BigDecimal sum);
+
     AccountResponse getByDriverId(Long driverId);
+
     AccountResponse getById(Long id);
 }

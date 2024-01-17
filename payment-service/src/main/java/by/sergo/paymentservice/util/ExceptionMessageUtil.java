@@ -1,4 +1,4 @@
-package by.sergo.paymentservice.service.exception;
+package by.sergo.paymentservice.util;
 
 import lombok.experimental.UtilityClass;
 

@@ -6,15 +6,15 @@ import by.sergo.paymentservice.domain.dto.response.CreditCardResponse;
 import by.sergo.paymentservice.domain.entity.CreditCard;
 import by.sergo.paymentservice.domain.entity.TransactionStore;
 import by.sergo.paymentservice.domain.enums.UserType;
+import by.sergo.paymentservice.mapper.CreditCardMapper;
 import by.sergo.paymentservice.repository.AccountRepository;
 import by.sergo.paymentservice.repository.CreditCardRepository;
 import by.sergo.paymentservice.repository.TransactionStoreRepository;
 import by.sergo.paymentservice.service.CreditCardService;
 import by.sergo.paymentservice.service.exception.BadRequestException;
-import by.sergo.paymentservice.service.exception.ExceptionMessageUtil;
+import by.sergo.paymentservice.util.ExceptionMessageUtil;
 import by.sergo.paymentservice.service.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,27 +30,25 @@ public class CreditCardServiceImpl implements CreditCardService {
     private final CreditCardRepository creditCardRepository;
     private final AccountRepository accountRepository;
     private final TransactionStoreRepository transactionStoreRepository;
-    private final ModelMapper modelMapper;
+    private final CreditCardMapper creditCardMapper;
 
     @Override
     @Transactional
     public CreditCardResponse addCard(CreditCardCreateUpdate dto) {
-        checkUniqueCreditCard(dto);
-        checkExpirationDate(dto);
-        var entity = mapToEntity(dto);
-        entity.setId(null);
-        var creditCard = creditCardRepository.save(entity);
-        creditCardRepository.flush();
-        return mapToDto(creditCard);
+        checkUniqueCreditCardAndExpirationDate(dto);
+        var creditCard = creditCardMapper.mapToEntity(dto);
+        creditCard.setId(null);
+        var savedCreditCard = creditCardRepository.save(creditCard);
+        return creditCardMapper.mapToDto(savedCreditCard);
     }
 
     @Override
     @Transactional
     public CreditCardResponse changeCard(CreditCardCreateUpdate dto, Long id) {
         checkCardIsUniqueForUpdate(dto, id);
-        var creditCard = mapToEntity(dto);
+        var creditCard = creditCardMapper.mapToEntity(dto);
         creditCard.setId(id);
-        return mapToDto(creditCardRepository.save(creditCard));
+        return creditCardMapper.mapToDto(creditCardRepository.save(creditCard));
     }
 
     @Override
@@ -58,20 +56,20 @@ public class CreditCardServiceImpl implements CreditCardService {
     public CreditCardResponse deleteById(Long id) {
         var creditCard = getByIdOrElseThrow(id);
         creditCardRepository.deleteById(id);
-        return mapToDto(creditCard);
+        return creditCardMapper.mapToDto(creditCard);
     }
 
     @Override
     public CreditCardResponse getDriverCard(Long driverId) {
         var creditCard = creditCardRepository.findByUserIdAndUserType(driverId, UserType.DRIVER)
                 .orElseThrow(() -> new NotFoundException(ExceptionMessageUtil.getNotFoundMessage("Credit card with type driver", "userId", driverId)));
-        return mapToDto(creditCard);
+        return creditCardMapper.mapToDto(creditCard);
     }
 
     @Override
     public CreditCardResponse getPassengerCard(Long passengerId) {
         CreditCard creditCard = getPassengerCreditCard(passengerId);
-        return mapToDto(creditCard);
+        return creditCardMapper.mapToDto(creditCard);
     }
 
     @Override
@@ -98,7 +96,7 @@ public class CreditCardServiceImpl implements CreditCardService {
                 .operation(PAYMENT)
                 .build();
         transactionStoreRepository.save(transaction);
-        return mapToDto(savedCreditCard);
+        return creditCardMapper.mapToDto(savedCreditCard);
     }
 
     private CreditCard getByIdOrElseThrow(Long id) {
@@ -112,34 +110,23 @@ public class CreditCardServiceImpl implements CreditCardService {
     }
 
     private void checkCardIsUniqueForUpdate(CreditCardCreateUpdate dto, Long id) {
-        getByIdOrElseThrow(id);
-        checkUniqueCreditCard(dto);
+        if (!creditCardRepository.existsById(id)){
+            throw new NotFoundException(ExceptionMessageUtil.getNotFoundMessage("Credit card", "id", id));
+        }
+        checkUniqueCreditCardAndExpirationDate(dto);
 
         if (creditCardRepository.existsByUserIdAndUserType(dto.getUserId(), UserType.valueOf(dto.getUserType()))){
             throw new BadRequestException(ExceptionMessageUtil.getAlreadyExistMessage("Credit Card", "userId", dto.getUserId(), "userType", dto.getUserType()));
         }
-        if (dto.getExpDate().isBefore(LocalDate.now())) {
-            throw new BadRequestException(ExceptionMessageUtil.getExpirationCardExceptionMessage("Credit card", "expiration date", dto.getExpDate().toString()));
-        }
     }
 
-    private static void checkExpirationDate(CreditCardCreateUpdate dto) {
-        if (dto.getExpDate().isBefore(LocalDate.now())) {
-            throw new BadRequestException(ExceptionMessageUtil.getExpirationCardExceptionMessage("Credit card", "expiration date", dto.getExpDate().toString()));
-        }
-    }
-
-    private void checkUniqueCreditCard(CreditCardCreateUpdate dto) {
+    private void checkUniqueCreditCardAndExpirationDate(CreditCardCreateUpdate dto) {
         if (creditCardRepository.existsByCreditCardNumber(dto.getCreditCardNumber())) {
             throw new BadRequestException(ExceptionMessageUtil.getAlreadyExistMessage("Credit Card", "card number", dto.getCreditCardNumber()));
+        } else {
+            if (dto.getExpDate().isBefore(LocalDate.now())) {
+                throw new BadRequestException(ExceptionMessageUtil.getExpirationCardExceptionMessage("Credit card", "expiration date", dto.getExpDate().toString()));
+            }
         }
-    }
-
-    public CreditCardResponse mapToDto(CreditCard creditCard) {
-        return modelMapper.map(creditCard, CreditCardResponse.class);
-    }
-
-    public CreditCard mapToEntity(CreditCardCreateUpdate dto) {
-        return modelMapper.map(dto, CreditCard.class);
     }
 }
