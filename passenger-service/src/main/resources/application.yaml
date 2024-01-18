@@ -11,3 +11,10 @@ spring:
     change-log: db/changelog/db.changelog-master.xml
   jpa:
     show-sql: true
+feign:
+  client:
+    config:
+      driver:
+        name: driver
+        url: http://localhost:9002
+        path: /api/v1/drivers
