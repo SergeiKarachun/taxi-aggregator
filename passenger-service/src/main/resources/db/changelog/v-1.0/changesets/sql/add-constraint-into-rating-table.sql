@@ -1,0 +1,5 @@
+ALTER TABLE rating
+ADD CONSTRAINT rating_passenger_fk
+FOREIGN KEY (passenger_id) REFERENCES passenger(id)
+ON UPDATE CASCADE
+ON DELETE CASCADE
