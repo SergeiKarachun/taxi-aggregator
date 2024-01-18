@@ -103,16 +103,19 @@ public class PassengerServiceImpl implements PassengerService {
         if (page < 1 || size < 1) {
             throw new BadRequestException(ExceptionMessageUtil.getInvalidRequestMessage(page, size));
         } else if (field != null) {
-            Arrays.stream(PassengerResponse.class.getDeclaredFields())
-                    .map(Field::getName)
-                    .filter(s -> s.contains(field.toLowerCase()))
-                    .findFirst()
-                    .orElseThrow(() -> new BadRequestException(getInvalidSortingParamRequestMessage(field)));
-
+            checkFieldForSort(field);
             return PageRequest.of(page - 1, size).withSort(Sort.by(Sort.Order.asc(field.toLowerCase())));
         } else {
             return PageRequest.of(page - 1, size);
         }
+    }
+
+    private void checkFieldForSort(String field) {
+        Arrays.stream(PassengerResponse.class.getDeclaredFields())
+                .map(Field::getName)
+                .filter(s -> s.contains(field.toLowerCase()))
+                .findFirst()
+                .orElseThrow(() -> new BadRequestException(getInvalidSortingParamRequestMessage(field)));
     }
 
     private void checkIsPassengerForUpdateUnique(PassengerCreateUpdateRequest dto, Passenger entity) {

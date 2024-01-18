@@ -1,22 +1,19 @@
 package by.sergo.passengerservice.domain.dto.response;
 
-import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.experimental.FieldDefaults;
 
 import java.util.List;
 
 @Builder
 @Getter
 @Setter
-@FieldDefaults(level = AccessLevel.PRIVATE)
 public class PassengerListResponse {
-    Integer page;
-    Integer totalPages;
-    Integer size;
-    Integer total;
-    String sortedByField;
-    List<PassengerResponse> passengers;
+    private Integer page;
+    private Integer totalPages;
+    private Integer size;
+    private Integer total;
+    private String sortedByField;
+    private List<PassengerResponse> passengers;
 }

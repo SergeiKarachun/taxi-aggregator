@@ -7,7 +7,6 @@ import by.sergo.passengerservice.service.impl.RatingServiceImpl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,11 +17,11 @@ public class RatingController {
 
     private final RatingServiceImpl ratingService;
 
-    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping
     public ResponseEntity<RatingResponse> createRateOfPassenger(@RequestBody @Valid RatingCreateRequest dto,
                                                                 @PathVariable("id") Long passengerId) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                             .body(ratingService.createRateOfPassenger(dto, passengerId));
+                             .body(ratingService.ratePassenger(dto, passengerId));
     }
 
     @GetMapping

@@ -29,7 +29,7 @@ public class RatingServiceImpl implements RatingService {
 
     @Override
     @Transactional
-    public RatingResponse createRateOfPassenger(RatingCreateRequest dto, Long passengerId) {
+    public RatingResponse ratePassenger(RatingCreateRequest dto, Long passengerId) {
         var passenger = getByIdOrElseThrow(passengerId);
         if (ratingRepository.existsByRideId(dto.getRideId())) {
             throw new BadRequestException(getAlreadyExistMessage("Rating", "rideId", dto.getRideId()));
@@ -51,8 +51,9 @@ public class RatingServiceImpl implements RatingService {
                     .passengerId(passengerId)
                     .rating(floorRating(passengerRating))
                     .build();
+        } else {
+            throw new NotFoundException(getNotFoundMessage("Passenger", "passengerId", passengerId));
         }
-        else throw new NotFoundException(getNotFoundMessage("Passenger", "passengerId", passengerId));
     }
 
     private static double floorRating(double passengerRating) {

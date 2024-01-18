@@ -7,7 +7,6 @@ import by.sergo.passengerservice.service.impl.PassengerServiceImpl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,7 +23,7 @@ public class PassengerController {
                              .body(passengerServiceImpl.create(dto));
     }
 
-    @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(value = "/{id}")
     public ResponseEntity<PassengerResponse> update(@RequestBody @Valid PassengerCreateUpdateRequest dto,
                                                     @PathVariable("id") Long id) {
         var passengerResponseDto = passengerServiceImpl.update(id, dto);
