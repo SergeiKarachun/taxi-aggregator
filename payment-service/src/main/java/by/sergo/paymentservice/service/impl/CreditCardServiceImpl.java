@@ -79,11 +79,10 @@ public class CreditCardServiceImpl implements CreditCardService {
         var driverAccount = accountRepository.findByDriverId(payment.getDriverId())
                 .orElseThrow(() -> new NotFoundException(ExceptionMessageUtil.getNotFoundMessage("Account", "driverId", payment.getDriverId())));
 
-        if (passengerCreditCard.getBalance().compareTo(payment.getSum()) >= 0) {
-            passengerCreditCard.setBalance(passengerCreditCard.getBalance().subtract(payment.getSum()));
-        } else {
-            throw new BadRequestException(ExceptionMessageUtil.getWithdrawalExceptionMessage("Credit card", "passengerId", payment.getPassengerId().toString(), passengerCreditCard.getBalance().toString()));
-        }
+        if (passengerCreditCard.getBalance().compareTo(payment.getSum()) < 0) {     
+            throw new BadRequestException(ExceptionMessageUtil.getWithdrawalExceptionMessage("Credit card", "passengerId", payment.getPassengerId().toString(), passengerCreditCard.getBalance().toString())); 
+        }   
+        passengerCreditCard.setBalance(passengerCreditCard.getBalance().subtract(payment.getSum()));
 
         var savedCreditCard = creditCardRepository.save(passengerCreditCard);
         driverAccount.setBalance(driverAccount.getBalance().add(payment.getSum()));
@@ -122,11 +121,9 @@ public class CreditCardServiceImpl implements CreditCardService {
 
     private void checkUniqueCreditCardAndExpirationDate(CreditCardCreateUpdate dto) {
         if (creditCardRepository.existsByCreditCardNumber(dto.getCreditCardNumber())) {
-            throw new BadRequestException(ExceptionMessageUtil.getAlreadyExistMessage("Credit Card", "card number", dto.getCreditCardNumber()));
-        } else {
-            if (dto.getExpDate().isBefore(LocalDate.now())) {
-                throw new BadRequestException(ExceptionMessageUtil.getExpirationCardExceptionMessage("Credit card", "expiration date", dto.getExpDate().toString()));
-            }
-        }
+            throw new BadRequestException(ExceptionMessageUtil.getAlreadyExistMessage("Credit Card", "card number", dto.getCreditCardNumber())); 
+        } 
+        if (dto.getExpDate().isBefore(LocalDate.now())) {     
+            throw new BadRequestException(ExceptionMessageUtil.getExpirationCardExceptionMessage("Credit card", "expiration date", dto.getExpDate().toString())); }
     }
 }
