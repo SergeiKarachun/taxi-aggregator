@@ -1,0 +1,2 @@
+ALTER TABLE rating
+DROP CONSTRAINT IF EXISTS car_driver_fk;

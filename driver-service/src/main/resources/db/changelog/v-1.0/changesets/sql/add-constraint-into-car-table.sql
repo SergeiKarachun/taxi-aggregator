@@ -1,0 +1,5 @@
+ALTER TABLE car
+    ADD CONSTRAINT car_driver_fk
+    FOREIGN KEY (driver_id) REFERENCES driver(id)
+    ON UPDATE CASCADE
+       ON DELETE CASCADE

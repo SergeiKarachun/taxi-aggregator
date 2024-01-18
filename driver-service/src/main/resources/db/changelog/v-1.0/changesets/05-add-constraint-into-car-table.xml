@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="05-add-constraint-into-car-table" author="Sergey Karachun">
+        <preConditions onFail="HALT">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="car_driver_fk"/>
+            </not>
+        </preConditions>
+        <sqlFile path="sql/add-constraint-into-car-table.sql" relativeToChangelogFile="true"/>
+        <rollback>
+            <sqlFile path="sql/drop-car-table-fk.sql"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>
