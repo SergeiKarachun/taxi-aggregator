@@ -10,15 +10,13 @@ import by.sergo.driverservice.repository.DriverRepository;
 import by.sergo.driverservice.service.CarService;
 import by.sergo.driverservice.service.exception.BadRequestException;
 import by.sergo.driverservice.service.exception.NotFoundException;
+import by.sergo.driverservice.util.PageRequestUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.lang.reflect.Field;
 import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -80,7 +78,7 @@ public class CarServiceImpl implements CarService {
 
     @Override
     public CarListResponse getAll(Integer page, Integer size, String orderBy) {
-        PageRequest pageRequest = getPageRequest(page, size, orderBy, Car.class);
+        PageRequest pageRequest = PageRequestUtil.getPageRequest(page, size, orderBy, Car.class);
         var responsePage = carRepository.findAll(pageRequest)
                 .map(carMapper::mapToDto);
         return CarListResponse.builder()
@@ -91,21 +89,6 @@ public class CarServiceImpl implements CarService {
                 .total((int) responsePage.getTotalElements())
                 .sortedByField(orderBy)
                 .build();
-    }
-
-    private <T> PageRequest getPageRequest(Integer page, Integer size, String orderBy, Class<T> clazz) {
-        if (page < 1 || size < 1) {
-            throw new BadRequestException(getInvalidRequestMessage(page, size));
-        } else if (orderBy != null) {
-            Arrays.stream(clazz.getDeclaredFields())
-                    .map(Field::getName)
-                    .filter(s -> s.contains(orderBy.toLowerCase()))
-                    .findFirst()
-                    .orElseThrow(() -> new BadRequestException(getInvalidSortingParamRequestMessage(orderBy)));
-            return PageRequest.of(page - 1, size).withSort(Sort.by(Sort.Order.asc(orderBy.toLowerCase())));
-        } else {
-            return PageRequest.of(page - 1, size);
-        }
     }
 
     private void checkCarForCreate(CarCreateUpdateRequest dto) {

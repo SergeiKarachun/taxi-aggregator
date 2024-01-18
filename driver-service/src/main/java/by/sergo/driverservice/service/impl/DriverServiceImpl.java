@@ -11,13 +11,12 @@ import by.sergo.driverservice.service.DriverService;
 import by.sergo.driverservice.service.exception.BadRequestException;
 import by.sergo.driverservice.util.ExceptionMessageUtil;
 import by.sergo.driverservice.service.exception.NotFoundException;
+import by.sergo.driverservice.util.PageRequestUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.lang.reflect.Field;
 import java.util.*;
 
 import static by.sergo.driverservice.util.ExceptionMessageUtil.*;
@@ -66,7 +65,7 @@ public class DriverServiceImpl implements DriverService {
 
     @Override
     public DriverListResponse getAvailableDrivers(Integer page, Integer size, String orderBy) {
-        PageRequest pageRequest = getPageRequest(page, size, orderBy, DriverResponse.class);
+        PageRequest pageRequest = PageRequestUtil.getPageRequest(page, size, orderBy, DriverResponse.class);
         var responsePage = driverRepository.getAllByStatus(Status.AVAILABLE, pageRequest)
                 .map(driverMapper::mapToDto);
         return DriverListResponse.builder()
@@ -81,7 +80,7 @@ public class DriverServiceImpl implements DriverService {
 
     @Override
     public DriverListResponse getAll(Integer page, Integer size, String orderBy) {
-        PageRequest pageRequest = getPageRequest(page, size, orderBy, DriverResponse.class);
+        PageRequest pageRequest = PageRequestUtil.getPageRequest(page, size, orderBy, DriverResponse.class);
         var responsePage = driverRepository.findAll(pageRequest)
                 .map(driverMapper::mapToDto);
         return DriverListResponse.builder()
@@ -102,21 +101,6 @@ public class DriverServiceImpl implements DriverService {
             driver.setStatus(Status.UNAVAILABLE);
         } else driver.setStatus(Status.AVAILABLE);
         return driverMapper.mapToDto(driverRepository.save(driver));
-    }
-
-    private <T> PageRequest getPageRequest(Integer page, Integer size, String orderBy, Class<T> clazz) {
-        if (page < 1 || size < 1) {
-            throw new BadRequestException(getInvalidRequestMessage(page, size));
-        } else if (orderBy != null) {
-            Arrays.stream(clazz.getDeclaredFields())
-                    .map(Field::getName)
-                    .filter(s -> s.contains(orderBy.toLowerCase()))
-                    .findFirst()
-                    .orElseThrow(() -> new BadRequestException(getInvalidSortingParamRequestMessage(orderBy)));
-            return PageRequest.of(page - 1, size).withSort(Sort.by(Sort.Order.asc(orderBy.toLowerCase())));
-        } else {
-            return PageRequest.of(page - 1, size);
-        }
     }
 
     private void checkIsDriverForUpdateUnique(DriverCreateUpdateRequest dto, Driver existDriver) {
