@@ -1,0 +1,13 @@
+server:
+  port: 9004
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5433/payment
+    username: postgres
+    password: ${DB_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+  liquibase:
+    enabled: true
+    change-log: db/changelog/db.changelog-master.xml
+  jpa:
+    show-sql: true
