@@ -5,7 +5,7 @@ import feign.Response;
 import feign.RetryableException;
 import feign.codec.ErrorDecoder;
 
-public class Custom5xxErrorDriverDecoder implements ErrorDecoder {
+public class Custom5xxErrorDecoder implements ErrorDecoder {
     @Override
     public Exception decode(String methodKey, Response response) {
         FeignException exception = feign.FeignException.errorStatus(methodKey, response);

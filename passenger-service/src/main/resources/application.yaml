@@ -18,3 +18,7 @@ feign:
         name: driver
         url: http://localhost:9002
         path: /api/v1/drivers
+      ride:
+        name: ride
+        url: http://localhost:9003
+        path: /api/v1/rides

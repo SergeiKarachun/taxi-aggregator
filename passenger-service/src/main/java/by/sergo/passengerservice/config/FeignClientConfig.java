@@ -11,7 +11,7 @@ import static by.sergo.passengerservice.util.ConstantUtil.*;
 public class FeignClientConfig {
     @Bean
     public ErrorDecoder errorDecoder() {
-        return new Custom5xxErrorDriverDecoder();
+        return new Custom5xxErrorDecoder();
     }
 
     @Bean
