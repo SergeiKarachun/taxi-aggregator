@@ -1,8 +1,8 @@
 package by.sergo.paymentservice.service.impl;
 
 import by.sergo.paymentservice.domain.dto.response.ListTransactionStoreResponse;
+import by.sergo.paymentservice.domain.entity.CreditCard;
 import by.sergo.paymentservice.mapper.TransactionStoreMapper;
-import by.sergo.paymentservice.repository.AccountRepository;
 import by.sergo.paymentservice.repository.CreditCardRepository;
 import by.sergo.paymentservice.repository.TransactionStoreRepository;
 import by.sergo.paymentservice.service.TransactionStoreService;
@@ -14,6 +14,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import static by.sergo.paymentservice.domain.enums.UserType.DRIVER;
 import static by.sergo.paymentservice.domain.enums.UserType.PASSENGER;
 
 @Service
@@ -21,31 +22,23 @@ import static by.sergo.paymentservice.domain.enums.UserType.PASSENGER;
 public class TransactionStoreServiceImpl implements TransactionStoreService {
     private final TransactionStoreMapper transactionStoreMapper;
     private final TransactionStoreRepository transactionStoreRepository;
-    private final AccountRepository accountRepository;
     private final CreditCardRepository creditCardRepository;
 
     @Override
     public ListTransactionStoreResponse getDriverTransactionByDriverId(Long driverId, Integer page, Integer size) {
-        var accountByDriverId = accountRepository.findByDriverId(driverId)
-                .orElseThrow(() -> new NotFoundException(ExceptionMessageUtil.getNotFoundMessage("Account", "driverId", driverId)));
-        var pageRequest = getPageRequest(page, size);
-        var responsePage = transactionStoreRepository.findAllByAccountNumber(accountByDriverId.getAccountNumber(), pageRequest)
-                .map(transactionStoreMapper::mapToDto);
-
-        return ListTransactionStoreResponse.builder()
-                .transactions(responsePage.getContent())
-                .page(responsePage.getPageable().getPageNumber() + 1)
-                .totalPages(responsePage.getTotalPages())
-                .size(responsePage.getContent().size())
-                .total((int) responsePage.getTotalElements())
-                .sortedByField("operationDate")
-                .build();
+        var creditCard = creditCardRepository.findByUserIdAndUserType(driverId, DRIVER)
+                .orElseThrow(() -> new NotFoundException(ExceptionMessageUtil.getNotFoundMessage("Credit card", "driverId", driverId)));
+        return getListTransactionStoreResponse(page, size, creditCard);
     }
 
     @Override
     public ListTransactionStoreResponse getPassengerTransactionByPassengerId(Long passengerId, Integer page, Integer size) {
         var creditCard = creditCardRepository.findByUserIdAndUserType(passengerId, PASSENGER)
                 .orElseThrow(() -> new NotFoundException(ExceptionMessageUtil.getNotFoundMessage("Credit card", "passengerId", passengerId)));
+        return getListTransactionStoreResponse(page, size, creditCard);
+    }
+
+    private ListTransactionStoreResponse getListTransactionStoreResponse(Integer page, Integer size, CreditCard creditCard) {
         var pageRequest = getPageRequest(page, size);
         var responsePage = transactionStoreRepository.findAllByCreditCardNumber(creditCard.getCreditCardNumber(), pageRequest)
                 .map(transactionStoreMapper::mapToDto);

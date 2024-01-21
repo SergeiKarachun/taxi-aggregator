@@ -22,7 +22,6 @@ public class TransactionStore {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String creditCardNumber;
-    private String accountNumber;
     private LocalDateTime operationDate;
     @Enumerated(EnumType.STRING)
     private Operation operation;

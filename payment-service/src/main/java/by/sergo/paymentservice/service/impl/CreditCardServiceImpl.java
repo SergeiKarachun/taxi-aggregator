@@ -7,7 +7,6 @@ import by.sergo.paymentservice.domain.entity.CreditCard;
 import by.sergo.paymentservice.domain.entity.TransactionStore;
 import by.sergo.paymentservice.domain.enums.UserType;
 import by.sergo.paymentservice.mapper.CreditCardMapper;
-import by.sergo.paymentservice.repository.AccountRepository;
 import by.sergo.paymentservice.repository.CreditCardRepository;
 import by.sergo.paymentservice.repository.TransactionStoreRepository;
 import by.sergo.paymentservice.service.CreditCardService;
@@ -28,7 +27,6 @@ import static by.sergo.paymentservice.domain.enums.Operation.PAYMENT;
 @Transactional(readOnly = true)
 public class CreditCardServiceImpl implements CreditCardService {
     private final CreditCardRepository creditCardRepository;
-    private final AccountRepository accountRepository;
     private final TransactionStoreRepository transactionStoreRepository;
     private final CreditCardMapper creditCardMapper;
 
@@ -76,8 +74,6 @@ public class CreditCardServiceImpl implements CreditCardService {
     @Transactional
     public CreditCardResponse makePayment(PaymentRequest payment) {
         var passengerCreditCard = getPassengerCreditCard(payment.getPassengerId());
-        var driverAccount = accountRepository.findByDriverId(payment.getDriverId())
-                .orElseThrow(() -> new NotFoundException(ExceptionMessageUtil.getNotFoundMessage("Account", "driverId", payment.getDriverId())));
 
         if (passengerCreditCard.getBalance().compareTo(payment.getSum()) < 0) {     
             throw new BadRequestException(ExceptionMessageUtil.getWithdrawalExceptionMessage("Credit card", "passengerId", payment.getPassengerId().toString(), passengerCreditCard.getBalance().toString())); 
@@ -85,10 +81,8 @@ public class CreditCardServiceImpl implements CreditCardService {
         passengerCreditCard.setBalance(passengerCreditCard.getBalance().subtract(payment.getSum()));
 
         var savedCreditCard = creditCardRepository.save(passengerCreditCard);
-        driverAccount.setBalance(driverAccount.getBalance().add(payment.getSum()));
-        accountRepository.save(driverAccount);
+
         var transaction = TransactionStore.builder()
-                .accountNumber(driverAccount.getAccountNumber())
                 .creditCardNumber(savedCreditCard.getCreditCardNumber())
                 .value(payment.getSum())
                 .operationDate(LocalDateTime.now())

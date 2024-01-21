@@ -7,15 +7,15 @@
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
 
-    <changeSet id="03-create-transaction-store-table" author="Sergey Karachun">
+    <changeSet id="01-create-credit-card-table" author="Sergey Karachun">
         <preConditions onFail="HALT">
             <not>
-                <tableExists tableName="transaction_store"/>
+                <tableExists tableName="credit_card"/>
             </not>
         </preConditions>
-        <sqlFile path="sql/03-create-transaction-store-table.sql" relativeToChangelogFile="true"/>
+        <sqlFile path="sql/01-create-credit-card-table.sql" relativeToChangelogFile="true"/>
         <rollback>
-            <sqlFile path="sql/drop-transaction-store-table.sql"/>
+            <sqlFile path="sql/drop-credit-card-table.sql"/>
         </rollback>
     </changeSet>
 </databaseChangeLog>
