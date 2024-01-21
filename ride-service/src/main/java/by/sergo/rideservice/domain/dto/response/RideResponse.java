@@ -23,4 +23,5 @@ public class RideResponse {
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private Status status;
+    private String paymentMethod;
 }
