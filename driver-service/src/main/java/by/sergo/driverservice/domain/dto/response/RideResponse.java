@@ -1,6 +1,6 @@
-package by.sergo.passengerservice.domain.dto.response;
+package by.sergo.driverservice.domain.dto.response;
 
-import by.sergo.passengerservice.domain.enums.Status;
+import by.sergo.driverservice.domain.enums.RideStatus;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -18,6 +18,6 @@ public class RideResponse {
     private LocalDateTime creatingTime;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
-    private Status status;
+    private RideStatus status;
     private String paymentMethod;
 }

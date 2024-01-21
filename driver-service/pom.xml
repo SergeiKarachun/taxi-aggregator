@@ -17,6 +17,7 @@
         <java.version>17</java.version>
         <modelmapper.version>3.2.0</modelmapper.version>
         <swagger.version>2.3.0</swagger.version>
+        <openfeign.version>4.1.0</openfeign.version>
     </properties>
     <dependencies>
         <dependency>
@@ -32,6 +33,11 @@
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-openfeign</artifactId>
+            <version>${openfeign.version}</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>

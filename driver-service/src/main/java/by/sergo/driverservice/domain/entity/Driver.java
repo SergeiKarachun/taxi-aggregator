@@ -29,6 +29,7 @@ public class Driver {
     private String phone;
     @Column(nullable = false, unique = true)
     private String email;
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     private Status status = Status.AVAILABLE;
     @Builder.Default

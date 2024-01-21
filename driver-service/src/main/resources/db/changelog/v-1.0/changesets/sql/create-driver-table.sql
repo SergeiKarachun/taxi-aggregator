@@ -6,5 +6,6 @@ CREATE TABLE IF NOT EXISTS driver
     email   VARCHAR(255) NOT NULL UNIQUE,
     phone   VARCHAR(32)  NOT NULL UNIQUE,
     status  varchar(255) NOT NULL,
-    rating  DECIMAL
+    rating  DECIMAL,
+    balance NUMERIC(10,2) DEFAULT 0.00
 );
