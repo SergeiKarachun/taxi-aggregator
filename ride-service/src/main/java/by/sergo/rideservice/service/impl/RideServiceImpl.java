@@ -1,8 +1,10 @@
 package by.sergo.rideservice.service.impl;
 
+import by.sergo.rideservice.client.PaymentFeignClient;
 import by.sergo.rideservice.domain.Ride;
 import by.sergo.rideservice.domain.dto.request.DriverRequest;
 import by.sergo.rideservice.domain.dto.request.RideCreateUpdateRequest;
+import by.sergo.rideservice.domain.dto.response.CreditCardResponse;
 import by.sergo.rideservice.domain.dto.response.RideListResponse;
 import by.sergo.rideservice.domain.dto.response.RideResponse;
 import by.sergo.rideservice.domain.enums.Status;
@@ -19,10 +21,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Field;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Random;
 
+import static by.sergo.rideservice.domain.enums.PaymentMethod.CARD;
 import static by.sergo.rideservice.domain.enums.Status.*;
 import static by.sergo.rideservice.util.ConstantUtil.MAX_PRICE;
 import static by.sergo.rideservice.util.ConstantUtil.MIN_PRICE;
@@ -34,13 +38,16 @@ public class RideServiceImpl implements RideService {
 
     private final RideRepository rideRepository;
     private final RideMapper rideMapper;
+    private final PaymentFeignClient paymentFeignClient;
 
     @Override
     @Transactional
     public RideResponse create(RideCreateUpdateRequest dto) {
+        var price = getPrice();
+        checkRidePayment(dto, price);
         var ride = rideMapper.mapToEntity(dto);
         ride.setCreatingTime(LocalDateTime.now());
-        ride.setPrice(getPrice());
+        ride.setPrice(price);
         var savedRide = rideRepository.save(ride);
         return rideMapper.mapToDto(savedRide);
     }
@@ -61,10 +68,12 @@ public class RideServiceImpl implements RideService {
     @Override
     @Transactional
     public RideResponse update(RideCreateUpdateRequest dto, String id) {
+        var price = getPrice();
+        checkRidePayment(dto, price);
         var ride = getByIdOrElseThrow(id);
         var mappedRide = rideMapper.mapToEntity(dto);
         mappedRide.setId(ride.getId());
-        mappedRide.setPrice(getPrice());
+        mappedRide.setPrice(price);
         var savedRide = rideRepository.save(mappedRide);
         return rideMapper.mapToDto(savedRide);
     }
@@ -174,6 +183,19 @@ public class RideServiceImpl implements RideService {
             return PageRequest.of(page - 1, size).withSort(Sort.by(Sort.Order.asc(field.toLowerCase())));
         } else {
             return PageRequest.of(page - 1, size);
+        }
+    }
+
+    private CreditCardResponse getPassengerCreditCardById(Long id) {
+        return paymentFeignClient.getPassengerCreditCard(id);
+    }
+
+    private void checkRidePayment(RideCreateUpdateRequest dto, Double price) {
+        if (dto.getPaymentMethod().equals(CARD.toString())) {
+            var passengerCreditCard = getPassengerCreditCardById(dto.getPassengerId());
+            if (passengerCreditCard.getBalance().compareTo(new BigDecimal(price)) < 0) {
+                throw new BadRequestException(ExceptionMessageUtil.getNotEnoughMoneyMessage("Passenger", "passengerId", dto.getPassengerId()));
+            }
         }
     }
 
