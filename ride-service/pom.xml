@@ -45,6 +45,7 @@
         <dependency>
             <groupId>io.mongock</groupId>
             <artifactId>mongodb-springdata-v4-driver</artifactId>
+            <scope>runtime</scope>
             <version>${mongok.version}</version>
         </dependency>
         <dependency>
