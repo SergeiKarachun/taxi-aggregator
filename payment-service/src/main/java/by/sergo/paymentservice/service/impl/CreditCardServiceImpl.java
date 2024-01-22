@@ -114,6 +114,9 @@ public class CreditCardServiceImpl implements CreditCardService {
     }
 
     private void checkUniqueCreditCardAndExpirationDate(CreditCardCreateUpdate dto) {
+        if (creditCardRepository.existsByUserIdAndUserType(dto.getUserId(), UserType.valueOf(dto.getUserType()))){
+            throw new BadRequestException(ExceptionMessageUtil.getAlreadyExistMessage("Credit Card", "userId", dto.getUserId(), "userType", dto.getUserType()));
+        }
         if (creditCardRepository.existsByCreditCardNumber(dto.getCreditCardNumber())) {
             throw new BadRequestException(ExceptionMessageUtil.getAlreadyExistMessage("Credit Card", "card number", dto.getCreditCardNumber())); 
         } 

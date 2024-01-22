@@ -13,7 +13,7 @@ public class CreditCardResponse {
     private String creditCardNumber;
     private String cvv;
     private LocalDate expDate;
-    private Long userId;
     private BigDecimal balance;
     private String userType;
+    private UserResponse userResponse;
 }
