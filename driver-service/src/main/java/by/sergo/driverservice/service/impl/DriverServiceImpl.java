@@ -1,10 +1,13 @@
 package by.sergo.driverservice.service.impl;
 
 import by.sergo.driverservice.domain.dto.request.DriverCreateUpdateRequest;
+import by.sergo.driverservice.domain.dto.request.DriverForRideResponse;
+import by.sergo.driverservice.domain.dto.request.FindDriverForRideRequest;
 import by.sergo.driverservice.domain.dto.response.DriverListResponse;
 import by.sergo.driverservice.domain.dto.response.DriverResponse;
 import by.sergo.driverservice.domain.entity.Driver;
 import by.sergo.driverservice.domain.enums.Status;
+import by.sergo.driverservice.kafka.DriverProducer;
 import by.sergo.driverservice.mapper.DriverMapper;
 import by.sergo.driverservice.repository.DriverRepository;
 import by.sergo.driverservice.service.DriverService;
@@ -28,6 +31,7 @@ public class DriverServiceImpl implements DriverService {
 
     private final DriverRepository driverRepository;
     private final DriverMapper driverMapper;
+    private final DriverProducer driverProducer;
 
     @Override
     @Transactional
@@ -99,8 +103,25 @@ public class DriverServiceImpl implements DriverService {
         var driver = getByIdOrElseThrow(id);
         if (driver.getStatus().equals(Status.AVAILABLE)) {
             driver.setStatus(Status.UNAVAILABLE);
-        } else driver.setStatus(Status.AVAILABLE);
+        } else {
+            driver.setStatus(Status.AVAILABLE);
+            driverProducer.sendMessage(DriverForRideResponse.builder()
+                    .driverId(driver.getId())
+                    .build());
+        }
         return driverMapper.mapToDto(driverRepository.save(driver));
+    }
+
+    @Override
+    public void findDriverForRide(FindDriverForRideRequest request) {
+        List<DriverResponse> drivers = getAvailableDrivers(1, 1, "rating").getDrivers();
+        if (!drivers.isEmpty()) {
+            DriverForRideResponse driver = DriverForRideResponse.builder()
+                    .driverId(drivers.get(drivers.size() - 1).getId())
+                    .rideId(request.getRideId())
+                    .build();
+            driverProducer.sendMessage(driver);
+        }
     }
 
     private void checkIsDriverForUpdateUnique(DriverCreateUpdateRequest dto, Driver existDriver) {

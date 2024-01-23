@@ -19,6 +19,7 @@
         <swagger.version>2.3.0</swagger.version>
         <mongok.version>5.3.6</mongok.version>
         <openfeign.version>4.1.0</openfeign.version>
+        <kafka.version>3.1.1</kafka.version>
     </properties>
     <dependencies>
         <dependency>
@@ -57,6 +58,11 @@
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-openfeign</artifactId>
             <version>${openfeign.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka</artifactId>
+            <version>${kafka.version}</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>

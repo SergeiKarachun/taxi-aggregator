@@ -8,6 +8,27 @@ spring:
       port: 27017
       host: localhost
       auto-index-creation: true
+  kafka:
+    consumer:
+      group-id:
+        driver: driver-creation-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    bootstrap-servers: localhost:9092
+topic:
+  name:
+    ride: create.ride
+    driver: available.driver
+    status: change.driver.status
+kafka:
+  bootstrap-servers: localhost:9092
+  partitions:
+    count: 1
+  replicas:
+    count: 1
 mongock:
   migration-scan-package: by.sergo.rideservice.config
 server:

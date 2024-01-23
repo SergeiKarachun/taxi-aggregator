@@ -2,12 +2,13 @@ package by.sergo.rideservice.service.impl;
 
 import by.sergo.rideservice.client.PaymentFeignClient;
 import by.sergo.rideservice.domain.Ride;
-import by.sergo.rideservice.domain.dto.request.DriverRequest;
-import by.sergo.rideservice.domain.dto.request.RideCreateUpdateRequest;
+import by.sergo.rideservice.domain.dto.request.*;
 import by.sergo.rideservice.domain.dto.response.CreditCardResponse;
 import by.sergo.rideservice.domain.dto.response.RideListResponse;
 import by.sergo.rideservice.domain.dto.response.RideResponse;
 import by.sergo.rideservice.domain.enums.Status;
+import by.sergo.rideservice.kafka.RideProducer;
+import by.sergo.rideservice.kafka.StatusProducer;
 import by.sergo.rideservice.mapper.RideMapper;
 import by.sergo.rideservice.repository.RideRepository;
 import by.sergo.rideservice.service.RideService;
@@ -39,6 +40,8 @@ public class RideServiceImpl implements RideService {
     private final RideRepository rideRepository;
     private final RideMapper rideMapper;
     private final PaymentFeignClient paymentFeignClient;
+    private final StatusProducer statusProducer;
+    private final RideProducer rideProducer;
 
     @Override
     @Transactional
@@ -49,6 +52,10 @@ public class RideServiceImpl implements RideService {
         ride.setCreatingTime(LocalDateTime.now());
         ride.setPrice(price);
         var savedRide = rideRepository.save(ride);
+        rideProducer.sendMessage(FindDriverForRideRequest.builder()
+                .rideId(savedRide.getId().toString())
+                .build()
+        );
         return rideMapper.mapToDto(savedRide);
     }
 
@@ -78,18 +85,25 @@ public class RideServiceImpl implements RideService {
         return rideMapper.mapToDto(savedRide);
     }
 
-    @Override
     @Transactional
-    public RideResponse setDriverAndAcceptRide(DriverRequest dto, String rideId) {
-        var ride = getByIdOrElseThrow(rideId);
+    public void setDriverAndAcceptRide(DriverForRideResponse response) {
+        var ride = getByIdOrElseThrow(response.getRideId());
         if (ride.getStatus().equals(CREATED) && ride.getDriverId() == null) {
-            ride.setDriverId(dto.getDriverId());
+            ride.setDriverId(response.getDriverId());
             ride.setStatus(ACCEPTED);
         } else {
-            throw new BadRequestException(ExceptionMessageUtil.alreadyHasDriver(rideId));
+            throw new BadRequestException(ExceptionMessageUtil.alreadyHasDriver(response.getRideId()));
         }
-        var savedRide = rideRepository.save(ride);
-        return rideMapper.mapToDto(savedRide);
+        rideRepository.save(ride);
+    }
+
+    @Override
+    public void sendEditStatus(DriverForRideResponse response) {
+        setDriverAndAcceptRide(response);
+        EditDriverStatusRequest driverStatusRequest = EditDriverStatusRequest.builder()
+                .driverId(response.getDriverId())
+                .build();
+        statusProducer.sendMessage(driverStatusRequest);
     }
 
     @Override
@@ -124,6 +138,10 @@ public class RideServiceImpl implements RideService {
         if (ride.getStatus().equals(TRANSPORT)) {
             ride.setStatus(FINISHED);
             ride.setEndTime(LocalDateTime.now());
+            EditDriverStatusRequest driverStatusRequest = EditDriverStatusRequest.builder()
+                    .driverId(ride.getDriverId())
+                    .build();
+            statusProducer.sendMessage(driverStatusRequest);
         } else {
             throw new BadRequestException(ExceptionMessageUtil.canNotChangeStatusMessage(FINISHED.toString(), ride.getStatus().toString(), TRANSPORT.toString()));
         }
