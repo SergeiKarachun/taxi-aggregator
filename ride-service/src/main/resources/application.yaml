@@ -1,0 +1,14 @@
+spring:
+  data:
+    mongodb:
+      authentication-database: admin
+      username: root
+      password: ${DB_PASSWORD:example}
+      database: ridedb
+      port: 27017
+      host: localhost
+      auto-index-creation: true
+mongock:
+  migration-scan-package: by.sergo.rideservice.config
+server:
+  port: 9003
