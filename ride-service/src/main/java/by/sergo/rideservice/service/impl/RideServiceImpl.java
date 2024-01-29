@@ -170,16 +170,19 @@ public class RideServiceImpl implements RideService {
         if (page < 1 || size < 1) {
             throw new BadRequestException(ExceptionMessageUtil.getInvalidRequestMessage(page, size));
         } else if (field != null) {
-            Arrays.stream(RideResponse.class.getDeclaredFields())
-                    .map(Field::getName)
-                    .filter(s -> s.contains(field.toLowerCase()))
-                    .findFirst()
-                    .orElseThrow(() -> new BadRequestException(ExceptionMessageUtil.getInvalidSortingParamRequestMessage(field)));
+            checkFieldToSort(field);
 
             return PageRequest.of(page - 1, size).withSort(Sort.by(Sort.Order.asc(field.toLowerCase())));
         }
-        
         return PageRequest.of(page - 1, size);
+    }
+
+    private static void checkFieldToSort(String field) {
+        Arrays.stream(RideResponse.class.getDeclaredFields())
+                .map(Field::getName)
+                .filter(s -> s.contains(field.toLowerCase()))
+                .findFirst()
+                .orElseThrow(() -> new BadRequestException(ExceptionMessageUtil.getInvalidSortingParamRequestMessage(field)));
     }
 
     private Double getPrice() {
