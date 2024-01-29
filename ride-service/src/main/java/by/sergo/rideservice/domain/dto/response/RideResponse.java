@@ -13,8 +13,8 @@ public class RideResponse {
     private String pickUpAddress;
     private String destinationAddress;
     private Double price;
-    private PassengerResponse passengerResponse;
-    private DriverResponse driverResponse;
+    private PassengerResponse passenger;
+    private DriverResponse driver;
     private LocalDateTime creatingTime;
     private LocalDateTime startTime;
     private LocalDateTime endTime;

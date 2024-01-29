@@ -24,7 +24,7 @@ public class DriverConsumer {
     @KafkaListener(topics = "${topic.name.driver}", groupId = "${spring.kafka.consumer.group-id.driver}")
     public void consumeMessage(DriverForRideResponse driver) {
         log.info("message consumed {}", driver);
-        if (driver.getRideId() == null) {
+        if (driver.getRideId().equals("free")) {
             setDriver(driver);
         } else {
             rideService.sendEditStatus(driver);

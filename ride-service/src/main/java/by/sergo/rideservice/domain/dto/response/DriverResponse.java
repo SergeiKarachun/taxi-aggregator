@@ -3,8 +3,6 @@ package by.sergo.rideservice.domain.dto.response;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.math.BigDecimal;
-
 @Getter
 @Setter
 public class DriverResponse {
@@ -15,6 +13,5 @@ public class DriverResponse {
     private String email;
     private String status;
     private Double rating;
-    private BigDecimal balance;
     private CarResponse car;
 }

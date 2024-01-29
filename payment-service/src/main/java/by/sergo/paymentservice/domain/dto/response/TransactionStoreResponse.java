@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 public class TransactionStoreResponse {
     private Long id;
     private String creditCardNumber;
+    private String accountNumber;
     private LocalDateTime operationDate;
     private String operation;
     private BigDecimal value;

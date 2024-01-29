@@ -107,6 +107,7 @@ public class DriverServiceImpl implements DriverService {
             driver.setStatus(Status.AVAILABLE);
             driverProducer.sendMessage(DriverForRideResponse.builder()
                     .driverId(driver.getId())
+                    .rideId("free")
                     .build());
         }
         return driverMapper.mapToDto(driverRepository.save(driver));

@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,7 +18,7 @@ public class RideController {
 
     private final RideServiceImpl rideService;
 
-    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping
     @Operation(description = "Create a ride.")
     public ResponseEntity<RideResponse> create(@RequestBody @Valid RideCreateUpdateRequest dto) {
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -79,7 +78,7 @@ public class RideController {
         return ResponseEntity.ok(rideListResponseDto);
     }
 
-    @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(value = "/{id}")
     @Operation(description = "Update a ride by id.")
     public ResponseEntity<RideResponse> update(@RequestBody @Valid RideCreateUpdateRequest dto,
                                                @PathVariable("id") String id) {

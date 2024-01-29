@@ -20,11 +20,11 @@ public class RideMapper {
 
     public RideResponse mapToDto(Ride ride) {
         RideResponse response = modelMapper.map(ride, RideResponse.class);
-        response.setPassengerResponse(getPassengerById(ride.getPassengerId()));
+        response.setPassenger(getPassengerById(ride.getPassengerId()));
         if (ride.getDriverId() != null) {
-            response.setDriverResponse(getDriverById(ride.getDriverId()));
+            response.setDriver(getDriverById(ride.getDriverId()));
         } else {
-            response.setDriverResponse(null);
+            response.setDriver(null);
         }
         return response;
     }

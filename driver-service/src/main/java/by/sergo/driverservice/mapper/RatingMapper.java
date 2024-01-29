@@ -20,8 +20,8 @@ public class RatingMapper {
 
     public RatingResponse mapToDto(Rating rating){
         RatingResponse response = modelMapper.map(rating, RatingResponse.class);
-        response.setPassengerResponse(getPassengerById(rating.getPassengerId()));
-        response.setRideResponse(getRideById(rating.getRideId()));
+        response.setPassenger(getPassengerById(rating.getPassengerId()));
+        response.setRide(getRideById(rating.getRideId()));
         return response;
 
     }

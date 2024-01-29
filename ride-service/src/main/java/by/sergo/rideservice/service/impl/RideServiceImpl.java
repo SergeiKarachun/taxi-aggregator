@@ -19,6 +19,7 @@ import by.sergo.rideservice.service.exception.BadRequestException;
 import by.sergo.rideservice.util.ExceptionMessageUtil;
 import by.sergo.rideservice.service.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -96,12 +97,13 @@ public class RideServiceImpl implements RideService {
     public void setDriverAndAcceptRide(DriverForRideResponse response) {
         checkDriver(response);
         var ride = getByIdOrElseThrow(response.getRideId());
-        if (ride.getStatus().equals(CREATED) && ride.getDriverId() == null) {
-            ride.setDriverId(response.getDriverId());
-            ride.setStatus(ACCEPTED);
-        } else {
+
+        if (!ride.getStatus().equals(CREATED) || ride.getDriverId() != null) {
             throw new BadRequestException(ExceptionMessageUtil.alreadyHasDriver(response.getRideId()));
         }
+
+        ride.setDriverId(response.getDriverId());
+        ride.setStatus(ACCEPTED);
         rideRepository.save(ride);
     }
 
@@ -118,11 +120,11 @@ public class RideServiceImpl implements RideService {
     @Transactional
     public RideResponse rejectRide(String rideId) {
         var ride = getByIdOrElseThrow(rideId);
-        if (ride.getStatus().equals(CREATED)) {
-            ride.setStatus(REJECTED);
-        } else {
+        if (!ride.getStatus().equals(CREATED)) {
             throw new BadRequestException(ExceptionMessageUtil.canNotChangeStatusMessage(REJECTED.toString(), ride.getStatus().toString(), CREATED.toString()));
         }
+
+        ride.setStatus(REJECTED);
         return rideMapper.mapToDto(rideRepository.save(ride));
     }
 
@@ -130,12 +132,12 @@ public class RideServiceImpl implements RideService {
     @Transactional
     public RideResponse startRide(String rideId) {
         var ride = getByIdOrElseThrow(rideId);
-        if (ride.getStatus().equals(ACCEPTED)) {
-            ride.setStatus(TRANSPORT);
-            ride.setStartTime(LocalDateTime.now());
-        } else {
+        if (!ride.getStatus().equals(ACCEPTED)) {
             throw new BadRequestException(ExceptionMessageUtil.canNotChangeStatusMessage(TRANSPORT.toString(), ride.getStatus().toString(), ACCEPTED.toString()));
         }
+
+        ride.setStartTime(LocalDateTime.now());
+        ride.setStatus(TRANSPORT);
         return rideMapper.mapToDto(rideRepository.save(ride));
     }
 
@@ -143,16 +145,12 @@ public class RideServiceImpl implements RideService {
     @Transactional
     public RideResponse endRide(String rideId) {
         var ride = getByIdOrElseThrow(rideId);
-        if (ride.getStatus().equals(TRANSPORT)) {
-            ride.setStatus(FINISHED);
-            ride.setEndTime(LocalDateTime.now());
-            EditDriverStatusRequest driverStatusRequest = EditDriverStatusRequest.builder()
-                    .driverId(ride.getDriverId())
-                    .build();
-            statusProducer.sendMessage(driverStatusRequest);
-        } else {
+        if (!ride.getStatus().equals(TRANSPORT)) {
             throw new BadRequestException(ExceptionMessageUtil.canNotChangeStatusMessage(FINISHED.toString(), ride.getStatus().toString(), TRANSPORT.toString()));
         }
+
+        ride.setStatus(FINISHED);
+        ride.setEndTime(LocalDateTime.now());
         return rideMapper.mapToDto(rideRepository.save(ride));
     }
 
@@ -160,11 +158,9 @@ public class RideServiceImpl implements RideService {
     public RideListResponse getByPassengerId(Long passengerId, String status, Integer page, Integer size, String orderBy) {
         PageRequest pageRequest = getPageRequest(page, size, orderBy);
 
-        if (!Arrays.stream(values()).map(Enum::toString).toList().contains(status.toUpperCase())) {
-            throw new BadRequestException(ExceptionMessageUtil.getInvalidStatusMessage(status));
-        }
+        checkStatus(status);
 
-        var responsePage = rideRepository.findAllByPassengerIdAndStatus(passengerId, Status.valueOf(status.toUpperCase()), pageRequest)
+        Page<RideResponse> responsePage = rideRepository.findAllByPassengerIdAndStatus(passengerId, Status.valueOf(status.toUpperCase()), pageRequest)
                 .map(rideMapper::mapToDto);
         return RideListResponse.builder()
                 .rides(responsePage.getContent())
@@ -180,11 +176,9 @@ public class RideServiceImpl implements RideService {
     public RideListResponse getByDriverId(Long driverId, String status, Integer page, Integer size, String orderBy) {
         PageRequest pageRequest = getPageRequest(page, size, orderBy);
 
-        if (!Arrays.stream(values()).map(Enum::toString).toList().contains(status.toUpperCase())) {
-            throw new BadRequestException(ExceptionMessageUtil.getInvalidStatusMessage(status));
-        }
+        checkStatus(status);
 
-        var responsePage = rideRepository.findAllByDriverIdAndStatus(driverId, Status.valueOf(status.toUpperCase()), pageRequest)
+        Page<RideResponse> responsePage = rideRepository.findAllByDriverIdAndStatus(driverId, Status.valueOf(status.toUpperCase()), pageRequest)
                 .map(rideMapper::mapToDto);
         return RideListResponse.builder()
                 .rides(responsePage.getContent())
@@ -196,20 +190,31 @@ public class RideServiceImpl implements RideService {
                 .build();
     }
 
+    private static void checkStatus(String status) {
+        Arrays.stream(Status.values())
+                .map(Enum::toString)
+                .filter(s -> s.contains(status.toUpperCase()))
+                .findFirst()
+                .orElseThrow(() -> new BadRequestException(ExceptionMessageUtil.getInvalidStatusMessage(status)));
+    }
+
     private PageRequest getPageRequest(Integer page, Integer size, String field) {
         if (page < 1 || size < 1) {
             throw new BadRequestException(ExceptionMessageUtil.getInvalidRequestMessage(page, size));
         } else if (field != null) {
-            Arrays.stream(RideResponse.class.getDeclaredFields())
-                    .map(Field::getName)
-                    .filter(s -> s.contains(field.toLowerCase()))
-                    .findFirst()
-                    .orElseThrow(() -> new BadRequestException(ExceptionMessageUtil.getInvalidSortingParamRequestMessage(field)));
+            checkFieldToSort(field);
 
             return PageRequest.of(page - 1, size).withSort(Sort.by(Sort.Order.asc(field.toLowerCase())));
-        } else {
-            return PageRequest.of(page - 1, size);
         }
+        return PageRequest.of(page - 1, size);
+    }
+
+    private static void checkFieldToSort(String field) {
+        Arrays.stream(RideResponse.class.getDeclaredFields())
+                .map(Field::getName)
+                .filter(s -> s.contains(field.toLowerCase()))
+                .findFirst()
+                .orElseThrow(() -> new BadRequestException(ExceptionMessageUtil.getInvalidSortingParamRequestMessage(field)));
     }
 
     private CreditCardResponse getPassengerCreditCardById(Long id) {
@@ -227,7 +232,7 @@ public class RideServiceImpl implements RideService {
 
     private RideResponse getRideResponse(PassengerResponse passengerResponse, Ride ride) {
         var response = rideMapper.customMapToDto(ride);
-        response.setPassengerResponse(passengerResponse);
+        response.setPassenger(passengerResponse);
         return response;
     }
 
