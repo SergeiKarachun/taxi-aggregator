@@ -29,6 +29,10 @@ public class RideMapper {
         return response;
     }
 
+    public RideResponse customMapToDto(Ride ride) {
+        return modelMapper.map(ride, RideResponse.class);
+    }
+
     public Ride mapToEntity(RideCreateUpdateRequest dto) {
         return modelMapper.map(dto, Ride.class);
     }
