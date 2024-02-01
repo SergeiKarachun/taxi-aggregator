@@ -10,7 +10,6 @@ import java.util.List;
 @Getter
 @Setter
 public class PassengerListResponse {
-    private Integer page;
     private Integer totalPages;
     private Integer size;
     private Integer total;

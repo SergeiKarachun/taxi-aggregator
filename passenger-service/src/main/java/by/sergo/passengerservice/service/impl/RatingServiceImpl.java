@@ -1,8 +1,12 @@
 package by.sergo.passengerservice.service.impl;
 
+import by.sergo.passengerservice.client.DriverFeignClient;
+import by.sergo.passengerservice.client.RideFeignClient;
 import by.sergo.passengerservice.domain.dto.request.RatingCreateRequest;
+import by.sergo.passengerservice.domain.dto.response.DriverResponse;
 import by.sergo.passengerservice.domain.dto.response.PassengerRatingResponse;
 import by.sergo.passengerservice.domain.dto.response.RatingResponse;
+import by.sergo.passengerservice.domain.dto.response.RideResponse;
 import by.sergo.passengerservice.domain.entity.Passenger;
 import by.sergo.passengerservice.mapper.RatingMapper;
 import by.sergo.passengerservice.repository.PassengerRepository;
@@ -26,6 +30,8 @@ public class RatingServiceImpl implements RatingService {
     private final RatingRepository ratingRepository;
     private final PassengerRepository passengerRepository;
     private final RatingMapper ratingMapper;
+    private final DriverFeignClient driverFeignClient;
+    private final RideFeignClient rideFeignClient;
 
     @Override
     @Transactional
@@ -40,7 +46,10 @@ public class RatingServiceImpl implements RatingService {
         var savedRating = ratingRepository.save(newRating);
         passenger.setRating(floorRating(getAverageRating(passengerId)));
         passengerRepository.save(passenger);
-        return ratingMapper.mapToDto(savedRating);
+        var response = ratingMapper.mapToDto(savedRating);
+        response.setDriver(getDriverById(dto.getDriverId()));
+        response.setRide(getRideById(dto.getRideId()));
+        return response;
     }
 
     @Override
@@ -68,5 +77,13 @@ public class RatingServiceImpl implements RatingService {
     private Double getAverageRating(Long passengerId) {
         return ratingRepository.getRatingsByPassengerId(passengerId)
                 .orElse(DEFAULT_RATING);
+    }
+
+    private RideResponse getRideById(String id) {
+        return rideFeignClient.getRideById(id);
+    }
+
+    private DriverResponse getDriverById(Long id) {
+        return driverFeignClient.getDriverById(id);
     }
 }
