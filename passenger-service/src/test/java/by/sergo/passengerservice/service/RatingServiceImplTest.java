@@ -29,18 +29,18 @@ import static org.mockito.Mockito.verify;
 public class RatingServiceImplTest {
 
     @Mock
-    PassengerRepository passengerRepository;
+    private PassengerRepository passengerRepository;
     @Mock
-    RatingRepository ratingRepository;
+    private RatingRepository ratingRepository;
     @Mock
-    RatingMapper ratingMapper;
+    private RatingMapper ratingMapper;
     @Mock
-    DriverFeignClient driverFeignClient;
+    private DriverFeignClient driverFeignClient;
     @Mock
-    RideFeignClient rideFeignClient;
+    private RideFeignClient rideFeignClient;
 
     @InjectMocks
-    RatingServiceImpl ratingService;
+    private RatingServiceImpl ratingService;
 
     @Test
     void rateExistingPassenger() {

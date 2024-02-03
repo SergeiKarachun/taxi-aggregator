@@ -64,11 +64,9 @@ public class PassengerServiceImplTest {
                 .when(passengerRepository)
                 .findById(NOT_FOUND_ID);
 
-        assertThrows(NotFoundException.class,
-                () -> passengerService.getById(NOT_FOUND_ID));
+        assertThrows(NotFoundException.class, () -> passengerService.getById(NOT_FOUND_ID));
 
-        verify(passengerRepository)
-                .findById(NOT_FOUND_ID);
+        verify(passengerRepository).findById(NOT_FOUND_ID);
     }
 
     @Test

@@ -1,8 +1,12 @@
 package by.sergo.driverservice.service.impl;
 
+import by.sergo.driverservice.client.PassengerFeignClient;
+import by.sergo.driverservice.client.RideFeignClient;
 import by.sergo.driverservice.domain.dto.request.RatingCreateRequest;
 import by.sergo.driverservice.domain.dto.response.DriverRatingResponse;
+import by.sergo.driverservice.domain.dto.response.PassengerResponse;
 import by.sergo.driverservice.domain.dto.response.RatingResponse;
+import by.sergo.driverservice.domain.dto.response.RideResponse;
 import by.sergo.driverservice.mapper.RatingMapper;
 import by.sergo.driverservice.repository.DriverRepository;
 import by.sergo.driverservice.repository.RatingRepository;
@@ -25,6 +29,8 @@ public class RatingServiceImpl implements RatingService {
     private final DriverRepository driverRepository;
     private final RatingRepository ratingRepository;
     private final RatingMapper ratingMapper;
+    private final PassengerFeignClient passengerFeignClient;
+    private final RideFeignClient rideFeignClient;
 
     @Override
     @Transactional
@@ -38,10 +44,13 @@ public class RatingServiceImpl implements RatingService {
 
         var rating = ratingMapper.mapToEntity(dto);
         rating.setDriver(driver);
-        var savedRating = ratingRepository.saveAndFlush(rating);
+        var savedRating = ratingRepository.save(rating);
         driver.setRating(getFloorRating(getAverageRating(driverId)));
         driverRepository.save(driver);
-        return ratingMapper.mapToDto(savedRating);
+        var response = ratingMapper.mapToDto(savedRating);
+        response.setPassenger(getPassengerById(dto.getPassengerId()));
+        response.setRide(getRideById(dto.getRideId()));
+        return response;
     }
 
     @Override
@@ -61,5 +70,14 @@ public class RatingServiceImpl implements RatingService {
 
     private double getFloorRating(Double driverId) {
         return Math.floor(driverId * 100) / 100;
+    }
+
+
+    private PassengerResponse getPassengerById(Long id) {
+        return passengerFeignClient.getPassengerById(id);
+    }
+
+    private RideResponse getRideById(String id) {
+        return rideFeignClient.getRideById(id);
     }
 }

@@ -1,6 +1,7 @@
 package by.sergo.driverservice.domain.dto.request;
 
 import jakarta.validation.constraints.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,6 +10,7 @@ import static by.sergo.driverservice.util.ConstantUtil.NUMBER_PATTERN;
 
 @Getter
 @Setter
+@Builder
 public class CarCreateUpdateRequest {
     @NotBlank(message = "{model.not.blank}")
     @Size(min = 2, message = "{model.min.value}")

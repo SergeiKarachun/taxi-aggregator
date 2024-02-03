@@ -50,7 +50,7 @@ public class DriverServiceImpl implements DriverService {
         checkIsDriverForUpdateUnique(dto, existDriver);
         var driverToSave = driverMapper.mapToEntity(dto);
         driverToSave.setId(id);
-        return driverMapper.mapToDto(driverRepository.save(existDriver));
+        return driverMapper.mapToDto(driverRepository.save(driverToSave));
     }
 
     @Override
@@ -74,7 +74,6 @@ public class DriverServiceImpl implements DriverService {
                 .map(driverMapper::mapToDto);
         return DriverListResponse.builder()
                 .drivers(responsePage.getContent())
-                .page(responsePage.getPageable().getPageNumber() + 1)
                 .totalPages(responsePage.getTotalPages())
                 .size(responsePage.getContent().size())
                 .total((int) responsePage.getTotalElements())
@@ -89,7 +88,6 @@ public class DriverServiceImpl implements DriverService {
                 .map(driverMapper::mapToDto);
         return DriverListResponse.builder()
                 .drivers(responsePage.getContent())
-                .page(responsePage.getPageable().getPageNumber() + 1)
                 .totalPages(responsePage.getTotalPages())
                 .size(responsePage.getContent().size())
                 .total((int) responsePage.getTotalElements())

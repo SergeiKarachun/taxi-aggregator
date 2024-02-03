@@ -1,6 +1,7 @@
 package by.sergo.driverservice.domain.dto.response;
 
 import by.sergo.driverservice.domain.enums.RideStatus;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -8,6 +9,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
+@Builder
 public class RideResponse {
     private String id;
     private String pickUpAddress;

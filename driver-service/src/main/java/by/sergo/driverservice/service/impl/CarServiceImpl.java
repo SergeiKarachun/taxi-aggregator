@@ -16,7 +16,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -95,7 +94,6 @@ public class CarServiceImpl implements CarService {
         checkCarIsUnique(dto);
         checkDriverIsExist(dto.getDriverId());
         checkDriverAlreadyHasCar(dto.getDriverId());
-        checkDate(dto.getYearOfManufacture());
     }
 
     private void checkDriverAlreadyHasCar(Long driverId) {
@@ -112,13 +110,6 @@ public class CarServiceImpl implements CarService {
 
         if (!existCar.getDriver().getId().equals(dto.getDriverId())){
             checkDriverAlreadyHasCar(dto.getDriverId());
-        }
-        checkDate(dto.getYearOfManufacture());
-    }
-
-    private void checkDate(Integer yearOfManufacture) {
-        if (yearOfManufacture > LocalDate.now().getYear()) {
-            throw new BadRequestException(YEAR_SHOULD_BE_MESSAGE);
         }
     }
 
