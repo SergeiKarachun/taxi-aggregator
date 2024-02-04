@@ -63,7 +63,7 @@ public class RideServiceImpl implements RideService {
                 .rideId(savedRide.getId().toString())
                 .build()
         );
-        return getRideResponse(passengerResponse, ride);
+        return rideMapper.mapToDto(savedRide);
     }
 
     @Override
@@ -164,7 +164,6 @@ public class RideServiceImpl implements RideService {
                 .map(rideMapper::mapToDto);
         return RideListResponse.builder()
                 .rides(responsePage.getContent())
-                .page(responsePage.getPageable().getPageNumber() + 1)
                 .totalPages(responsePage.getTotalPages())
                 .size(responsePage.getContent().size())
                 .total((int) responsePage.getTotalElements())
@@ -182,7 +181,6 @@ public class RideServiceImpl implements RideService {
                 .map(rideMapper::mapToDto);
         return RideListResponse.builder()
                 .rides(responsePage.getContent())
-                .page(responsePage.getPageable().getPageNumber() + 1)
                 .totalPages(responsePage.getTotalPages())
                 .size(responsePage.getContent().size())
                 .total((int) responsePage.getTotalElements())
@@ -228,12 +226,6 @@ public class RideServiceImpl implements RideService {
                 throw new BadRequestException(ExceptionMessageUtil.getNotEnoughMoneyMessage("Passenger", "passengerId", dto.getPassengerId()));
             }
         }
-    }
-
-    private RideResponse getRideResponse(PassengerResponse passengerResponse, Ride ride) {
-        var response = rideMapper.customMapToDto(ride);
-        response.setPassenger(passengerResponse);
-        return response;
     }
 
     private PassengerResponse checkPassenger(RideCreateUpdateRequest dto) {

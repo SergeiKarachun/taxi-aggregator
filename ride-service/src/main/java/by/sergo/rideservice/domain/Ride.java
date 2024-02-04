@@ -4,10 +4,7 @@ import by.sergo.rideservice.domain.enums.PaymentMethod;
 import by.sergo.rideservice.domain.enums.Status;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -32,6 +29,7 @@ public class Ride {
     Long driverId;
     @NotNull
     Long passengerId;
+    @Builder.Default
     LocalDateTime creatingTime = LocalDateTime.now();
     LocalDateTime startTime;
     LocalDateTime endTime;
