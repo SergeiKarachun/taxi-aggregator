@@ -24,9 +24,9 @@ public class CreditCardMapper {
 
         CreditCardResponse response = modelMapper.map(creditCard, CreditCardResponse.class);
         if (creditCard.getUserType().equals(PASSENGER)) {
-            response.setUserResponse(getPassengerById(creditCard.getUserId()));
+            response.setUser(getPassengerById(creditCard.getUserId()));
         } else {
-            response.setUserResponse(getDriverById(creditCard.getUserId()));
+            response.setUser(getDriverById(creditCard.getUserId()));
 
         }
         return response;

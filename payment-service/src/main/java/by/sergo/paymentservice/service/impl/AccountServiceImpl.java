@@ -12,6 +12,7 @@ import by.sergo.paymentservice.repository.CreditCardRepository;
 import by.sergo.paymentservice.repository.TransactionStoreRepository;
 import by.sergo.paymentservice.service.AccountService;
 import by.sergo.paymentservice.service.exception.BadRequestException;
+import by.sergo.paymentservice.service.exception.NotFoundException;
 import by.sergo.paymentservice.util.ExceptionMessageUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -97,12 +98,12 @@ public class AccountServiceImpl implements AccountService {
 
     private Account getByIdOrElseThrow(Long id) {
         return accountRepository.findById(id)
-                .orElseThrow(() -> new BadRequestException(ExceptionMessageUtil.getNotFoundMessage("Account", "id", id)));
+                .orElseThrow(() -> new NotFoundException(ExceptionMessageUtil.getNotFoundMessage("Account", "id", id)));
     }
 
     private Account getByDriverIdOrElseThrow(Long driverId) {
         return accountRepository.findByDriverId(driverId)
-                .orElseThrow(() -> new BadRequestException(ExceptionMessageUtil.getNotFoundMessage("Account", "driverId", driverId)));
+                .orElseThrow(() -> new NotFoundException(ExceptionMessageUtil.getNotFoundMessage("Account", "driverId", driverId)));
     }
 
     private void checkDriver(Long driverId) {
