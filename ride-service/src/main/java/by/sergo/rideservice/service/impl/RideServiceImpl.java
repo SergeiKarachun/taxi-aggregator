@@ -1,8 +1,5 @@
 package by.sergo.rideservice.service.impl;
 
-import by.sergo.rideservice.client.DriverFeignClient;
-import by.sergo.rideservice.client.PassengerFeignClient;
-import by.sergo.rideservice.client.PaymentFeignClient;
 import by.sergo.rideservice.domain.Ride;
 import by.sergo.rideservice.domain.dto.request.*;
 import by.sergo.rideservice.domain.dto.response.CreditCardResponse;
@@ -14,6 +11,9 @@ import by.sergo.rideservice.kafka.RideProducer;
 import by.sergo.rideservice.kafka.StatusProducer;
 import by.sergo.rideservice.mapper.RideMapper;
 import by.sergo.rideservice.repository.RideRepository;
+import by.sergo.rideservice.service.DriverService;
+import by.sergo.rideservice.service.PassengerService;
+import by.sergo.rideservice.service.PaymentService;
 import by.sergo.rideservice.service.RideService;
 import by.sergo.rideservice.service.exception.BadRequestException;
 import by.sergo.rideservice.util.ExceptionMessageUtil;
@@ -29,6 +29,7 @@ import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 
 import static by.sergo.rideservice.domain.enums.PaymentMethod.CARD;
@@ -43,16 +44,16 @@ public class RideServiceImpl implements RideService {
 
     private final RideRepository rideRepository;
     private final RideMapper rideMapper;
-    private final PaymentFeignClient paymentFeignClient;
-    private final DriverFeignClient driverFeignClient;
-    private final PassengerFeignClient passengerFeignClient;
     private final StatusProducer statusProducer;
     private final RideProducer rideProducer;
+    private final PassengerService passengerService;
+    private final DriverService driverService;
+    private final PaymentService paymentService;
 
     @Override
     @Transactional
     public RideResponse create(RideCreateUpdateRequest dto) {
-        var passengerResponse = checkPassenger(dto);
+        checkPassenger(dto);
         var price = getPrice();
         checkRidePayment(dto, price);
         var ride = rideMapper.mapToEntity(dto);
@@ -63,12 +64,13 @@ public class RideServiceImpl implements RideService {
                 .rideId(savedRide.getId().toString())
                 .build()
         );
-        return getRideResponse(passengerResponse, ride);
+        return getRideResponse(savedRide);
     }
 
     @Override
     public RideResponse getById(String id) {
-        return rideMapper.mapToDto(getByIdOrElseThrow(id));
+        Ride ride = getByIdOrElseThrow(id);
+        return getRideResponse(ride);
     }
 
     @Override
@@ -90,7 +92,7 @@ public class RideServiceImpl implements RideService {
         mappedRide.setId(ride.getId());
         mappedRide.setPrice(price);
         var savedRide = rideRepository.save(mappedRide);
-        return rideMapper.mapToDto(savedRide);
+        return getRideResponse(savedRide);
     }
 
     @Transactional
@@ -125,7 +127,8 @@ public class RideServiceImpl implements RideService {
         }
 
         ride.setStatus(REJECTED);
-        return rideMapper.mapToDto(rideRepository.save(ride));
+        var savedRide = rideRepository.save(ride);
+        return getRideResponse(savedRide);
     }
 
     @Override
@@ -138,7 +141,8 @@ public class RideServiceImpl implements RideService {
 
         ride.setStartTime(LocalDateTime.now());
         ride.setStatus(TRANSPORT);
-        return rideMapper.mapToDto(rideRepository.save(ride));
+        var savedRide = rideRepository.save(ride);
+        return getRideResponse(savedRide);
     }
 
     @Override
@@ -151,7 +155,11 @@ public class RideServiceImpl implements RideService {
 
         ride.setStatus(FINISHED);
         ride.setEndTime(LocalDateTime.now());
-        return rideMapper.mapToDto(rideRepository.save(ride));
+        var savedRide = rideRepository.save(ride);
+        statusProducer.sendMessage(EditDriverStatusRequest.builder()
+                .driverId(ride.getDriverId())
+                .build());
+        return getRideResponse(savedRide);
     }
 
     @Override
@@ -161,7 +169,7 @@ public class RideServiceImpl implements RideService {
         checkStatus(status);
 
         Page<RideResponse> responsePage = rideRepository.findAllByPassengerIdAndStatus(passengerId, Status.valueOf(status.toUpperCase()), pageRequest)
-                .map(rideMapper::mapToDto);
+                .map(this::getRideResponse);
         return RideListResponse.builder()
                 .rides(responsePage.getContent())
                 .page(responsePage.getPageable().getPageNumber() + 1)
@@ -179,7 +187,7 @@ public class RideServiceImpl implements RideService {
         checkStatus(status);
 
         Page<RideResponse> responsePage = rideRepository.findAllByDriverIdAndStatus(driverId, Status.valueOf(status.toUpperCase()), pageRequest)
-                .map(rideMapper::mapToDto);
+                .map(this::getRideResponse);
         return RideListResponse.builder()
                 .rides(responsePage.getContent())
                 .page(responsePage.getPageable().getPageNumber() + 1)
@@ -188,6 +196,38 @@ public class RideServiceImpl implements RideService {
                 .total((int) responsePage.getTotalElements())
                 .sortedByField(orderBy)
                 .build();
+    }
+
+    public void setDriver(DriverForRideResponse driver) {
+        List<Ride> rides = rideRepository.findAll().stream()
+                .filter(ride -> ride.getDriverId() == null)
+                .toList();
+        if (!rides.isEmpty()) {
+            Ride rideWithoutDriver = rideRepository.findAll().stream()
+                    .filter(ride -> ride.getDriverId() == null)
+                    .toList()
+                    .get(0);
+            rideWithoutDriver.setDriverId(driver.getDriverId());
+            rideWithoutDriver.setStatus(Status.ACCEPTED);
+            rideRepository.save(rideWithoutDriver);
+            statusProducer.sendMessage(EditDriverStatusRequest.builder()
+                    .driverId(driver.getDriverId())
+                    .build());
+        }
+    }
+
+    private RideResponse getRideResponse(Ride ride) {
+        var rideResponse = rideMapper.mapToDto(ride);
+        if (ride.getPassengerId() != null) {
+            var passengerResponse = passengerService.getPassenger(ride.getPassengerId());
+            rideResponse.setPassenger(passengerResponse);
+        }
+
+        if (ride.getDriverId() != null) {
+            var driverResponse = driverService.getDriver(ride.getDriverId());
+            rideResponse.setDriver(driverResponse);
+        }
+        return rideResponse;
     }
 
     private static void checkStatus(String status) {
@@ -218,7 +258,7 @@ public class RideServiceImpl implements RideService {
     }
 
     private CreditCardResponse getPassengerCreditCardById(Long id) {
-        return paymentFeignClient.getPassengerCreditCard(id);
+        return paymentService.getPassengerCreditCard(id);
     }
 
     private void checkRidePayment(RideCreateUpdateRequest dto, Double price) {
@@ -230,18 +270,12 @@ public class RideServiceImpl implements RideService {
         }
     }
 
-    private RideResponse getRideResponse(PassengerResponse passengerResponse, Ride ride) {
-        var response = rideMapper.customMapToDto(ride);
-        response.setPassenger(passengerResponse);
-        return response;
-    }
-
     private PassengerResponse checkPassenger(RideCreateUpdateRequest dto) {
-        return passengerFeignClient.getPassengerById(dto.getPassengerId());
+        return passengerService.getPassenger(dto.getPassengerId());
     }
 
     private void checkDriver(DriverForRideResponse response) {
-        driverFeignClient.getDriverById(response.getDriverId());
+        driverService.getDriver(response.getDriverId());
     }
 
     private Double getPrice() {
