@@ -2,6 +2,7 @@ package by.sergo.rideservice.controller.handler;
 
 import by.sergo.rideservice.service.exception.BadRequestException;
 import by.sergo.rideservice.service.exception.NotFoundException;
+import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -46,6 +47,18 @@ public class RestControllerExceptionHandler {
                 .time(LocalDateTime.now())
                 .build();
         return new ResponseEntity<>(response, response.getStatus());
+    }
+
+    @ExceptionHandler(value = {FeignException.class})
+    public ResponseEntity<RestErrorResponse> handleFeignException(FeignException feignException) {
+        var start = feignException.getMessage().indexOf("[\"");
+        var end = feignException.getMessage().indexOf("\"]");
+        String res = feignException.getMessage().substring(start + 2, end);
+        return new ResponseEntity<>(RestErrorResponse.builder()
+                .messages(Collections.singletonList(res))
+                .status(HttpStatus.valueOf(feignException.status()))
+                .time(LocalDateTime.now())
+                .build(), HttpStatus.valueOf(feignException.status()));
     }
 
     @ExceptionHandler(ServerException.class)

@@ -11,3 +11,30 @@ spring:
     change-log: db/changelog/db.changelog-master.xml
   jpa:
     show-sql: true
+  kafka:
+    consumer:
+      group-id:
+        ride: ride-creation-group
+        status: edit-status-group
+topic:
+  name:
+    ride: create.ride
+    driver: available.driver
+    status: change.driver.status
+kafka:
+  bootstrap-servers: localhost:9092
+  partitions:
+    count: 1
+  replicas:
+    count: 1
+feign:
+  client:
+    config:
+      passenger:
+        name: passenger
+        url: http://localhost:9001
+        path: /api/v1/passengers
+      ride:
+        name: ride
+        url: http://localhost:9003
+        path: /api/v1/rides

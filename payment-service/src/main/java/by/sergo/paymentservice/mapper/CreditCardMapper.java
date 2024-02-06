@@ -19,5 +19,4 @@ public class CreditCardMapper {
     public CreditCard mapToEntity(CreditCardCreateUpdate dto) {
         return modelMapper.map(dto, CreditCard.class);
     }
-
 }

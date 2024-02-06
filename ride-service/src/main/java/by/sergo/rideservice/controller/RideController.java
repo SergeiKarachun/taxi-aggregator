@@ -1,6 +1,5 @@
 package by.sergo.rideservice.controller;
 
-import by.sergo.rideservice.domain.dto.request.DriverRequest;
 import by.sergo.rideservice.domain.dto.request.RideCreateUpdateRequest;
 import by.sergo.rideservice.domain.dto.response.RideListResponse;
 import by.sergo.rideservice.domain.dto.response.RideResponse;
@@ -24,13 +23,6 @@ public class RideController {
     public ResponseEntity<RideResponse> create(@RequestBody @Valid RideCreateUpdateRequest dto) {
         return ResponseEntity.status(HttpStatus.CREATED)
                              .body(rideService.create(dto));
-    }
-
-    @PutMapping(value = "/{id}/driver")
-    @Operation(description = "Accept a ride and assign a driver.")
-    public ResponseEntity<RideResponse> setDriverAndAcceptRide(@RequestBody @Valid DriverRequest dto,
-                                                               @PathVariable("id") String rideId) {
-        return ResponseEntity.ok(rideService.setDriverAndAcceptRide(dto, rideId));
     }
 
     @PutMapping("/{id}/reject")

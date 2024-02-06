@@ -2,6 +2,7 @@ package by.sergo.passengerservice.controller.handler;
 
 import by.sergo.passengerservice.service.exception.BadRequestException;
 import by.sergo.passengerservice.service.exception.NotFoundException;
+import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -51,6 +52,18 @@ public class RestControllerExceptionHandler {
     @ExceptionHandler(ServerException.class)
     public ResponseEntity<RestErrorResponse> handleServerException(ServerException ex) {
         return createResponse(ex, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(value = {FeignException.class})
+    public ResponseEntity<RestErrorResponse> handleFeignException(FeignException feignException) {
+        var start = feignException.getMessage().indexOf("[\"");
+        var end = feignException.getMessage().indexOf("\"]");
+        String res = feignException.getMessage().substring(start + 2, end);
+        return new ResponseEntity<>(RestErrorResponse.builder()
+                .messages(Collections.singletonList(res))
+                .status(HttpStatus.valueOf(feignException.status()))
+                .time(LocalDateTime.now())
+                .build(), HttpStatus.valueOf(feignException.status()));
     }
 
     private ResponseEntity<RestErrorResponse> createResponse(Exception ex, HttpStatus status) {

@@ -9,6 +9,6 @@ public class RatingResponse {
     private Long id;
     private Integer grade;
     private Long passengerId;
-    private Long driverId;
-    private String rideId;
+    private DriverResponse driver;
+    private RideResponse ride;
 }

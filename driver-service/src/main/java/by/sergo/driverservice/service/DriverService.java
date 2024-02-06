@@ -1,6 +1,7 @@
 package by.sergo.driverservice.service;
 
 import by.sergo.driverservice.domain.dto.request.DriverCreateUpdateRequest;
+import by.sergo.driverservice.domain.dto.request.FindDriverForRideRequest;
 import by.sergo.driverservice.domain.dto.response.DriverListResponse;
 import by.sergo.driverservice.domain.dto.response.DriverResponse;
 
@@ -18,4 +19,6 @@ public interface DriverService {
     DriverListResponse getAll(Integer page, Integer size, String orderBy);
 
     DriverResponse changeStatus(Long id);
+
+    void handleDriverForRide(FindDriverForRideRequest request);
 }

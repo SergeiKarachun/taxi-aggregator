@@ -1,5 +1,6 @@
 package by.sergo.paymentservice.service.impl;
 
+import by.sergo.paymentservice.client.DriverFeignClient;
 import by.sergo.paymentservice.domain.dto.request.AccountCreateUpdateRequest;
 import by.sergo.paymentservice.domain.dto.response.AccountResponse;
 import by.sergo.paymentservice.domain.entity.Account;
@@ -31,6 +32,7 @@ public class AccountServiceImpl implements AccountService {
     private final AccountRepository accountRepository;
     private final CreditCardRepository creditCardRepository;
     private final TransactionStoreRepository transactionStoreRepository;
+    private final DriverFeignClient driverFeignClient;
 
     @Override
     @Transactional
@@ -38,6 +40,7 @@ public class AccountServiceImpl implements AccountService {
         if (accountRepository.existsByDriverId(dto.getDriverId())) {
             throw new BadRequestException(ExceptionMessageUtil.getAlreadyExistMessage("Account", "driverId", dto.getDriverId().toString()));
         }
+        checkDriver(dto.getDriverId());
         var account = accountMapper.mapToEntity(dto);
         account.setAccountNumber(generateAccountNumber());
         return accountMapper.mapToDto(accountRepository.save(account));
@@ -54,6 +57,7 @@ public class AccountServiceImpl implements AccountService {
     @Override
     @Transactional
     public AccountResponse withdrawalBalance(Long driverId, BigDecimal sum) {
+        checkDriver(driverId);
         var account = getByDriverIdOrElseThrow(driverId);
         var creditCard = getByUserIdAndUserTypeOrElseThrow(driverId);
 
@@ -99,6 +103,10 @@ public class AccountServiceImpl implements AccountService {
     private Account getByDriverIdOrElseThrow(Long driverId) {
         return accountRepository.findByDriverId(driverId)
                 .orElseThrow(() -> new BadRequestException(ExceptionMessageUtil.getNotFoundMessage("Account", "driverId", driverId)));
+    }
+
+    private void checkDriver(Long driverId) {
+        driverFeignClient.getDriverById(driverId);
     }
 
     private String generateAccountNumber() {

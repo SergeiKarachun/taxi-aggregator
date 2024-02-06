@@ -35,7 +35,8 @@ public class InitCollectionsChangeLog {
                                         JsonSchemaProperty.date("creatingTime"),
                                         JsonSchemaProperty.date("startTime"),
                                         JsonSchemaProperty.date("endTime"),
-                                        JsonSchemaProperty.string("status"))
+                                        JsonSchemaProperty.string("status"),
+                                        JsonSchemaProperty.string("paymentMethod"))
                                 .build())));
     }
 

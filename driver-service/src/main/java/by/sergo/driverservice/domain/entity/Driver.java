@@ -4,6 +4,8 @@ import by.sergo.driverservice.domain.enums.Status;
 import jakarta.persistence.*;
 import lombok.*;
 
+import static by.sergo.driverservice.util.ConstantUtil.DEFAULT_RATING;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -24,10 +26,11 @@ public class Driver {
     private String phone;
     @Column(nullable = false, unique = true)
     private String email;
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     private Status status = Status.AVAILABLE;
     @Builder.Default
-    private Double rating = 5.0;
+    private Double rating = DEFAULT_RATING;
     @OneToOne(mappedBy = "driver", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private Car car;
 }

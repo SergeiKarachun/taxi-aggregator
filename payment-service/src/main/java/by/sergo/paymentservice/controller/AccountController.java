@@ -22,14 +22,14 @@ public class AccountController {
     @Operation(summary = "Create new account")
     public ResponseEntity<AccountResponse> create(@RequestBody @Valid AccountCreateUpdateRequest dto) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                             .body(accountService.createAccount(dto));
+                .body(accountService.createAccount(dto));
     }
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete account")
     public ResponseEntity<AccountResponse> delete(@PathVariable("id") Long id) {
         return ResponseEntity.status(HttpStatus.NO_CONTENT)
-                             .body(accountService.deleteById(id));
+                .body(accountService.deleteById(id));
     }
 
     @PutMapping("/driver/{id}")

@@ -14,6 +14,7 @@ public class RatingMapper {
 
     public RatingResponse mapToDto(Rating rating){
         return modelMapper.map(rating, RatingResponse.class);
+
     }
 
     public Rating mapToEntity(RatingCreateRequest dto) {

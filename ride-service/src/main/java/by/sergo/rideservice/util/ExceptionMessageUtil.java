@@ -28,4 +28,12 @@ public class ExceptionMessageUtil {
     public static String alreadyHasDriver(String rideId) {
         return "Ride with rideId %s already has driver.".formatted(rideId);
     }
+
+    public static String getNotFoundCreditCardMessage(String className, String variableName, Long variableValue) {
+        return "%s with %s %s doesn't have credit card, please add credit card or pay in CASH.".formatted(className, variableName, variableValue);
+    }
+
+    public static String getNotEnoughMoneyMessage(String className, String variableName, Long variableValue) {
+        return "%s with %s %s doesn't have enough money on credit card, please top up balance or pay in CASH.".formatted(className, variableName, variableValue);
+    }
 }

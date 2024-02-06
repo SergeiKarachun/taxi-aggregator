@@ -1,5 +1,6 @@
 package by.sergo.rideservice.domain;
 
+import by.sergo.rideservice.domain.enums.PaymentMethod;
 import by.sergo.rideservice.domain.enums.Status;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -35,4 +36,5 @@ public class Ride {
     LocalDateTime startTime;
     LocalDateTime endTime;
     Status status = Status.CREATED;
+    PaymentMethod paymentMethod;
 }

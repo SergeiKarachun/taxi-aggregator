@@ -2,11 +2,15 @@ package by.sergo.driverservice.service.impl;
 
 import by.sergo.driverservice.domain.dto.request.RatingCreateRequest;
 import by.sergo.driverservice.domain.dto.response.DriverRatingResponse;
+import by.sergo.driverservice.domain.dto.response.PassengerResponse;
 import by.sergo.driverservice.domain.dto.response.RatingResponse;
+import by.sergo.driverservice.domain.dto.response.RideResponse;
 import by.sergo.driverservice.mapper.RatingMapper;
 import by.sergo.driverservice.repository.DriverRepository;
 import by.sergo.driverservice.repository.RatingRepository;
+import by.sergo.driverservice.service.PassengerService;
 import by.sergo.driverservice.service.RatingService;
+import by.sergo.driverservice.service.RideService;
 import by.sergo.driverservice.service.exception.BadRequestException;
 import by.sergo.driverservice.service.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -25,10 +29,14 @@ public class RatingServiceImpl implements RatingService {
     private final DriverRepository driverRepository;
     private final RatingRepository ratingRepository;
     private final RatingMapper ratingMapper;
+    private final PassengerService passengerService;
+    private final RideService rideService;
 
     @Override
     @Transactional
     public RatingResponse createRateOfDriver(RatingCreateRequest dto, Long driverId) {
+        PassengerResponse passengerResponse = getPassenger(dto.getPassengerId());
+        RideResponse rideResponse = getRide(dto.getRideId());
         var driver = driverRepository.findById(driverId)
                 .orElseThrow(() -> new NotFoundException(getNotFoundMessage("Driver", "id", driverId)));
 
@@ -41,7 +49,10 @@ public class RatingServiceImpl implements RatingService {
         var savedRating = ratingRepository.saveAndFlush(rating);
         driver.setRating(getFloorRating(getAverageRating(driverId)));
         driverRepository.save(driver);
-        return ratingMapper.mapToDto(savedRating);
+        var response = ratingMapper.mapToDto(savedRating);
+        response.setPassenger(passengerResponse);
+        response.setRide(rideResponse);
+        return response;
     }
 
     @Override
@@ -61,5 +72,13 @@ public class RatingServiceImpl implements RatingService {
 
     private double getFloorRating(Double driverId) {
         return Math.floor(driverId * 100) / 100;
+    }
+
+    private PassengerResponse getPassenger(Long id) {
+        return passengerService.getPassenger(id);
+    }
+
+    private RideResponse getRide(String id) {
+        return rideService.getRide(id);
     }
 }
