@@ -1,8 +1,5 @@
 package by.sergo.rideservice.service;
 
-import by.sergo.rideservice.client.DriverFeignClient;
-import by.sergo.rideservice.client.PassengerFeignClient;
-import by.sergo.rideservice.client.PaymentFeignClient;
 import by.sergo.rideservice.domain.Ride;
 import by.sergo.rideservice.domain.dto.request.DriverForRideResponse;
 import by.sergo.rideservice.domain.dto.request.EditDriverStatusRequest;
@@ -51,11 +48,11 @@ public class RideServiceImplTest {
     @Mock
     private RideMapper rideMapper;
     @Mock
-    private PaymentFeignClient paymentFeignClient;
+    private PaymentService paymentService;
     @Mock
-    private DriverFeignClient driverFeignClient;
+    private DriverService driverService;
     @Mock
-    private PassengerFeignClient passengerFeignClient;
+    private PassengerService passengerService;
     @Mock
     private StatusProducer statusProducer;
     @Mock
@@ -85,17 +82,17 @@ public class RideServiceImplTest {
                 .when(rideMapper)
                 .mapToDto(savedRide);
         doReturn(getDefaultPassengerResponse())
-                .when(passengerFeignClient)
-                .getPassengerById(DEFAULT_ID);
+                .when(passengerService)
+                .getPassenger(DEFAULT_ID);
 
         RideResponse actual = rideService.create(request);
 
 
         assertNotNull(actual);
         assertEquals(expected, actual);
-        verify(passengerFeignClient, times(1)).getPassengerById(DEFAULT_PASSENGER_ID);
-        verify(driverFeignClient, never()).getDriverById(DEFAULT_ID);
-        verify(paymentFeignClient, never()).getPassengerCreditCard(DEFAULT_PASSENGER_ID);
+        verify(passengerService, times(2)).getPassenger(DEFAULT_PASSENGER_ID);
+        verify(driverService, never()).getDriver(DEFAULT_ID);
+        verify(paymentService, never()).getPassengerCreditCard(DEFAULT_PASSENGER_ID);
         verify(rideProducer).sendMessage(any(FindDriverForRideRequest.class));
     }
 
@@ -110,7 +107,7 @@ public class RideServiceImplTest {
         expected.setPassenger(passengerResponse);
 
         doReturn(creditCardResponse)
-                .when(paymentFeignClient)
+                .when(paymentService)
                 .getPassengerCreditCard(DEFAULT_PASSENGER_ID);
         doReturn(createdRide)
                 .when(rideMapper)
@@ -122,17 +119,17 @@ public class RideServiceImplTest {
                 .when(rideMapper)
                 .mapToDto(savedRide);
         doReturn(getDefaultPassengerResponse())
-                .when(passengerFeignClient)
-                .getPassengerById(DEFAULT_ID);
+                .when(passengerService)
+                .getPassenger(DEFAULT_ID);
 
         RideResponse actual = rideService.create(request);
 
 
         assertNotNull(actual);
         assertEquals(expected, actual);
-        verify(passengerFeignClient, times(1)).getPassengerById(DEFAULT_PASSENGER_ID);
-        verify(driverFeignClient, never()).getDriverById(DEFAULT_ID);
-        verify(paymentFeignClient).getPassengerCreditCard(DEFAULT_PASSENGER_ID);
+        verify(passengerService, times(2)).getPassenger(DEFAULT_PASSENGER_ID);
+        verify(driverService, never()).getDriver(DEFAULT_ID);
+        verify(paymentService).getPassengerCreditCard(DEFAULT_PASSENGER_ID);
         verify(rideProducer).sendMessage(any(FindDriverForRideRequest.class));
     }
 
@@ -143,14 +140,14 @@ public class RideServiceImplTest {
         creditCardResponse.setBalance(BigDecimal.ZERO);
 
         doReturn(creditCardResponse)
-                .when(paymentFeignClient)
+                .when(paymentService)
                 .getPassengerCreditCard(DEFAULT_PASSENGER_ID);
 
         assertThrows(BadRequestException.class, () -> rideService.create(request));
 
-        verify(passengerFeignClient, times(1)).getPassengerById(DEFAULT_PASSENGER_ID);
-        verify(driverFeignClient, never()).getDriverById(DEFAULT_ID);
-        verify(paymentFeignClient).getPassengerCreditCard(DEFAULT_PASSENGER_ID);
+        verify(passengerService, times(1)).getPassenger(DEFAULT_PASSENGER_ID);
+        verify(driverService, never()).getDriver(DEFAULT_ID);
+        verify(paymentService).getPassengerCreditCard(DEFAULT_PASSENGER_ID);
         verify(rideProducer, never()).sendMessage(any(FindDriverForRideRequest.class));
     }
 
@@ -169,8 +166,8 @@ public class RideServiceImplTest {
         RideResponse actual = rideService.getById(DEFAULT_RIDE_ID);
 
         assertEquals(expected, actual);
-        verify(driverFeignClient, never()).getDriverById(DEFAULT_ID);
-        verify(paymentFeignClient, never()).getPassengerCreditCard(DEFAULT_PASSENGER_ID);
+        verify(driverService, never()).getDriver(DEFAULT_ID);
+        verify(paymentService, never()).getPassengerCreditCard(DEFAULT_PASSENGER_ID);
         verify(rideProducer, never()).sendMessage(any(FindDriverForRideRequest.class));
     }
 
@@ -182,8 +179,8 @@ public class RideServiceImplTest {
 
         assertThrows(NotFoundException.class, () -> rideService.getById(DEFAULT_RIDE_ID));
 
-        verify(passengerFeignClient, never()).getPassengerById(DEFAULT_PASSENGER_ID);
-        verify(driverFeignClient, never()).getDriverById(DEFAULT_ID);
+        verify(passengerService, never()).getPassenger(DEFAULT_PASSENGER_ID);
+        verify(driverService, never()).getDriver(DEFAULT_ID);
     }
 
     @Test
@@ -238,8 +235,8 @@ public class RideServiceImplTest {
         verify(rideMapper).mapToEntity(updateRequest);
         verify(rideRepository).save(ride);
         verify(rideMapper).mapToDto(savedRide);
-        verify(passengerFeignClient, times(1)).getPassengerById(DEFAULT_PASSENGER_ID);
-        verify(driverFeignClient, never()).getDriverById(DEFAULT_ID);
+        verify(passengerService, times(2)).getPassenger(DEFAULT_PASSENGER_ID);
+        verify(driverService, never()).getDriver(DEFAULT_ID);
     }
 
     @Test
