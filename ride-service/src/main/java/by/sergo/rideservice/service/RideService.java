@@ -25,4 +25,6 @@ public interface RideService {
     RideListResponse getByDriverId(Long driverId, String status, Integer page, Integer size, String orderBy);
 
     void sendEditStatus(DriverForRideResponse driver);
+
+    void setDriver(DriverForRideResponse driver);
 }

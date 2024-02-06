@@ -20,5 +20,5 @@ public interface DriverService {
 
     DriverResponse changeStatus(Long id);
 
-    void findDriverForRide(FindDriverForRideRequest request);
+    void handleDriverForRide(FindDriverForRideRequest request);
 }

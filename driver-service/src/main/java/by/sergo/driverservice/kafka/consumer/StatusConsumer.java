@@ -1,4 +1,4 @@
-package by.sergo.driverservice.kafka;
+package by.sergo.driverservice.kafka.consumer;
 
 import by.sergo.driverservice.domain.dto.request.EditDriverStatusRequest;
 import by.sergo.driverservice.service.DriverService;

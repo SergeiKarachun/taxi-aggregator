@@ -22,9 +22,9 @@ public class DriverProducerConfig {
     @Value("${topic.name.driver}")
     private String driverTopic;
     @Value("${kafka.partitions.count}")
-    private int PARTITIONS_COUNT;
+    private int partitionsCount;
     @Value("${kafka.replicas.count}")
-    private int REPLICAS_COUNT;
+    private int replicasCount;
     @Value("${kafka.bootstrap-servers}")
     private String bootstrapServers;
 
@@ -47,8 +47,8 @@ public class DriverProducerConfig {
     @Bean
     public NewTopic sendRideTopic() {
         return TopicBuilder.name(driverTopic)
-                .partitions(PARTITIONS_COUNT)
-                .replicas(REPLICAS_COUNT)
+                .partitions(partitionsCount)
+                .replicas(replicasCount)
                 .build();
     }
 }
