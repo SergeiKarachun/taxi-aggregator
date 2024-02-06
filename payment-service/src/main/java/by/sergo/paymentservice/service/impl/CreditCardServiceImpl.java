@@ -132,10 +132,6 @@ public class CreditCardServiceImpl implements CreditCardService {
             throw new NotFoundException(ExceptionMessageUtil.getNotFoundMessage("Credit card", "id", id));
         }
         checkUniqueCreditCardAndExpirationDate(dto);
-
-        if (creditCardRepository.existsByUserIdAndUserType(dto.getUserId(), UserType.valueOf(dto.getUserType()))) {
-            throw new BadRequestException(ExceptionMessageUtil.getAlreadyExistMessage("Credit Card", "userId", dto.getUserId(), "userType", dto.getUserType()));
-        }
     }
 
     private void checkUniqueCreditCardAndExpirationDate(CreditCardCreateUpdate dto) {
@@ -152,7 +148,7 @@ public class CreditCardServiceImpl implements CreditCardService {
 
     private CreditCardResponse getCreditCardResponse(UserResponse userResponse, CreditCard creditCard) {
         var response = creditCardMapper.mapToDto(creditCard);
-        response.setUserResponse(userResponse);
+        response.setUser(userResponse);
         return response;
     }
 
