@@ -1,7 +1,5 @@
 package by.sergo.passengerservice.service;
 
-import by.sergo.passengerservice.client.DriverFeignClient;
-import by.sergo.passengerservice.client.RideFeignClient;
 import by.sergo.passengerservice.domain.dto.request.RatingCreateRequest;
 import by.sergo.passengerservice.domain.dto.response.*;
 import by.sergo.passengerservice.domain.entity.Rating;
@@ -35,9 +33,9 @@ public class RatingServiceImplTest {
     @Mock
     private RatingMapper ratingMapper;
     @Mock
-    private DriverFeignClient driverFeignClient;
+    private DriverService driverService;
     @Mock
-    private RideFeignClient rideFeignClient;
+    private RideService rideService;
 
     @InjectMocks
     private RatingServiceImpl ratingService;
@@ -64,26 +62,35 @@ public class RatingServiceImplTest {
                 .when(ratingMapper)
                 .mapToDto(savedRating);
         doReturn(driverResponse)
-                .when(driverFeignClient)
-                .getDriverById(request.getDriverId());
+                .when(driverService)
+                .getDriver(request.getDriverId());
         doReturn(rideResponse)
-                .when(rideFeignClient)
-                .getRideById(request.getRideId());
+                .when(rideService)
+                .getRide(request.getRideId());
         RatingResponse expected = ratingService.ratePassenger(request, DEFAULT_ID);
 
         assertNotNull(expected);
         verify(passengerRepository).findById(DEFAULT_ID);
         verify(ratingRepository).save(ratingToSave);
         verify(ratingMapper).mapToDto(savedRating);
-        verify(driverFeignClient).getDriverById(request.getDriverId());
-        verify(rideFeignClient).getRideById(request.getRideId());
+        verify(driverService).getDriver(request.getDriverId());
+        verify(rideService).getRide(request.getRideId());
     }
 
     @Test
     void rateNotExistingPassenger() {
         RatingCreateRequest request = getRatingRequest();
+        DriverResponse driverResponse = getDefaultDriverResponse();
+        RideResponse rideResponse = getDefaultRideResponse();
+
         Rating rating = getDefaulRating();
 
+        doReturn(driverResponse)
+                .when(driverService)
+                .getDriver(request.getDriverId());
+        doReturn(rideResponse)
+                .when(rideService)
+                .getRide(request.getRideId());
         doReturn(Optional.empty())
                 .when(passengerRepository)
                 .findById(rating.getPassenger().getId());

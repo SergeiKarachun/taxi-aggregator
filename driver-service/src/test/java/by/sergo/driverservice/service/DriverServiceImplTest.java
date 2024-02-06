@@ -7,7 +7,7 @@ import by.sergo.driverservice.domain.dto.response.DriverListResponse;
 import by.sergo.driverservice.domain.dto.response.DriverResponse;
 import by.sergo.driverservice.domain.entity.Driver;
 import by.sergo.driverservice.domain.enums.Status;
-import by.sergo.driverservice.kafka.DriverProducer;
+import by.sergo.driverservice.kafka.producer.DriverProducer;
 import by.sergo.driverservice.mapper.DriverMapper;
 import by.sergo.driverservice.repository.DriverRepository;
 import by.sergo.driverservice.service.exception.BadRequestException;
@@ -23,7 +23,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Optional;
 
 import static by.sergo.driverservice.domain.enums.Status.*;
@@ -292,19 +291,14 @@ public class DriverServiceImplTest {
 
     @Test
     void findDriverForRide() {
+        Driver driver = getDefaultDriver();
         FindDriverForRideRequest request = gerDefaultFindDriverForRideRequest();
-        Page<Driver> driverPage = new PageImpl<>(Arrays.asList(
-                getDefaultDriver(),
-                getSecondDriver()
-        ));
 
-        when(driverRepository.getAllByStatus(any(Status.class), any(PageRequest.class))).thenReturn(driverPage);
-        doReturn(getDefaultDriverResponse()).when(driverMapper).mapToDto(any(Driver.class));
+        when(driverRepository.findFirstByStatusOrderByRating()).thenReturn(Optional.of(driver));
 
-        driverService.findDriverForRide(request);
+        driverService.handleDriverForRide(request);
 
-        verify(driverRepository).getAllByStatus(any(Status.class), any(PageRequest.class));
-        verify(driverMapper, times(2)).mapToDto(any(Driver.class));
+        verify(driverRepository).findFirstByStatusOrderByRating();
         verify(driverProducer).sendMessage(any(DriverForRideResponse.class));
     }
 
@@ -312,11 +306,11 @@ public class DriverServiceImplTest {
     void findDriverForRideWhenDriversNotAvailable() {
         FindDriverForRideRequest request = gerDefaultFindDriverForRideRequest();
 
-        when(driverRepository.getAllByStatus(any(Status.class), any(PageRequest.class))).thenReturn(new PageImpl<>(Collections.emptyList()));
+        when(driverRepository.findFirstByStatusOrderByRating()).thenReturn(Optional.empty());
 
-        driverService.findDriverForRide(request);
+        driverService.handleDriverForRide(request);
 
-        verify(driverRepository).getAllByStatus(any(Status.class), any(PageRequest.class));
+        verify(driverRepository).findFirstByStatusOrderByRating();
         verify(driverMapper, never()).mapToDto(any(Driver.class));
         verify(driverProducer, never()).sendMessage(any(DriverForRideResponse.class));
     }

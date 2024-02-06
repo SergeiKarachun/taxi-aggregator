@@ -23,7 +23,6 @@ import java.util.Optional;
 
 import static by.sergo.paymentservice.domain.enums.UserType.*;
 import static by.sergo.paymentservice.util.CreditCardTestUtil.*;
-import static by.sergo.paymentservice.util.AccountTestUtil.DEFAULT_ID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
@@ -39,6 +38,10 @@ public class CreditCardServiceImplTest {
     private TransactionStoreRepository transactionStoreRepository;
     @Mock
     private CreditCardMapper creditCardMapper;
+    @Mock
+    private PassengerService passengerService;
+    @Mock
+    private DriverService driverService;
 
     @InjectMocks
     private CreditCardServiceImpl creditCardService;
@@ -65,6 +68,7 @@ public class CreditCardServiceImplTest {
         verify(creditCardRepository, times(1)).save(creditCard);
         verify(creditCardRepository, times(1)).existsByUserIdAndUserType(request.getUserId(), valueOf(request.getUserType()));
         verify(creditCardRepository, times(1)).existsByCreditCardNumber(request.getCreditCardNumber());
+        verify(driverService, times(1)).getDriver(any());
     }
 
     @Test
@@ -104,6 +108,7 @@ public class CreditCardServiceImplTest {
         verify(creditCardRepository, times(1)).existsById(DEFAULT_CREDIT_CARD_ID);
         verify(creditCardRepository, times(1)).existsByUserIdAndUserType(request.getUserId(), valueOf(request.getUserType()));
         verify(creditCardRepository, times(1)).existsByCreditCardNumber(request.getCreditCardNumber());
+        verify(driverService, times(1)).getDriver(any());
     }
 
     @Test
@@ -154,6 +159,7 @@ public class CreditCardServiceImplTest {
         CreditCardResponse actual = creditCardService.getDriverCard(DEFAULT_DRIVER_ID);
 
         assertEquals(expected, actual);
+        verify(driverService, times(1)).getDriver(any());
     }
 
     @Test
@@ -182,6 +188,7 @@ public class CreditCardServiceImplTest {
         CreditCardResponse actual = creditCardService.getPassengerCard(DEFAULT_ID);
 
         assertEquals(expected, actual);
+        verify(passengerService, times(1)).getPassenger(any());
     }
 
     @Test
@@ -229,6 +236,7 @@ public class CreditCardServiceImplTest {
         verify(creditCardRepository, times(1)).save(creditCardAfterPayment);
         verify(accountRepository, times(1)).save(accountAfterPayment);
         verify(transactionStoreRepository, times(1)).save(transaction);
+        verify(passengerService, times(1)).getPassenger(any());
     }
 
     @Test
@@ -251,5 +259,6 @@ public class CreditCardServiceImplTest {
         verify(creditCardRepository, never()).save(any());
         verify(accountRepository, never()).save(any());
         verify(transactionStoreRepository, never()).save(any());
+        verify(passengerService, times(1)).getPassenger(any());
     }
 }
