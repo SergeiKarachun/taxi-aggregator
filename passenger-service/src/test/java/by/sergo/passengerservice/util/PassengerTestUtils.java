@@ -13,7 +13,7 @@ import java.util.List;
 public class PassengerTestUtils {
 
     public static final Long DEFAULT_ID = 1L;
-    public static final Long NOT_FOUND_ID = 2L;
+    public static final Long NOT_FOUND_ID = 99L;
     public static final String DEFAULT_NAME = "Petr";
     public static final String DEFAULT_SURNAME = "Petrov";
     public static final String DEFAULT_EMAIL = "petr@gmail.com";
@@ -27,16 +27,22 @@ public class PassengerTestUtils {
     public final int VALID_SIZE = 10;
     public final String INVALID_ORDER_BY = "mane";
     public final String VALID_ORDER_BY = "name";
-    public static final String DEFAULT_RIDE_ID = "ride_id";
-    public static final Long DEFAULT_DRIVER_ID = 1L;
-    public static final Integer DEFAULT_GRADE = 4;
-    public static final Double AVERAGE_GRADE = 4.5;
-    public static final String DEFAULT_STATUS = "AVAILABLE";
+    public final String DEFAULT_RIDE_ID = "ride_id";
+    public final Long DEFAULT_DRIVER_ID = 1L;
+    public final Integer DEFAULT_GRADE = 4;
+    public final Double AVERAGE_GRADE = 4.5;
+    public final String DEFAULT_STATUS = "AVAILABLE";
+    public final String DEFAULT_ID_PATH = "/api/v1/passengers/{id}";
+    public final String DEFAULT_PATH = "/api/v1/passengers";
+    public final String ID_PARAM_NAME = "id";
+    public static final Long NEW_ID = 4L;
+    public final String UNIQUE_EMAIL = "unique@gmail.com";
+    public final String UNIQUE_PHONE = "+375339876543";
 
 
     public PassengerResponse getDefaultPassengerResponse() {
         return PassengerResponse.builder()
-                .id(DEFAULT_ID) 
+                .id(DEFAULT_ID)
                 .name(DEFAULT_NAME)
                 .surname(DEFAULT_SURNAME)
                 .email(DEFAULT_EMAIL)
@@ -74,6 +80,15 @@ public class PassengerTestUtils {
                 .build();
     }
 
+    public PassengerCreateUpdateRequest getUniquePassengerRequest() {
+        return PassengerCreateUpdateRequest.builder()
+                .name(DEFAULT_NAME)
+                .surname(DEFAULT_SURNAME)
+                .email(UNIQUE_EMAIL)
+                .phone(UNIQUE_PHONE)
+                .build();
+    }
+
     public PassengerCreateUpdateRequest getPassengerUpdateRequest() {
         return PassengerCreateUpdateRequest.builder()
                 .name(DEFAULT_NAME)
@@ -93,6 +108,7 @@ public class PassengerTestUtils {
                 .rating(DEFAULT_RATING)
                 .build();
     }
+
     public Passenger getUpdatedPassenger() {
         return Passenger.builder()
                 .id(DEFAULT_ID)
