@@ -7,7 +7,7 @@ import by.sergo.driverservice.domain.dto.response.DriverListResponse;
 import by.sergo.driverservice.domain.dto.response.DriverResponse;
 import by.sergo.driverservice.domain.entity.Driver;
 import by.sergo.driverservice.domain.enums.Status;
-import by.sergo.driverservice.kafka.DriverProducer;
+import by.sergo.driverservice.kafka.producer.DriverProducer;
 import by.sergo.driverservice.mapper.DriverMapper;
 import by.sergo.driverservice.repository.DriverRepository;
 import by.sergo.driverservice.service.DriverService;
@@ -112,11 +112,11 @@ public class DriverServiceImpl implements DriverService {
     }
 
     @Override
-    public void findDriverForRide(FindDriverForRideRequest request) {
-        List<DriverResponse> drivers = getAvailableDrivers(1, 1, "rating").getDrivers();
-        if (!drivers.isEmpty()) {
+    public void handleDriverForRide(FindDriverForRideRequest request) {
+        Optional<Driver> driverForRide = driverRepository.findFirstByStatusOrderByRating();
+        if (driverForRide.isPresent()) {
             DriverForRideResponse driver = DriverForRideResponse.builder()
-                    .driverId(drivers.get(drivers.size() - 1).getId())
+                    .driverId(driverForRide.get().getId())
                     .rideId(request.getRideId())
                     .build();
             driverProducer.sendMessage(driver);

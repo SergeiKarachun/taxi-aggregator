@@ -1,17 +1,14 @@
 package by.sergo.passengerservice.service.impl;
 
-import by.sergo.passengerservice.client.DriverFeignClient;
-import by.sergo.passengerservice.client.RideFeignClient;
 import by.sergo.passengerservice.domain.dto.request.RatingCreateRequest;
-import by.sergo.passengerservice.domain.dto.response.DriverResponse;
-import by.sergo.passengerservice.domain.dto.response.PassengerRatingResponse;
-import by.sergo.passengerservice.domain.dto.response.RatingResponse;
-import by.sergo.passengerservice.domain.dto.response.RideResponse;
+import by.sergo.passengerservice.domain.dto.response.*;
 import by.sergo.passengerservice.domain.entity.Passenger;
 import by.sergo.passengerservice.mapper.RatingMapper;
 import by.sergo.passengerservice.repository.PassengerRepository;
 import by.sergo.passengerservice.repository.RatingRepository;
+import by.sergo.passengerservice.service.DriverService;
 import by.sergo.passengerservice.service.RatingService;
+import by.sergo.passengerservice.service.RideService;
 import by.sergo.passengerservice.service.exception.BadRequestException;
 import by.sergo.passengerservice.service.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -30,12 +27,14 @@ public class RatingServiceImpl implements RatingService {
     private final RatingRepository ratingRepository;
     private final PassengerRepository passengerRepository;
     private final RatingMapper ratingMapper;
-    private final DriverFeignClient driverFeignClient;
-    private final RideFeignClient rideFeignClient;
+    private final DriverService driverService;
+    private final RideService rideService;
 
     @Override
     @Transactional
     public RatingResponse ratePassenger(RatingCreateRequest dto, Long passengerId) {
+        DriverResponse driverResponse = getDriver(dto.getDriverId());
+        RideResponse rideResponse = getRide(dto.getRideId());
         var passenger = getByIdOrElseThrow(passengerId);
         if (ratingRepository.existsByRideId(dto.getRideId())) {
             throw new BadRequestException(getAlreadyExistMessage("Rating", "rideId", dto.getRideId()));
@@ -47,14 +46,14 @@ public class RatingServiceImpl implements RatingService {
         passenger.setRating(floorRating(getAverageRating(passengerId)));
         passengerRepository.save(passenger);
         var response = ratingMapper.mapToDto(savedRating);
-        response.setDriver(getDriverById(dto.getDriverId()));
-        response.setRide(getRideById(dto.getRideId()));
+        response.setRide(rideResponse);
+        response.setDriver(driverResponse);
         return response;
     }
 
     @Override
     public PassengerRatingResponse getPassengerRating(Long passengerId) {
-        if (passengerRepository.existsById(passengerId)){
+        if (passengerRepository.existsById(passengerId)) {
             double passengerRating = getAverageRating(passengerId);
             return PassengerRatingResponse.builder()
                     .passengerId(passengerId)
@@ -79,11 +78,11 @@ public class RatingServiceImpl implements RatingService {
                 .orElse(DEFAULT_RATING);
     }
 
-    private RideResponse getRideById(String id) {
-        return rideFeignClient.getRideById(id);
+    private DriverResponse getDriver(Long id) {
+        return driverService.getDriver(id);
     }
 
-    private DriverResponse getDriverById(Long id) {
-        return driverFeignClient.getDriverById(id);
+    private RideResponse getRide(String id) {
+        return rideService.getRide(id);
     }
 }

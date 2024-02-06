@@ -1,4 +1,4 @@
-package by.sergo.driverservice.kafka;
+package by.sergo.driverservice.kafka.producer;
 
 import by.sergo.driverservice.domain.dto.request.DriverForRideResponse;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +16,7 @@ public class DriverProducer {
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
     public void sendMessage(DriverForRideResponse request) {
-        log.info(String.format("Message sent %s", request));
+        log.info("Message sent {}", request);
         kafkaTemplate.send(rideTopic, request);
     }
 }

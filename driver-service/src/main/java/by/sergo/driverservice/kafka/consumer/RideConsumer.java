@@ -1,4 +1,4 @@
-package by.sergo.driverservice.kafka;
+package by.sergo.driverservice.kafka.consumer;
 
 import by.sergo.driverservice.domain.dto.request.FindDriverForRideRequest;
 import by.sergo.driverservice.service.DriverService;
@@ -16,7 +16,7 @@ public class RideConsumer {
     @KafkaListener(topics = "${topic.name.ride}", groupId = "${spring.kafka.consumer.group-id.ride}")
     public void consumeMessage(FindDriverForRideRequest message) {
         log.info("message consumed {}", message);
-        driverService.findDriverForRide(message);
+        driverService.handleDriverForRide(message);
     }
 
 }
