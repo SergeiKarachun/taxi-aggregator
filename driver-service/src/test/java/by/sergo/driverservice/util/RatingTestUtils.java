@@ -53,6 +53,7 @@ public class RatingTestUtils {
 
     public RatingResponse getDefaultRatingResponse() {
         return RatingResponse.builder()
+                .id(DEFAULT_ID)
                 .driverId(DEFAULT_DRIVER_ID)
                 .passenger(getDefaultPassengerResponse())
                 .ride(getDefaultRideResponse())

@@ -1,7 +1,5 @@
 package by.sergo.driverservice.service;
 
-import by.sergo.driverservice.client.PassengerFeignClient;
-import by.sergo.driverservice.client.RideFeignClient;
 import by.sergo.driverservice.domain.dto.request.RatingCreateRequest;
 import by.sergo.driverservice.domain.dto.response.DriverRatingResponse;
 import by.sergo.driverservice.domain.dto.response.PassengerResponse;
@@ -13,7 +11,6 @@ import by.sergo.driverservice.repository.DriverRepository;
 import by.sergo.driverservice.repository.RatingRepository;
 import by.sergo.driverservice.service.exception.NotFoundException;
 import by.sergo.driverservice.service.impl.RatingServiceImpl;
-import by.sergo.driverservice.util.RatingTestUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -36,9 +33,9 @@ public class RatingServiceImplTest {
     @Mock
     private RatingMapper ratingMapper;
     @Mock
-    private PassengerFeignClient passengerFeignClient;
+    private PassengerService passengerService;
     @Mock
-    private RideFeignClient rideFeignClient;
+    private RideService rideService;
 
     @InjectMocks
     private RatingServiceImpl ratingService;
@@ -46,12 +43,19 @@ public class RatingServiceImplTest {
     @Test
     void rateExistingDriver() {
         RatingCreateRequest request = getRatingRequest();
+        PassengerResponse passengerResponse = getDefaultPassengerResponse();
+        RideResponse rideResponse = getDefaultRideResponse();
         Rating ratingToSave = getDefaultRating();
-        Rating savedRating = getDefaultRating();
-        RatingResponse response = RatingTestUtils.getDefaultRatingResponse();
-        PassengerResponse passengerResponse = RatingTestUtils.getDefaultPassengerResponse();
-        RideResponse rideResponse = RatingTestUtils.getDefaultRideResponse();
+        Rating savedRating = ratingToSave;
+        savedRating.setId(DEFAULT_ID);
+        RatingResponse response = getDefaultRatingResponse();
 
+        doReturn(passengerResponse)
+                .when(passengerService)
+                .getPassenger(DEFAULT_PASSENGER_ID);
+        doReturn(rideResponse)
+                .when(rideService)
+                .getRide(DEFAULT_RIDE_ID);
         doReturn(Optional.of(getDefaultDriver()))
                 .when(driverRepository)
                 .findById(DEFAULT_DRIVER_ID);
@@ -64,12 +68,6 @@ public class RatingServiceImplTest {
         doReturn(response)
                 .when(ratingMapper)
                 .mapToDto(savedRating);
-        doReturn(passengerResponse)
-                .when(passengerFeignClient)
-                .getPassengerById(request.getPassengerId());
-        doReturn(rideResponse)
-                .when(rideFeignClient)
-                .getRideById(request.getRideId());
 
         RatingResponse actual = ratingService.createRateOfDriver(request, DEFAULT_DRIVER_ID);
 
@@ -77,8 +75,8 @@ public class RatingServiceImplTest {
         verify(driverRepository).findById(DEFAULT_DRIVER_ID);
         verify(ratingRepository).save(ratingToSave);
         verify(ratingMapper).mapToDto(savedRating);
-        verify(passengerFeignClient).getPassengerById(request.getPassengerId());
-        verify(rideFeignClient).getRideById(request.getRideId());
+        verify(passengerService, times(1)).getPassenger(request.getPassengerId());
+        verify(rideService, times(1)).getRide(request.getRideId());
     }
 
     @Test
@@ -92,7 +90,7 @@ public class RatingServiceImplTest {
 
     @Test
     void getDriverRatingWhenDriverExists() {
-        DriverRatingResponse ratingResponse = RatingTestUtils.getDriverRatingResponse();
+        DriverRatingResponse ratingResponse = getDriverRatingResponse();
 
         doReturn(true)
                 .when(driverRepository)
