@@ -1,4 +1,4 @@
-package by.sergo.passengerservice.integration;
+package by.sergo.passengerservice.integration.config;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;

@@ -1,18 +1,18 @@
-package by.sergo.passengerservice.integration;
+package by.sergo.driverservice.integration.controller;
 
-import by.sergo.passengerservice.controller.handler.RestErrorResponse;
-import by.sergo.passengerservice.controller.handler.ValidationExceptionResponse;
-import by.sergo.passengerservice.domain.dto.request.RatingCreateRequest;
-import by.sergo.passengerservice.domain.dto.response.DriverResponse;
-import by.sergo.passengerservice.domain.dto.response.PassengerRatingResponse;
-import by.sergo.passengerservice.domain.dto.response.RatingResponse;
-import by.sergo.passengerservice.domain.dto.response.RideResponse;
-import by.sergo.passengerservice.integration.config.IntegrationTestConfig;
-import by.sergo.passengerservice.integration.config.WireMockConfig;
-import by.sergo.passengerservice.mapper.RatingMapper;
-import by.sergo.passengerservice.repository.PassengerRepository;
-import by.sergo.passengerservice.repository.RatingRepository;
-import by.sergo.passengerservice.util.PassengerTestUtils;
+import by.sergo.driverservice.domain.dto.response.DriverRatingResponse;
+import by.sergo.driverservice.domain.dto.response.PassengerResponse;
+import by.sergo.driverservice.domain.dto.response.RatingResponse;
+import by.sergo.driverservice.domain.dto.response.RideResponse;
+import by.sergo.driverservice.mapper.RatingMapper;
+import by.sergo.driverservice.util.RatingTestUtils;
+import by.sergo.driverservice.controller.handler.RestErrorResponse;
+import by.sergo.driverservice.controller.handler.ValidationExceptionResponse;
+import by.sergo.driverservice.domain.dto.request.RatingCreateRequest;
+import by.sergo.driverservice.integration.config.IntegrationTestConfig;
+import by.sergo.driverservice.integration.config.WireMockConfig;
+import by.sergo.driverservice.repository.DriverRepository;
+import by.sergo.driverservice.repository.RatingRepository;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import io.restassured.http.ContentType;
 import lombok.RequiredArgsConstructor;
@@ -24,13 +24,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlGroup;
+
 import java.io.IOException;
 import java.util.Collections;
 
-import static by.sergo.passengerservice.integration.ResponseMocks.setupMockDriverResponse;
-import static by.sergo.passengerservice.integration.ResponseMocks.setupMockRideResponse;
-import static by.sergo.passengerservice.util.ExceptionMessageUtil.getNotFoundMessage;
-import static by.sergo.passengerservice.util.PassengerTestUtils.*;
+import static by.sergo.driverservice.integration.ResponseMocks.setupMockPassengerResponse;
+import static by.sergo.driverservice.integration.ResponseMocks.setupMockRideResponse;
+import static by.sergo.driverservice.util.ExceptionMessageUtil.getNotFoundMessage;
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -38,51 +38,52 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @SqlGroup({
         @Sql(scripts = {
-                "classpath:sql/insert-test_values-in-passenger-table.sql",
+                "classpath:sql/insert-test_values-in-driver-table.sql",
                 "classpath:sql/insert-test-values-in-rating-table.sql"
         },
                 executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD),
         @Sql(scripts = {
-                "classpath:sql/truncate-passenger-table.sql",
+                "classpath:sql/truncate-driver-table.sql",
                 "classpath:sql/truncate-rating-table.sql"
         },
                 executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 })
 @ContextConfiguration(classes = { WireMockConfig.class })
-public class RatingServiceIntegrationTest extends IntegrationTestConfig {
+public class RatingIntegrationTest extends IntegrationTestConfig {
     private final RatingRepository ratingRepository;
-    private final PassengerRepository passengerRepository;
+    private final DriverRepository driverRepository;
     private final RatingMapper ratingMapper;
     @LocalServerPort
     private int port;
     @Autowired
-    private WireMockServer mockDriverService;
+    private WireMockServer mockPassengerService;
     @Autowired
     private WireMockServer mockRideService;
 
     @BeforeEach
     void setUp() throws IOException {
-        setupMockDriverResponse(mockDriverService);
+        setupMockPassengerResponse(mockPassengerService);
         setupMockRideResponse(mockRideService);
     }
 
     @Test
     void ratePassenger_whenDataValid() {
-        RatingCreateRequest request = getRatingRequest();
-        DriverResponse driverResponse = getDefaultDriverResponse();
-        RideResponse rideResponse = getDefaultRideResponse();
-        RatingResponse expected = PassengerTestUtils.getRatingResponse();
+        RatingCreateRequest request = RatingTestUtils.getRatingRequest();
+        PassengerResponse passengerResponse = RatingTestUtils.getDefaultPassengerResponse();
+        RideResponse rideResponse = RatingTestUtils.getDefaultRideResponse();
+        RatingResponse expected = RatingTestUtils.getRatingResponse();
+        passengerResponse.setId(RatingTestUtils.DEFAULT_ID);
         expected.setId(4L);
-        expected.setDriver(driverResponse);
+        expected.setPassenger(passengerResponse);
         expected.setRide(rideResponse);
 
         var actual = given()
                 .port(port)
                 .contentType(ContentType.JSON)
                 .body(request)
-                .pathParam(ID_PARAM_NAME, DEFAULT_ID)
+                .pathParam(RatingTestUtils.ID_PARAM_NAME, RatingTestUtils.DEFAULT_ID)
                 .when()
-                .post(RATING_PATH)
+                .post(RatingTestUtils.RATING_PATH)
                 .then()
                 .statusCode(HttpStatus.CREATED.value())
                 .extract()
@@ -95,16 +96,16 @@ public class RatingServiceIntegrationTest extends IntegrationTestConfig {
     void addRating_whenDataNotValid() {
         RatingCreateRequest invalidRequest = RatingCreateRequest.builder()
                 .grade(25)
-                .driverId(0L)
+                .passengerId(0L)
                 .build();
-        ValidationExceptionResponse expected = getRatingValidationExceptionResponse();
+        ValidationExceptionResponse expected = RatingTestUtils.getRatingValidationExceptionResponse();
 
         var actual = given()
                 .port(port)
-                .pathParam(ID_PARAM_NAME, DEFAULT_ID)
+                .pathParam(RatingTestUtils.ID_PARAM_NAME, RatingTestUtils.DEFAULT_ID)
                 .contentType(ContentType.JSON)
                 .body(invalidRequest).when()
-                .post(RATING_PATH).then()
+                .post(RatingTestUtils.RATING_PATH).then()
                 .statusCode(HttpStatus.BAD_REQUEST.value())
                 .extract()
                 .as(ValidationExceptionResponse.class);
@@ -116,14 +117,14 @@ public class RatingServiceIntegrationTest extends IntegrationTestConfig {
     void getPassengerRating_whenPassengerNotExist() {
          RestErrorResponse expected = RestErrorResponse.builder()
                  .status(HttpStatus.NOT_FOUND)
-                 .messages(Collections.singletonList(getNotFoundMessage("Passenger", "passengerId", NOT_FOUND_ID)))
+                 .messages(Collections.singletonList(getNotFoundMessage("Driver", "id", 99L)))
                  .build();
 
         var actual = given()
                 .port(port)
-                .pathParam(ID_PARAM_NAME, NOT_FOUND_ID)
+                .pathParam(RatingTestUtils.ID_PARAM_NAME, 99L)
                 .when()
-                .get(RATING_PATH)
+                .get(RatingTestUtils.RATING_PATH)
                 .then()
                 .statusCode(HttpStatus.NOT_FOUND.value())
                 .extract()
@@ -134,20 +135,20 @@ public class RatingServiceIntegrationTest extends IntegrationTestConfig {
 
     @Test
     void getAverageRating_whenPassengerExists() {
-        PassengerRatingResponse expected = PassengerRatingResponse.builder()
-                .passengerId(DEFAULT_ID)
-                .rating(DEFAULT_RATING)
+        DriverRatingResponse expected = DriverRatingResponse.builder()
+                .driverId(RatingTestUtils.DEFAULT_ID)
+                .rating(RatingTestUtils.DEFAULT_RATING)
                 .build();
 
         var actual = given()
                 .port(port)
-                .pathParam(ID_PARAM_NAME, DEFAULT_ID)
+                .pathParam(RatingTestUtils.ID_PARAM_NAME, RatingTestUtils.DEFAULT_ID)
                 .when()
-                .get(RATING_PATH)
+                .get(RatingTestUtils.RATING_PATH)
                 .then()
                 .statusCode(HttpStatus.OK.value())
                 .extract()
-                .as(PassengerRatingResponse.class);
+                .as(DriverRatingResponse.class);
 
         assertThat(actual).isEqualTo(expected);
     }

@@ -1,7 +1,7 @@
 package by.sergo.driverservice.kafka.consumer;
 
-import by.sergo.driverservice.domain.dto.request.FindDriverForRideRequest;
 import by.sergo.driverservice.service.DriverService;
+import by.sergo.driverservice.domain.dto.request.FindDriverForRideRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;

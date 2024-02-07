@@ -1,12 +1,13 @@
 package by.sergo.driverservice.domain.dto.response;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@EqualsAndHashCode(exclude = "car")
 public class DriverResponse {
     private Long id;
     private String name;

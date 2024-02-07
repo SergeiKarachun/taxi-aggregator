@@ -1,4 +1,4 @@
-package by.sergo.passengerservice.integration;
+package by.sergo.passengerservice.integration.config;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import org.springframework.boot.test.context.TestConfiguration;

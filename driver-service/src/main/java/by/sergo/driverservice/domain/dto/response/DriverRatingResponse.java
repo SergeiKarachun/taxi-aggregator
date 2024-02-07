@@ -1,12 +1,13 @@
 package by.sergo.driverservice.domain.dto.response;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@EqualsAndHashCode
 public class DriverRatingResponse {
     private Long driverId;
     private Double rating;

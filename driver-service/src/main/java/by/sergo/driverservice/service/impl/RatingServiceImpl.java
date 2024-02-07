@@ -1,11 +1,11 @@
 package by.sergo.driverservice.service.impl;
 
+import by.sergo.driverservice.mapper.RatingMapper;
 import by.sergo.driverservice.domain.dto.request.RatingCreateRequest;
 import by.sergo.driverservice.domain.dto.response.DriverRatingResponse;
 import by.sergo.driverservice.domain.dto.response.PassengerResponse;
 import by.sergo.driverservice.domain.dto.response.RatingResponse;
 import by.sergo.driverservice.domain.dto.response.RideResponse;
-import by.sergo.driverservice.mapper.RatingMapper;
 import by.sergo.driverservice.repository.DriverRepository;
 import by.sergo.driverservice.repository.RatingRepository;
 import by.sergo.driverservice.service.PassengerService;

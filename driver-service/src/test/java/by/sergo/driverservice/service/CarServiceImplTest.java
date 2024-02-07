@@ -6,19 +6,18 @@ import by.sergo.driverservice.domain.entity.Car;
 import by.sergo.driverservice.mapper.CarMapper;
 import by.sergo.driverservice.repository.CarRepository;
 import by.sergo.driverservice.repository.DriverRepository;
+import by.sergo.driverservice.service.impl.CarServiceImpl;
+import by.sergo.driverservice.util.CarTestUtils;
 import by.sergo.driverservice.service.exception.BadRequestException;
 import by.sergo.driverservice.service.exception.NotFoundException;
-import by.sergo.driverservice.service.impl.CarServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-
 import java.util.Optional;
 
-import static by.sergo.driverservice.util.CarTestUtils.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -39,10 +38,10 @@ public class CarServiceImplTest {
 
     @Test
     void createUniqueCar() {
-        CarCreateUpdateRequest request = getCarCreateRequest();
-        CarResponse response = getDefaultCarResponse();
-        Car carToSave = getCarToSave();
-        Car savedCar = getDefaultCar();
+        CarCreateUpdateRequest request = CarTestUtils.getCarCreateRequest();
+        CarResponse response = CarTestUtils.getDefaultCarResponse();
+        Car carToSave = CarTestUtils.getCarToSave();
+        Car savedCar = CarTestUtils.getDefaultCar();
 
         doReturn(false)
                 .when(carRepository)
@@ -70,8 +69,8 @@ public class CarServiceImplTest {
 
     @Test
     void createCar_WhenCarNumberNotUnique() {
-        CarCreateUpdateRequest request = getCarCreateRequest();
-        Car existingCar = getDefaultCar();
+        CarCreateUpdateRequest request = CarTestUtils.getCarCreateRequest();
+        Car existingCar = CarTestUtils.getDefaultCar();
 
         when(carRepository.existsByNumber(existingCar.getNumber()))
                 .thenThrow(BadRequestException.class);
@@ -83,15 +82,15 @@ public class CarServiceImplTest {
 
     @Test
     void updateCar_WhenCarExistsAndNumberUnique() {
-        CarCreateUpdateRequest request = getCarUpdateRequest();
-        Car car = getDefaultCar();
-        Car updateCar = getUpdatedCar();
-        CarResponse expected = getDefaultCarResponse();
+        CarCreateUpdateRequest request = CarTestUtils.getCarUpdateRequest();
+        Car car = CarTestUtils.getDefaultCar();
+        Car updateCar = CarTestUtils.getUpdatedCar();
+        CarResponse expected = CarTestUtils.getDefaultCarResponse();
 
 
         doReturn(Optional.of(car))
                 .when(carRepository)
-                .findById(DEFAULT_ID);
+                .findById(CarTestUtils.DEFAULT_ID);
         doReturn(true)
                 .when(driverRepository)
                 .existsById(car.getDriver().getId());
@@ -117,34 +116,34 @@ public class CarServiceImplTest {
 
     @Test
     void updateCar_WhenCarNumberAlreadyExists() {
-        CarCreateUpdateRequest request = getCarUpdateRequest();
-        Car car = getDefaultCar();
+        CarCreateUpdateRequest request = CarTestUtils.getCarUpdateRequest();
+        Car car = CarTestUtils.getDefaultCar();
 
         doReturn(Optional.of(car))
                 .when(carRepository)
-                .findById(DEFAULT_ID);
+                .findById(CarTestUtils.DEFAULT_ID);
         doReturn(true)
                 .when(carRepository)
                 .existsByNumber(request.getNumber());
 
-        assertThrows(BadRequestException.class, ()-> carService.update(car.getId(), request));
+        assertThrows(BadRequestException.class, () -> carService.update(car.getId(), request));
 
         verify(carRepository, times(1)).findById(car.getId());
     }
 
     @Test
     void updateCar_WhenDriverNotExists() {
-        CarCreateUpdateRequest request = getCarUpdateRequest();
-        Car car = getDefaultCar();
+        CarCreateUpdateRequest request = CarTestUtils.getCarUpdateRequest();
+        Car car = CarTestUtils.getDefaultCar();
 
         doReturn(Optional.of(car))
                 .when(carRepository)
-                .findById(DEFAULT_ID);
+                .findById(CarTestUtils.DEFAULT_ID);
         doReturn(false)
                 .when(driverRepository)
                 .existsById(car.getDriver().getId());
 
-        assertThrows(BadRequestException.class, ()-> carService.update(car.getId(), request));
+        assertThrows(BadRequestException.class, () -> carService.update(car.getId(), request));
 
         verify(carRepository, times(1)).findById(car.getId());
         verify(driverRepository, times(1)).existsById(car.getDriver().getId());
@@ -152,7 +151,7 @@ public class CarServiceImplTest {
 
     @Test
     void deleteExistingCar() {
-        Car car = getDefaultCar();
+        Car car = CarTestUtils.getDefaultCar();
         doReturn(Optional.of(car))
                 .when(carRepository)
                 .findById(car.getId());
@@ -165,7 +164,7 @@ public class CarServiceImplTest {
 
     @Test
     void deleteNotExistingCar() {
-        Long id = DEFAULT_ID;
+        Long id = CarTestUtils.DEFAULT_ID;
 
         assertThrows(NotFoundException.class, () -> carService.delete(id));
 
@@ -174,8 +173,8 @@ public class CarServiceImplTest {
 
     @Test
     void getCarById_WhenCarExists() {
-        Car car = getDefaultCar();
-        CarResponse expected = getDefaultCarResponse();
+        Car car = CarTestUtils.getDefaultCar();
+        CarResponse expected = CarTestUtils.getDefaultCarResponse();
 
         doReturn(Optional.of(car))
                 .when(carRepository)
@@ -195,17 +194,17 @@ public class CarServiceImplTest {
     void getCarById_WhenCarNotFound() {
         doReturn(Optional.empty())
                 .when(carRepository)
-                .findById(NOT_FOUND_ID);
+                .findById(CarTestUtils.NOT_FOUND_ID);
 
-        assertThrows(NotFoundException.class, () -> carService.getById(NOT_FOUND_ID));
+        assertThrows(NotFoundException.class, () -> carService.getById(CarTestUtils.NOT_FOUND_ID));
 
-        verify(carRepository).findById(NOT_FOUND_ID);
+        verify(carRepository).findById(CarTestUtils.NOT_FOUND_ID);
     }
 
     @Test
     void getCarByDriverId() {
-        Car car = getDefaultCar();
-        CarResponse expected = getDefaultCarResponse();
+        Car car = CarTestUtils.getDefaultCar();
+        CarResponse expected = CarTestUtils.getDefaultCarResponse();
 
         doReturn(Optional.of(car))
                 .when(carRepository)
@@ -225,7 +224,7 @@ public class CarServiceImplTest {
     void findAllCarsWhenParamsInvalid() {
         assertThrows(
                 BadRequestException.class,
-                () -> carService.getAll(INVALID_PAGE, INVALID_SIZE, INVALID_ORDER_BY)
+                () -> carService.getAll(CarTestUtils.INVALID_PAGE, CarTestUtils.INVALID_SIZE, CarTestUtils.INVALID_ORDER_BY)
         );
     }
 }
