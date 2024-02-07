@@ -19,6 +19,8 @@
         <swagger.version>2.3.0</swagger.version>
         <openfeign.version>4.1.0</openfeign.version>
         <testcontainers.version>1.19.4</testcontainers.version>
+        <jackson.core.version>2.16.1</jackson.core.version>
+        <wiremock.version>3.3.1</wiremock.version>
     </properties>
     <dependencies>
         <dependency>
@@ -63,6 +65,11 @@
             <optional>true</optional>
         </dependency>
         <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>${jackson.core.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
@@ -78,8 +85,23 @@
             <version>${testcontainers.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${testcontainers.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-testcontainers</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.wiremock</groupId>
+            <artifactId>wiremock-standalone</artifactId>
+            <version>${wiremock.version}</version>
+        </dependency>
     </dependencies>
-
     <build>
         <plugins>
             <plugin>

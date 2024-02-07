@@ -6,19 +6,23 @@ import by.sergo.passengerservice.domain.dto.response.PassengerResponse;
 import by.sergo.passengerservice.domain.entity.Passenger;
 import by.sergo.passengerservice.mapper.PassengerMapper;
 import by.sergo.passengerservice.repository.PassengerRepository;
-import by.sergo.passengerservice.util.ExceptionMessageUtil;
 import by.sergo.passengerservice.util.PassengerTestUtils;
 import io.restassured.http.ContentType;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlGroup;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static by.sergo.passengerservice.util.ExceptionMessageUtil.*;
 import static by.sergo.passengerservice.util.PassengerTestUtils.*;
@@ -243,5 +247,101 @@ public class PassengerServiceIntegrationTest extends IntegrationTestConfig{
         assertThat(actual).isEqualTo(expected);
     }
 
+    @Test
+    void findAll_whenValidParams() {
+        Page<Passenger> passengerPage = passengerRepository.findAll(
+                PageRequest.of(VALID_PAGE - 1, VALID_SIZE, Sort.by(VALID_ORDER_BY))
+        );
+        List<PassengerResponse> expected = passengerPage.getContent().stream()
+                .map(passengerMapper::mapToDto)
+                .toList();
 
+        var actual = given()
+                .port(port)
+                .params(Map.of(
+                        PAGE_PARAM_NAME, VALID_PAGE,
+                        SIZE_PARAM_NAME, VALID_SIZE,
+                        ORDER_BY_PARAM_NAME, VALID_ORDER_BY)
+                )
+                .when()
+                .get(DEFAULT_PATH)
+                .then()
+                .statusCode(HttpStatus.OK.value())
+                .extract().body().jsonPath().getList("passengers", PassengerResponse.class);
+
+        assertThat(actual).isEqualTo(expected);
+        assertThat(passengerRepository.findAll().size()).isEqualTo(3);
+    }
+
+    @Test
+    void findAll_whenInvalidPage() {
+        RestErrorResponse expected = RestErrorResponse.builder()
+                .status(HttpStatus.BAD_REQUEST)
+                .messages(Collections.singletonList(getInvalidRequestMessage(INVALID_PAGE, VALID_SIZE)))
+                .build();
+
+        var actual = given()
+                .port(port)
+                .params(Map.of(
+                        PAGE_PARAM_NAME, INVALID_PAGE,
+                        SIZE_PARAM_NAME, VALID_SIZE,
+                        ORDER_BY_PARAM_NAME, VALID_ORDER_BY)
+                )
+                .when()
+                .get(DEFAULT_PATH)
+                .then()
+                .statusCode(HttpStatus.BAD_REQUEST.value())
+                .extract()
+                .as(RestErrorResponse.class);
+
+        assertThat(actual).isEqualTo(expected);
+    }
+
+    @Test
+    void findAll_whenInvalidSize() {
+        RestErrorResponse expected = RestErrorResponse.builder()
+                .status(HttpStatus.BAD_REQUEST)
+                .messages(Collections.singletonList(getInvalidRequestMessage(VALID_PAGE, INVALID_SIZE)))
+                .build();
+
+        var actual = given()
+                .port(port)
+                .params(Map.of(
+                        PAGE_PARAM_NAME, VALID_PAGE,
+                        SIZE_PARAM_NAME, INVALID_SIZE,
+                        ORDER_BY_PARAM_NAME, VALID_ORDER_BY
+                ))
+                .when()
+                .get(DEFAULT_PATH)
+                .then()
+                .statusCode(HttpStatus.BAD_REQUEST.value())
+                .extract()
+                .as(RestErrorResponse.class);
+
+        assertThat(actual).isEqualTo(expected);
+    }
+
+    @Test
+    void findAll_whenInvalidOrderByParam() {
+        RestErrorResponse expected = RestErrorResponse.builder()
+                .status(HttpStatus.BAD_REQUEST)
+                .messages(Collections.singletonList(getInvalidSortingParamRequestMessage(INVALID_ORDER_BY)))
+                .build();
+
+        var actual = given()
+                .port(port)
+                .params(Map.of(
+                        PAGE_PARAM_NAME, VALID_PAGE,
+                        SIZE_PARAM_NAME, VALID_SIZE,
+                        ORDER_BY_PARAM_NAME, INVALID_ORDER_BY
+                ))
+                .when()
+                .get(DEFAULT_PATH)
+                .then()
+                .statusCode(HttpStatus.BAD_REQUEST.value())
+                .extract()
+                .as(RestErrorResponse.class);
+
+        assertThat(actual).isEqualTo(expected);
+    }
 }

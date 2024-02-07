@@ -172,7 +172,6 @@ public class RideServiceImpl implements RideService {
                 .map(this::getRideResponse);
         return RideListResponse.builder()
                 .rides(responsePage.getContent())
-                .page(responsePage.getPageable().getPageNumber() + 1)
                 .totalPages(responsePage.getTotalPages())
                 .size(responsePage.getContent().size())
                 .total((int) responsePage.getTotalElements())
@@ -190,7 +189,6 @@ public class RideServiceImpl implements RideService {
                 .map(this::getRideResponse);
         return RideListResponse.builder()
                 .rides(responsePage.getContent())
-                .page(responsePage.getPageable().getPageNumber() + 1)
                 .totalPages(responsePage.getTotalPages())
                 .size(responsePage.getContent().size())
                 .total((int) responsePage.getTotalElements())

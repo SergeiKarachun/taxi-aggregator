@@ -1,13 +1,18 @@
 package by.sergo.passengerservice.util;
 
+import by.sergo.passengerservice.controller.handler.ValidationExceptionResponse;
 import by.sergo.passengerservice.domain.dto.request.PassengerCreateUpdateRequest;
 import by.sergo.passengerservice.domain.dto.request.RatingCreateRequest;
 import by.sergo.passengerservice.domain.dto.response.*;
 import by.sergo.passengerservice.domain.entity.Passenger;
 import by.sergo.passengerservice.domain.entity.Rating;
 import lombok.experimental.UtilityClass;
+import org.springframework.http.HttpStatus;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.ResourceBundle;
 
 @UtilityClass
 public class PassengerTestUtils {
@@ -27,18 +32,25 @@ public class PassengerTestUtils {
     public final int VALID_SIZE = 10;
     public final String INVALID_ORDER_BY = "mane";
     public final String VALID_ORDER_BY = "name";
-    public final String DEFAULT_RIDE_ID = "ride_id";
+    public final String DEFAULT_RIDE_ID = "65c11084a3c5564557a6e768";
     public final Long DEFAULT_DRIVER_ID = 1L;
     public final Integer DEFAULT_GRADE = 4;
     public final Double AVERAGE_GRADE = 4.5;
     public final String DEFAULT_STATUS = "AVAILABLE";
     public final String DEFAULT_ID_PATH = "/api/v1/passengers/{id}";
     public final String DEFAULT_PATH = "/api/v1/passengers";
+    public final String RATING_PATH = "/api/v1/passengers/{id}/rating";
+    public final String DEFAULT_DRIVER_PATH = "/api/v1/drivers/";
+    public final String DEFAULT_RIDE_PATH = "/api/v1/rides/";
     public final String ID_PARAM_NAME = "id";
-    public static final Long NEW_ID = 4L;
+    public final Long NEW_ID = 4L;
     public final String UNIQUE_EMAIL = "unique@gmail.com";
     public final String UNIQUE_PHONE = "+375339876543";
-
+    public final String PAGE_PARAM_NAME = "page";
+    public final String SIZE_PARAM_NAME = "size";
+    public final String ORDER_BY_PARAM_NAME = "orderBy";
+    public final ResourceBundle validationMessages = ResourceBundle.getBundle("messages");
+    public final Integer GRADE = 5;
 
     public PassengerResponse getDefaultPassengerResponse() {
         return PassengerResponse.builder()
@@ -183,6 +195,29 @@ public class PassengerTestUtils {
                 .id(DEFAULT_RIDE_ID)
                 .passengerId(DEFAULT_ID)
                 .driverId(DEFAULT_DRIVER_ID)
+                .build();
+    }
+
+    public ValidationExceptionResponse getRatingValidationExceptionResponse() {
+        String driverId = validationMessages.getString("min.value");
+        String grade = validationMessages.getString("max.value");
+        String rideId = validationMessages.getString("ride.id.not.blank");
+        return ValidationExceptionResponse.builder()
+                .status(HttpStatus.BAD_REQUEST)
+                .message("Please check input parameters")
+                .errors(Map.of(
+                        "driverId", driverId,
+                        "rideId", rideId,
+                        "grade", grade
+                ))
+                .time(LocalDateTime.now())
+                .build();
+    }
+
+    public static RatingResponse getRatingResponse() {
+        return RatingResponse.builder()
+                .passengerId(DEFAULT_ID)
+                .grade(DEFAULT_GRADE)
                 .build();
     }
 }
