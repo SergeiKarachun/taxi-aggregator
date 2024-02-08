@@ -375,9 +375,8 @@ public class DriverIntegrationTest extends IntegrationTestConfig {
 
     @Test
     void findAllAvailable_whenValidParams() {
-        Page<Driver> driverPage = driverRepository.findAll(
-                PageRequest.of(VALID_PAGE - 1, VALID_SIZE, Sort.by(VALID_ORDER_BY))
-        );
+        var pageRequest = PageRequest.of(VALID_PAGE - 1, VALID_SIZE, Sort.by(VALID_ORDER_BY));
+        Page<Driver> driverPage = driverRepository.getAllByStatus(Status.AVAILABLE, pageRequest);
         List<DriverResponse> expected = driverPage.stream()
                 .map(driverMapper::mapToDto)
                 .toList();
@@ -395,7 +394,7 @@ public class DriverIntegrationTest extends IntegrationTestConfig {
                 .extract().body().jsonPath().getList("drivers", DriverResponse.class);
 
         assertThat(actual).isEqualTo(expected);
-        assertThat(driverRepository.findAll().size()).isEqualTo(3);
+        assertThat(driverRepository.getAllByStatus(Status.AVAILABLE, pageRequest).getContent().size()).isEqualTo(1);
     }
 
     @Test

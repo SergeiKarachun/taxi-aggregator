@@ -1,6 +1,6 @@
 package by.sergo.driverservice.integration.config;
 
-import by.sergo.driverservice.domain.dto.request.FindDriverForRideRequest;
+import by.sergo.driverservice.domain.dto.request.DriverForRideResponse;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.springframework.beans.factory.annotation.Value;
@@ -47,12 +47,12 @@ public class KafkaConfig {
                 ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class,
                 ConsumerConfig.GROUP_ID_CONFIG, "driver-creation-group",
                 ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest",
-                JsonDeserializer.VALUE_DEFAULT_TYPE, FindDriverForRideRequest.class
+                JsonDeserializer.VALUE_DEFAULT_TYPE, DriverForRideResponse.class
         );
     }
 
     @Bean
-    public ConsumerFactory<String, FindDriverForRideRequest> testConsumerFactory() {
+    public ConsumerFactory<String, DriverForRideResponse> testConsumerFactory() {
         return new DefaultKafkaConsumerFactory<>(kafkaConsumerConfigs());
     }
 }
