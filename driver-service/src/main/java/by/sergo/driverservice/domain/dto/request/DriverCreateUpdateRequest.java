@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,6 +14,7 @@ import static by.sergo.driverservice.util.ConstantUtil.PHONE_PATTERN;
 
 @Getter
 @Setter
+@Builder
 public class DriverCreateUpdateRequest {
     @NotBlank(message = "{name.not.blank}")
     @Size(min = 2, message = "{name.min.value}")

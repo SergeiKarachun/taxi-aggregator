@@ -11,6 +11,7 @@ import by.sergo.passengerservice.service.exception.BadRequestException;
 import by.sergo.passengerservice.util.ExceptionMessageUtil;
 import by.sergo.passengerservice.service.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -87,13 +88,16 @@ public class PassengerServiceImpl implements PassengerService {
     @Override
     public PassengerListResponse getAll(Integer page, Integer size, String field) {
         PageRequest pageRequest = getPageRequest(page, size, field);
-        var responsePage = passengerRepository.findAll(pageRequest)
-                .map(passengerMapper::mapToDto);
+        Page<Passenger> responsePage = passengerRepository.findAll(pageRequest);
+        List<Passenger> passengers = responsePage.getContent();
+        List<PassengerResponse> passengerResponseList = passengers.stream()
+                .map(passengerMapper::mapToDto)
+                .toList();
+
         return PassengerListResponse.builder()
-                .passengers(responsePage.getContent())
-                .page(responsePage.getPageable().getPageNumber() + 1)
+                .passengers(passengerResponseList)
                 .totalPages(responsePage.getTotalPages())
-                .size(responsePage.getContent().size())
+                .size(passengers.size())
                 .total((int) responsePage.getTotalElements())
                 .sortedByField(field)
                 .build();

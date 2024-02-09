@@ -2,14 +2,10 @@ package by.sergo.paymentservice.domain.entity;
 
 import by.sergo.paymentservice.domain.enums.Operation;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-
 
 @Data
 @NoArgsConstructor
@@ -17,6 +13,7 @@ import java.time.LocalDateTime;
 @Builder
 @Table(name = "transaction_store")
 @Entity
+@EqualsAndHashCode(exclude = "operationDate")
 public class TransactionStore {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

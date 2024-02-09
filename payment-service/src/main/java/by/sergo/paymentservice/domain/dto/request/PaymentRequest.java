@@ -1,6 +1,7 @@
 package by.sergo.paymentservice.domain.dto.request;
 
 import jakarta.validation.constraints.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -10,6 +11,7 @@ import static by.sergo.paymentservice.util.ConstantUtils.MIN_PRICE;
 
 @Getter
 @Setter
+@Builder
 public class PaymentRequest {
     @NotNull
     @Min(value = 1, message = "{min.value}")

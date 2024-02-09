@@ -1,6 +1,8 @@
 package by.sergo.rideservice.domain.dto.response;
 
 import by.sergo.rideservice.domain.enums.Status;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -8,6 +10,8 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
+@Builder
+@EqualsAndHashCode(exclude = {"creatingTime", "price"})
 public class RideResponse {
     private String id;
     private String pickUpAddress;

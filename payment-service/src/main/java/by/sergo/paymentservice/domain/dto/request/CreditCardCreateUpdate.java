@@ -1,6 +1,7 @@
 package by.sergo.paymentservice.domain.dto.request;
 
 import jakarta.validation.constraints.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,6 +12,7 @@ import static by.sergo.paymentservice.util.ConstantUtils.*;
 
 @Getter
 @Setter
+@Builder
 public class CreditCardCreateUpdate {
 
     @NotBlank(message = "{credit.card.not.blank}")

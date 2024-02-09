@@ -1,11 +1,13 @@
 package by.sergo.rideservice.domain.dto.request;
 
 import jakarta.validation.constraints.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
+@Builder
 public class RideCreateUpdateRequest {
     @NotBlank(message = "{pick.up.address.not.blank}")
     @Size(min = 2, message = "{address.size}")

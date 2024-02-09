@@ -10,7 +10,6 @@ import java.util.List;
 @Setter
 @Builder
 public class RideListResponse {
-    private  Integer page;
     private Integer totalPages;
     private Integer size;
     private Integer total;
