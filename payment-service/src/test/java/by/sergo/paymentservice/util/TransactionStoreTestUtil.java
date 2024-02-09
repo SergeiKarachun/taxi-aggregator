@@ -18,6 +18,7 @@ import static by.sergo.paymentservice.domain.enums.UserType.DRIVER;
 public class TransactionStoreTestUtil {
 
     public final Long DEFAULT_ID = 1L;
+    public final Long NOT_EXIST = 99L;
     public final String DEFAULT_ACCOUNT_NUMBER = "95e6fe3a83c845c5b7a5bffe160e14a4";
     public final String DEFAULT_CREDIT_CARD_NUMBER = "2844575209195922";
     public final Long DEFAULT_DRIVER_ID = 1L;
@@ -26,10 +27,17 @@ public class TransactionStoreTestUtil {
     public final String SORT_BY = "operationDate";
     public final int VALID_PAGE = 1;
     public final int VALID_SIZE = 1;
+    public final int VALID_SIZE_TEN = 10;
     public final int INVALID_PAGE = -1;
     public final int INVALID_SIZE = -1;
+    public final String PAGE_PARAM_NAME = "page";
+    public final String SIZE_PARAM_NAME = "size";
     public final Long DEFAULT_CREDIT_CARD_ID = 1L;
     public final String CVV = "111";
+    public final String ID_PARAM_NAME = "id";
+    public final String DEFAULT_PASSENGER_ID_PATH = "/api/v1/transactions/passenger/{id}";
+    public final String DEFAULT_DRIVER_ID_PATH = "/api/v1/transactions/driver/{id}";
+
 
     public Account getDriverAccount() {
         return Account.builder()

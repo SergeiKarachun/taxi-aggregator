@@ -16,6 +16,7 @@ import static by.sergo.paymentservice.domain.enums.UserType.*;
 public class AccountTestUtil {
 
     public final Long DEFAULT_ID = 1L;
+    public final Long NOT_EXIST_ID = 99L;
     public final String DEFAULT_ACCOUNT_NUMBER = "95e6fe3a83c845c5b7a5bffe160e14a4";
     public final Long DEFAULT_DRIVER_ID = 1L;
     public final BigDecimal DEFAULT_BALANCE = BigDecimal.valueOf(10);
@@ -25,6 +26,12 @@ public class AccountTestUtil {
     public final Long DEFAULT_CREDIT_CARD_ID = 1L;
     public final String DEFAULT_CREDIT_CARD_NUMBER = "2844575209195922";
     public final String CVV = "111";
+    public final String DEFAULT_PATH = "/api/v1/accounts";
+    public final String DEFAULT_ID_PATH = "/api/v1/accounts/{id}";
+    public final String DEFAULT_DRIVER_ID_PATH = "/api/v1/accounts/driver/{id}";
+    public final String ID_PARAM_NAME = "id";
+    public final String WITHDRAWAL_PARAM = "sum";
+    public final BigDecimal WITHDRAWAL_SUM= BigDecimal.valueOf(10);
 
     public AccountCreateUpdateRequest getAccountCreateRequest() {
         return AccountCreateUpdateRequest.builder()
