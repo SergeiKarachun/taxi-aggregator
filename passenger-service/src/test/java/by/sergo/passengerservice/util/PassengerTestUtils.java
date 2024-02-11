@@ -65,6 +65,7 @@ public class PassengerTestUtils {
 
     public Passenger getPassengerToSave() {
         return Passenger.builder()
+                .id(DEFAULT_ID)
                 .name(DEFAULT_NAME)
                 .surname(DEFAULT_SURNAME)
                 .email(DEFAULT_EMAIL)
@@ -218,6 +219,14 @@ public class PassengerTestUtils {
         return RatingResponse.builder()
                 .passengerId(DEFAULT_ID)
                 .grade(DEFAULT_GRADE)
+                .build();
+    }
+    public PassengerCreateUpdateRequest getPassengerRequest(String email, String phone) {
+        return PassengerCreateUpdateRequest.builder()
+                .name(DEFAULT_NAME)
+                .surname(DEFAULT_SURNAME)
+                .email(email)
+                .phone(phone)
                 .build();
     }
 }
