@@ -1,0 +1,9 @@
+{
+  "id": 1,
+  "creditCardNumber": "2844575209195922",
+  "cvv": "111",
+  "expDate": "2025-01-29",
+  "userId": "1",
+  "balance": "100.00",
+  "userType": "PASSENGER"
+}

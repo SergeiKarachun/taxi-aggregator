@@ -1,5 +1,6 @@
 package by.sergo.rideservice.util;
 
+import by.sergo.rideservice.controller.handler.ValidationExceptionResponse;
 import by.sergo.rideservice.domain.Ride;
 import by.sergo.rideservice.domain.dto.request.DriverForRideResponse;
 import by.sergo.rideservice.domain.dto.request.RideCreateUpdateRequest;
@@ -10,10 +11,13 @@ import by.sergo.rideservice.domain.dto.response.RideResponse;
 import by.sergo.rideservice.domain.enums.Status;
 import lombok.experimental.UtilityClass;
 import org.bson.types.ObjectId;
+import org.springframework.http.HttpStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Map;
+import java.util.ResourceBundle;
 
 import static by.sergo.rideservice.domain.enums.PaymentMethod.*;
 import static by.sergo.rideservice.domain.enums.Status.CREATED;
@@ -24,6 +28,7 @@ public class RideTestUtil {
 
     public final String DEFAULT_RIDE_ID = "65afd8b6759a765221df8051";
     public final ObjectId RIDE_ID = new ObjectId(DEFAULT_RIDE_ID);
+    public final String NOT_EXIST_ID = "99";
     public final Long DEFAULT_ID = 1L;
     public final Long DEFAULT_PASSENGER_ID = 1L;
     public final String DEFAULT_NAME = "Petr";
@@ -46,7 +51,22 @@ public class RideTestUtil {
     public final int VALID_SIZE = 10;
     public final String INVALID_ORDER_BY = "priiice";
     public final String VALID_ORDER_BY = "price";
-
+    public final String ORDER_BY_PARAM_NAME = "orderBy";
+    public final String PAGE_PARAM_NAME = "page";
+    public final String SIZE_PARAM_NAME = "size";
+    public final String STATUS_PARAM_NAME = "status";
+    public final String DEFAULT_ID_PATH = "/api/v1/rides/{id}";
+    public final String DEFAULT_PASSENGER_ID_PATH = "/api/v1/rides/passenger/{id}";
+    public final String DEFAULT_DRIVER_ID_PATH = "/api/v1/rides/driver/{id}";
+    public final String DEFAULT_REJECT_PATH = "/api/v1/rides/{id}/reject";
+    public final String DEFAULT_START_PATH = "/api/v1/rides/{id}/start";
+    public final String DEFAULT_FINISH_PATH = "/api/v1/rides/{id}/end";
+    public final String DEFAULT_PATH = "/api/v1/rides";
+    public final String ID_PARAM = "id";
+    public final String DEFAULT_PASSENGER_PATH = "/api/v1/passengers/";
+    public final String DEFAULT_DRIVER_PATH = "/api/v1/drivers/";
+    public final String DEFAULT_CREDIT_CARD_PATH = "/api/v1/creditcards/passenger/";
+    public final ResourceBundle validationMessages = ResourceBundle.getBundle("messages");
 
     public RideCreateUpdateRequest getRideCreateRequest() {
         return RideCreateUpdateRequest.builder()
@@ -167,6 +187,18 @@ public class RideTestUtil {
                 .driverId(DEFAULT_ID)
                 .paymentMethod(CARD)
                 .creatingTime(LocalDateTime.now())
+                .build();
+    }
+
+    public ValidationExceptionResponse getRatingValidationExceptionResponse() {
+        String pickUpAddress = validationMessages.getString("pick.up.address.not.blank");
+        return ValidationExceptionResponse.builder()
+                .status(HttpStatus.BAD_REQUEST)
+                .message("Please check input parameters")
+                .errors(Map.of(
+                        "pickUpAddress", pickUpAddress
+                ))
+                .time(LocalDateTime.now())
                 .build();
     }
 }

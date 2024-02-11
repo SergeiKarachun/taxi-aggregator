@@ -1,0 +1,43 @@
+spring:
+  data:
+    mongodb:
+      username: root
+      password: ${DB_PASSWORD:example}
+      database: ridedb
+      port: 27017
+      host: localhost
+      auto-index-creation: true
+  kafka:
+    consumer:
+      group-id:
+        driver: driver-creation-group
+topic:
+  name:
+    ride: create.ride
+    driver: available.driver
+    status: change.driver.status
+kafka:
+  bootstrap-servers: localhost:9092
+  partitions:
+    count: 1
+  replicas:
+    count: 1
+mongock:
+  migration-scan-package: by.sergo.rideservice.config
+server:
+  port: 9003
+feign:
+  client:
+    config:
+      driver:
+        name: driver
+        url: http://localhost:9002
+        path: /api/v1/drivers
+      passenger:
+        name: passenger
+        url: http://localhost:9001
+        path: /api/v1/passengers
+      payment:
+        name: payment
+        url: http://localhost:9004
+        path: /api/v1/creditcards

@@ -1,9 +1,6 @@
 package by.sergo.rideservice.controller.handler;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.http.HttpStatus;
 
 import java.time.LocalDateTime;
@@ -13,6 +10,7 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@EqualsAndHashCode(exclude = "time")
 public class ValidationExceptionResponse {
     private HttpStatus status;
     private String message;
