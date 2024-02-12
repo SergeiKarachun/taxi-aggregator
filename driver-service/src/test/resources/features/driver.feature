@@ -18,7 +18,7 @@ Feature: Driver Service
   Scenario: Deleting a driver by existing id
     Given A driver with id 1 exists
     When The id 1 is passed to the deleteById method
-    Then The response should contain message with id 1
+    Then The response should contain response with id 1
 
   Scenario: Creating a new driver with non-unique phone
     Given A driver with phone "+375331234567" exists

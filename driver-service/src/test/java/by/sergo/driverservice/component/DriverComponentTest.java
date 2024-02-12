@@ -115,11 +115,12 @@ public class DriverComponentTest {
         }
     }
 
-    @Then("The response should contain message with id {long}")
+    @Then("The response should contain response with id {long}")
     public void theResponseShouldContainMessageWithId(long id) {
         Driver driver = driverRepository.findById(id).get();
         DriverResponse expected = driverMapper.mapToDto(driver);
 
+        assertEquals(expected.getId(), id);
         assertThat(driverResponse).isEqualTo(expected);
     }
 

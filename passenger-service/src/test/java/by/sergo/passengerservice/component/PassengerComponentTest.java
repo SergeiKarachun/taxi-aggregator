@@ -99,6 +99,7 @@ public class PassengerComponentTest {
         Passenger passenger = passengerRepository.findById(id).get();
         PassengerResponse expected = passengerMapper.mapToDto(passenger);
 
+        assertEquals(expected.getId(), id);
         assertThat(passengerResponse).isEqualTo(expected);
     }
 
