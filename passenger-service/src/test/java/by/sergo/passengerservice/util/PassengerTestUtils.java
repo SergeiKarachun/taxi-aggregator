@@ -229,4 +229,22 @@ public class PassengerTestUtils {
                 .phone(phone)
                 .build();
     }
+
+    public Passenger getUpdatePassenger(String email, String phone) {
+        return Passenger.builder()
+                .name(DEFAULT_NAME)
+                .surname(DEFAULT_SURNAME)
+                .email(email)
+                .phone(phone)
+                .build();
+    }
+
+    public PassengerResponse getUpdateResponse(String email, String phone) {
+        return PassengerResponse.builder()
+                .name(DEFAULT_NAME)
+                .surname(DEFAULT_SURNAME)
+                .email(email)
+                .phone(phone)
+                .build();
+    }
 }

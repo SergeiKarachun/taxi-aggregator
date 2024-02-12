@@ -1,6 +1,7 @@
 package by.sergo.passengerservice.component;
 
 import by.sergo.passengerservice.domain.dto.request.PassengerCreateUpdateRequest;
+import by.sergo.passengerservice.domain.dto.response.DriverResponse;
 import by.sergo.passengerservice.domain.dto.response.PassengerResponse;
 import by.sergo.passengerservice.domain.entity.Passenger;
 import by.sergo.passengerservice.mapper.PassengerMapper;
@@ -9,6 +10,7 @@ import by.sergo.passengerservice.service.exception.BadRequestException;
 import by.sergo.passengerservice.service.exception.NotFoundException;
 import by.sergo.passengerservice.service.impl.PassengerServiceImpl;
 import by.sergo.passengerservice.util.ExceptionMessageUtil;
+import by.sergo.passengerservice.util.PassengerTestUtils;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -20,8 +22,7 @@ import java.util.Optional;
 
 import static by.sergo.passengerservice.util.PassengerTestUtils.*;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 
@@ -48,9 +49,10 @@ public class PassengerComponentTest {
                 .findById(id);
         doReturn(expectedResponse)
                 .when(passengerMapper)
-                .mapToDto(existPassenger);
+                .mapToDto(any(Passenger.class));
 
-        PassengerResponse passenger = passengerService.getById(id);
+        PassengerResponse actual = passengerService.getById(id);
+        assertEquals(expectedResponse, actual);
     }
 
     @When("The id {long} is passed to the findById method")
@@ -87,13 +89,13 @@ public class PassengerComponentTest {
     @When("The id {long} is passed to the deleteById method")
     public void theIdIsPassedToTheDeleteByIdMethod(long id) {
         try {
-            passengerService.delete(id);
+            passengerResponse = passengerService.delete(id);
         } catch (NotFoundException e) {
             exception = e;
         }
     }
 
-    @Then("The response should contain message with id {long}")
+    @Then("The response should contain response with id {long}")
     public void theResponseShouldContainMessageWithId(long id) {
         Passenger passenger = passengerRepository.findById(id).get();
         PassengerResponse expected = passengerMapper.mapToDto(passenger);
@@ -156,7 +158,7 @@ public class PassengerComponentTest {
 
     @Then("The BadRequestException for email should be thrown")
     public void theBadRequestExceptionForEmailShouldBeThrown() {
-        String expected = ExceptionMessageUtil.getAlreadyExistMessage("Passenger", "email", "petr@gmail.com");
+        String expected = "Passenger with this email petr@gmail.com already exists..";
         String actual = exception.getMessage();
 
         assertThat(actual).isEqualTo(expected);
@@ -186,5 +188,40 @@ public class PassengerComponentTest {
         } catch (NotFoundException e) {
             exception = e;
         }
+    }
+
+    @Given("A passenger with id {long} exists when email {string} and phone {string} doesn't exist")
+    public void aPassengerWithIdExistsWhenEmailAndPhoneDoesnTExist(long id, String email, String phone) {
+        Passenger passengerToUpdate = PassengerTestUtils.getUpdatePassenger(email, phone);
+        PassengerResponse notSavedPassenger = getUpdateResponse(email, phone);
+        doReturn(Optional.of(passengerToUpdate))
+                .when(passengerRepository)
+                .findById(id);
+        doReturn(Optional.of(passengerToUpdate))
+                .when(passengerRepository)
+                .findById(id);
+        doReturn(false)
+                .when(passengerRepository)
+                .existsByPhone(phone);
+        doReturn(false)
+                .when(passengerRepository)
+                .existsByEmail(email);
+        doReturn(passengerToUpdate)
+                .when(passengerMapper)
+                .mapToEntity(any(PassengerCreateUpdateRequest.class));
+        passengerToUpdate.setId(id);
+        doReturn(passengerToUpdate)
+                .when(passengerRepository)
+                .save(any(Passenger.class));
+        notSavedPassenger.setId(id);
+        doReturn(notSavedPassenger)
+                .when(passengerMapper)
+                .mapToDto(any(Passenger.class));
+    }
+
+    @Then("The response should contain updated passenger with id {long}")
+    public void theResponseShouldContainUpdatedPassengerWithId(long id) {
+        PassengerResponse actual = passengerMapper.mapToDto(passengerRepository.findById(id).get());
+        assertThat(actual).isEqualTo(passengerResponse);
     }
 }
