@@ -118,6 +118,39 @@ public class DriverTestUtils {
                 .build();
     }
 
+    public Driver getUpdateDriver(String phone) {
+        return Driver.builder()
+                .name(DEFAULT_NAME)
+                .surname(DEFAULT_SURNAME)
+                .phone(phone)
+                .build();
+    }
+
+    public DriverResponse getNotSavedResponse(String phone) {
+        return DriverResponse.builder()
+                .name(DEFAULT_NAME)
+                .surname(DEFAULT_SURNAME)
+                .phone(phone)
+                .build();
+    }
+
+    public Driver getSavedDriver(long id, String phone) {
+        return Driver.builder()
+                .id(id)
+                .name(DEFAULT_NAME)
+                .surname(DEFAULT_SURNAME)
+                .phone(phone)
+                .build();
+    }
+
+    public DriverCreateUpdateRequest getDriverRequest(String phone) {
+        return DriverCreateUpdateRequest.builder()
+                .name(DEFAULT_NAME)
+                .surname(DEFAULT_SURNAME)
+                .phone(phone)
+                .build();
+    }
+
 
     public Driver getUpdatedDriver() {
         return Driver.builder()

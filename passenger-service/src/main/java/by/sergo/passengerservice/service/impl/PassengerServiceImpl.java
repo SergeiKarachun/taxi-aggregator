@@ -56,8 +56,7 @@ public class PassengerServiceImpl implements PassengerService {
     public PassengerResponse delete(Long id) {
         var passenger = getByIdOrElseThrow(id);
         passengerRepository.deleteById(id);
-        var response = passengerMapper.mapToDto(passenger);
-        return response;
+        return passengerMapper.mapToDto(passenger);
     }
 
     @Override

@@ -8,6 +8,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(exclude = "car")
+@ToString
 public class DriverResponse {
     private Long id;
     private String name;

@@ -1,9 +1,10 @@
 package by.sergo.driverservice.component;
 
-
 import by.sergo.driverservice.domain.dto.request.DriverCreateUpdateRequest;
+import by.sergo.driverservice.domain.dto.response.DriverListResponse;
 import by.sergo.driverservice.domain.dto.response.DriverResponse;
 import by.sergo.driverservice.domain.entity.Driver;
+import by.sergo.driverservice.domain.enums.Status;
 import by.sergo.driverservice.kafka.producer.DriverProducer;
 import by.sergo.driverservice.mapper.DriverMapper;
 import by.sergo.driverservice.repository.DriverRepository;
@@ -18,9 +19,12 @@ import io.cucumber.java.en.When;
 import io.cucumber.spring.CucumberContextConfiguration;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
+import java.util.Arrays;
 import java.util.Optional;
-
 
 import static by.sergo.driverservice.util.DriverTestUtils.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -41,8 +45,8 @@ public class DriverComponentTest {
     private DriverServiceImpl driverService;
 
     private DriverResponse driverResponse;
+    private DriverListResponse driverListResponse;
     private Exception exception;
-
 
     @Given("A driver with id {long} exists")
     public void passengerWithIdExists(long id) {
@@ -52,9 +56,14 @@ public class DriverComponentTest {
         doReturn(Optional.of(driver))
                 .when(driverRepository)
                 .findById(id);
+        driver.setStatus(Status.UNAVAILABLE);
+        doReturn(driver)
+                .when(driverRepository)
+                .save(driver);
+        expected.setStatus(Status.UNAVAILABLE.name());
         doReturn(expected)
                 .when(driverMapper)
-                .mapToDto(driver);
+                .mapToDto(any());
 
 
         DriverResponse actual = driverService.getById(id);
@@ -80,6 +89,9 @@ public class DriverComponentTest {
 
     @Given("A driver with id {long} doesn't exist")
     public void aDriverWithIdDoesnTExist(long id) {
+        doReturn(Optional.empty())
+                .when(driverRepository)
+                .findById(id);
         Optional<Driver> driver = driverRepository.findById(id);
         assertFalse(driver.isPresent());
     }
@@ -151,43 +163,124 @@ public class DriverComponentTest {
         assertEquals(exception.getMessage(), ExceptionMessageUtil.getAlreadyExistMessage("Driver", "phone", phone));
     }
 
-    /*@Given("A driver with phone {string} doesn't exist")
-    public void aDriverWithPhoneDoesnTExist(String arg0) {
+    @Given("A driver with phone {string} doesn't exist")
+    public void aDriverWithPhoneDoesnTExist(String phone) {
+        DriverResponse expected = getDefaultDriverResponse();
+        Driver driverToSave = getNotSavedDriver();
+        Driver savedDriver = getDefaultDriver();
+        doReturn(Optional.of(getDefaultDriver()))
+                .when(driverRepository)
+                .findById(anyLong());
+        doReturn(false)
+                .when(driverRepository)
+                .existsByPhone(phone);
+        doReturn(driverToSave)
+                .when(driverMapper)
+                .mapToEntity(any(DriverCreateUpdateRequest.class));
+        doReturn(savedDriver)
+                .when(driverRepository)
+                .save(driverToSave);
+        doReturn(expected)
+                .when(driverMapper)
+                .mapToDto(any(Driver.class));
+
+        assertFalse(driverRepository.existsByPhone(phone));
     }
 
     @Then("The response should contain created driver")
     public void theResponseShouldContainCreatedDriver() {
+        var expected = getDefaultDriverResponse();
+        assertEquals(driverResponse, expected);
     }
 
-    @When("An update request with phone {string} for driver with id {int} is passed to the update method")
-    public void anUpdateRequestWithPhoneForDriverWithIdIsPassedToTheUpdateMethod(String arg0, int arg1) {
+    @When("An update request with phone {string} for driver with id {long} is passed to the update method")
+    public void anUpdateRequestWithPhoneForDriverWithIdIsPassedToTheUpdateMethod(String phone, long id) {
+        var request = DriverTestUtils.getDriverRequest(phone);
+        try {
+            driverResponse = driverService.update(id, request);
+        } catch (NotFoundException | BadRequestException e) {
+            exception = e;
+        }
     }
 
-    @Given("A driver with id {int} exists when phone {string} doesn't exist")
-    public void aDriverWithIdExistsWhenPhoneDoesnTExist(int arg0, String arg1) {
+    @Given("A driver with id {long} exists when phone {string} doesn't exist")
+    public void aDriverWithIdExistsWhenPhoneDoesnTExist(long id, String phone) {
+        Driver driverToUpdate = getUpdateDriver(phone);
+        DriverResponse notSavedDriver = getNotSavedResponse(phone);
+        Driver savedDriver = getSavedDriver(id, phone);
+        doReturn(Optional.of(driverToUpdate))
+                .when(driverRepository)
+                .findById(id);
+        doReturn(Optional.of(driverToUpdate))
+                .when(driverRepository)
+                .findById(id);
+        doReturn(false)
+                .when(driverRepository)
+                .existsByPhone(phone);
+        doReturn(driverToUpdate)
+                .when(driverMapper)
+                .mapToEntity(any(DriverCreateUpdateRequest.class));
+        doReturn(savedDriver)
+                .when(driverRepository)
+                .save(any(Driver.class));
+        notSavedDriver.setId(id);
+        doReturn(notSavedDriver)
+                .when(driverMapper)
+                .mapToDto(any(Driver.class));
     }
 
-    @Then("The response should contain updated driver with id {int}")
-    public void theResponseShouldContainUpdatedDriverWithId(int arg0) {
+    @Then("The response should contain updated driver with id {long}")
+    public void theResponseShouldContainUpdatedDriverWithId(long id) {
+        DriverResponse actual = driverMapper.mapToDto(driverRepository.findById(id).get());
+
+        assertEquals(actual, driverResponse);
     }
 
-    @When("Driver id {int} is passed to the changeStatus method")
-    public void driverIdIsPassedToTheChangeStatusMethod(int arg0) {
+    @When("Driver id {long} is passed to the changeStatus method")
+    public void driverIdIsPassedToTheChangeStatusMethod(long id) {
+        try {
+            driverResponse = driverService.changeStatus(id);
+        } catch (NotFoundException e) {
+            exception = e;
+        }
     }
 
-    @Then("The response should contain status message with id {int}")
-    public void theResponseShouldContainStatusMessageWithId(int arg0) {
+    @Then("The response should contain status message with id {long}")
+    public void theResponseShouldContainStatusMessageWithId(long id) {
+        DriverResponse actual = DriverResponse.builder()
+                .id(id)
+                .name(DEFAULT_NAME)
+                .surname(DEFAULT_SURNAME)
+                .email(DEFAULT_EMAIL)
+                .phone(DEFAULT_PHONE)
+                .rating(DEFAULT_RATING)
+                .status(Status.UNAVAILABLE.name())
+                .build();
+
+        assertEquals(actual, driverResponse);
     }
 
     @Given("A list of available drivers")
     public void aListOfAvailableDrivers() {
+        Page<Driver> driverPage = new PageImpl<>(Arrays.asList(getDefaultDriver(), getSecondDriver()));
+        doReturn(Optional.of(getDefaultDriver()))
+                .when(driverRepository)
+                .findById(anyLong());
+        doReturn(driverPage)
+                .when(driverRepository)
+                .getAllByStatus(any(Status.class), any(PageRequest.class));
+        doReturn(getDefaultDriverResponse())
+                .when(driverMapper)
+                .mapToDto(any(Driver.class));
     }
 
     @When("The findAvailableDrivers method is called with valid parameters")
     public void theFindAvailableDriversMethodIsCalledWithValidParameters() {
+        driverListResponse = driverService.getAvailableDrivers(VALID_PAGE, VALID_SIZE, VALID_ORDER_BY);
     }
 
     @Then("A list of drivers is returned")
     public void aListOfDriversIsReturned() {
-    }*/
+        assertEquals(driverListResponse.getDrivers().size(), 2);
+    }
 }

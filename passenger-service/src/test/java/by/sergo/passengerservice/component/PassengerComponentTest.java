@@ -1,7 +1,6 @@
 package by.sergo.passengerservice.component;
 
 import by.sergo.passengerservice.domain.dto.request.PassengerCreateUpdateRequest;
-import by.sergo.passengerservice.domain.dto.response.DriverResponse;
 import by.sergo.passengerservice.domain.dto.response.PassengerResponse;
 import by.sergo.passengerservice.domain.entity.Passenger;
 import by.sergo.passengerservice.mapper.PassengerMapper;
