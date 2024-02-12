@@ -17,14 +17,14 @@ import static by.sergo.driverservice.domain.enums.Status.AVAILABLE;
 
 @UtilityClass
 public class DriverTestUtils {
-    public static final Long DEFAULT_ID = 1L;
+    public final Long DEFAULT_ID = 1L;
     public final Long NEW_ID = 4L;
     public final Long NOT_FOUND_ID = 2L;
     public final String DEFAULT_NAME = "petr";
     public final String DEFAULT_SURNAME = "petrov";
     public final String DEFAULT_EMAIL = "petr@gmail.com";
     public final String DEFAULT_PHONE = "+375331234567";
-    public final String NEW_EMAIL = "newpet@gmail.com";
+    public final String NEW_EMAIL = "newpetr@gmail.com";
     public final String NEW_PHONE = "+375331111111";
     public final Double DEFAULT_RATING = 5.0;
     public final Long DEFAULT_DRIVER_ID = 1L;
