@@ -1,6 +1,8 @@
 server:
   port: 9001
 spring:
+  application:
+    name: passenger-service
   datasource:
     url: jdbc:postgresql://localhost:5433/passenger
     username: postgres
@@ -22,3 +24,9 @@ feign:
         name: ride
         url: http://localhost:9003
         path: /api/v1/rides
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka
+    fetch-registry: true
+    register-with-eureka: true

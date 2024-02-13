@@ -1,4 +1,8 @@
+server:
+  port: 9003
 spring:
+  application:
+    name: ride-service
   data:
     mongodb:
       authentication-database: admin
@@ -25,8 +29,6 @@ kafka:
     count: 1
 mongock:
   migration-scan-package: by.sergo.rideservice.config
-server:
-  port: 9003
 feign:
   client:
     config:
@@ -42,3 +44,9 @@ feign:
         name: payment
         url: http://localhost:9004
         path: /api/v1/creditcards
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka
+    fetch-registry: true
+    register-with-eureka: true
