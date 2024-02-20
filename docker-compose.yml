@@ -28,43 +28,6 @@ services:
     networks:
       - taxi_aggregator
 
-  ride-service:
-    image: ride-service:0.0.1
-    container_name: ride-service
-    ports:
-      - "9003:9003"
-    networks:
-      - taxi_aggregator
-    environment:
-      - SPRING_DATA_MONGODB_URL=mongodb://root:example@mongo_db:27017/
-      - SPRING_DATA_MONGODB_USERNAME=root
-      - SPRING_DATA_MONGODB_PASSWORD=${DB_MONGO_PASSWORD}
-      - SPRING_DATA_MONGODB_HOST=mongo_db
-
-      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
-      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
-    depends_on:
-      - eureka-server
-      - mongo_db
-      - kafka
-
-  payment-service:
-    image: payment-service:0.0.1
-    container_name: payment-service
-    ports:
-      - "9004:9004"
-    networks:
-      - taxi_aggregator
-    environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgrestaxi:5432/payment
-      - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
-    depends_on:
-      - eureka-server
-      - postgrestaxi
-
   mongo-express:
     image: mongo-express
     container_name: mongo-express
@@ -81,7 +44,7 @@ services:
   zookeeper:
     image: zookeeper:3.7.0
     container_name: zookeeper
-    restart: "no"
+    restart: always
     networks:
       - taxi_aggregator
     ports:
@@ -161,12 +124,45 @@ services:
       - postgrestaxi
       - kafka
 
+  ride-service:
+    image: ride-service:0.0.1
+    container_name: ride-service
+    ports:
+      - "9003:9003"
+    networks:
+      - taxi_aggregator
+    environment:
+      - SPRING_DATA_MONGODB_URL=mongodb://root:example@mongo_db:27017/
+      - SPRING_DATA_MONGODB_USERNAME=root
+      - SPRING_DATA_MONGODB_PASSWORD=${DB_MONGO_PASSWORD}
+      - SPRING_DATA_MONGODB_HOST=mongo_db
 
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
+    depends_on:
+      - eureka-server
+      - mongo_db
+      - kafka
 
+  payment-service:
+    image: payment-service:0.0.1
+    container_name: payment-service
+    ports:
+      - "9004:9004"
+    networks:
+      - taxi_aggregator
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgrestaxi:5432/payment
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
+    depends_on:
+      - eureka-server
+      - postgrestaxi
 
 volumes:
   data: {}
-
 
 networks:
   taxi_aggregator:

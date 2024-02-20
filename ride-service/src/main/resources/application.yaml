@@ -33,16 +33,13 @@ feign:
   client:
     config:
       driver:
-        name: driver
-        url: http://localhost:9002
+        name: driver-service
         path: /api/v1/drivers
       passenger:
-        name: passenger
-        url: http://localhost:9001
+        name: passenger-service
         path: /api/v1/passengers
       payment:
-        name: payment
-        url: http://localhost:9004
+        name: payment-service
         path: /api/v1/creditcards
 eureka:
   client:

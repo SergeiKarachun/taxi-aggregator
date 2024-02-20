@@ -17,12 +17,10 @@ feign:
   client:
     config:
       driver:
-        name: driver
-        url: http://localhost:9002
+        name: driver-service
         path: /api/v1/drivers
       ride:
-        name: ride
-        url: http://localhost:9003
+        name: ride-service
         path: /api/v1/rides
 eureka:
   client:
