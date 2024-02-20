@@ -92,6 +92,9 @@ public class CreditCardServiceImplTest {
         doReturn(true)
                 .when(creditCardRepository)
                 .existsById(creditCard.getId());
+        doReturn(true)
+                .when(creditCardRepository)
+                .existsByUserIdAndUserType(creditCard.getUserId(), DRIVER);
         doReturn(updatedCreditCard)
                 .when(creditCardMapper)
                 .mapToEntity(request);
