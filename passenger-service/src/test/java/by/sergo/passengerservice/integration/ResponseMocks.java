@@ -15,7 +15,7 @@ import static org.springframework.util.StreamUtils.copyToString;
 
 public class ResponseMocks {
     public static void setupMockDriverResponse(WireMockServer mockService) throws IOException {
-        mockService.stubFor(WireMock.get(WireMock.urlEqualTo(DEFAULT_DRIVER_PATH + DEFAULT_ID))
+        mockService.stubFor(WireMock.get(WireMock.urlMatching( DEFAULT_DRIVER_PATH + DEFAULT_ID))
                 .willReturn(WireMock.aResponse()
                         .withStatus(HttpStatus.OK.value())
                         .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
@@ -26,7 +26,7 @@ public class ResponseMocks {
     }
 
     public static void setupMockRideResponse(WireMockServer mockService) throws IOException {
-        mockService.stubFor(WireMock.get(WireMock.urlEqualTo(DEFAULT_RIDE_PATH + DEFAULT_RIDE_ID))
+        mockService.stubFor(WireMock.get(WireMock.urlMatching(DEFAULT_RIDE_PATH + DEFAULT_RIDE_ID))
                 .willReturn(WireMock.aResponse()
                         .withStatus(HttpStatus.OK.value())
                         .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)

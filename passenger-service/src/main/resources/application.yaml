@@ -3,6 +3,13 @@ server:
 spring:
   application:
     name: passenger-service
+  cloud:
+    discovery:
+      client:
+        simple:
+          instances:
+            api-gateway[0]:
+              uri: http://localhost:8765
   datasource:
     url: jdbc:postgresql://localhost:5433/passenger
     username: postgres
