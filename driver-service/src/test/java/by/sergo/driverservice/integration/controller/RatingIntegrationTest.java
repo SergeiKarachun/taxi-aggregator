@@ -10,23 +10,26 @@ import by.sergo.driverservice.controller.handler.RestErrorResponse;
 import by.sergo.driverservice.controller.handler.ValidationExceptionResponse;
 import by.sergo.driverservice.domain.dto.request.RatingCreateRequest;
 import by.sergo.driverservice.integration.config.IntegrationTestConfig;
-import by.sergo.driverservice.integration.config.WireMockConfig;
 import by.sergo.driverservice.repository.DriverRepository;
 import by.sergo.driverservice.repository.RatingRepository;
 import com.github.tomakehurst.wiremock.WireMockServer;
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import io.restassured.http.ContentType;
 import lombok.RequiredArgsConstructor;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.cloud.client.DefaultServiceInstance;
+import org.springframework.cloud.client.discovery.simple.SimpleDiscoveryProperties;
 import org.springframework.http.HttpStatus;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlGroup;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static by.sergo.driverservice.integration.ResponseMocks.setupMockPassengerResponse;
 import static by.sergo.driverservice.integration.ResponseMocks.setupMockRideResponse;
@@ -48,22 +51,50 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
         },
                 executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 })
-@ContextConfiguration(classes = { WireMockConfig.class })
 public class RatingIntegrationTest extends IntegrationTestConfig {
     private final RatingRepository ratingRepository;
     private final DriverRepository driverRepository;
     private final RatingMapper ratingMapper;
     @LocalServerPort
     private int port;
+    private static WireMockServer mockPassengerService;
+    private static WireMockServer mockRideService;
     @Autowired
-    private WireMockServer mockPassengerService;
-    @Autowired
-    private WireMockServer mockRideService;
+    private SimpleDiscoveryProperties simpleDiscoveryProperties;
 
     @BeforeEach
-    void setUp() throws IOException {
+    void addServiceInstance() throws IOException {
+        DefaultServiceInstance defaultPassengerServiceInstance = new DefaultServiceInstance("passenger-service", "passenger-service", "localhost", mockPassengerService.port(), false);
+        DefaultServiceInstance defaultRideServiceInstance = new DefaultServiceInstance("ride-service", "ride-service", "localhost", mockRideService.port(), false);
+
+        Map<String, List<DefaultServiceInstance>> instances = new HashMap<>();
+        instances.put("passenger-service", Collections.singletonList(defaultPassengerServiceInstance));
+        instances.put("ride-service", Collections.singletonList(defaultRideServiceInstance));
+        simpleDiscoveryProperties.setInstances(instances);
+
         setupMockPassengerResponse(mockPassengerService);
         setupMockRideResponse(mockRideService);
+    }
+
+    @AfterEach
+    void removeServiceInstance() {
+        simpleDiscoveryProperties.getInstances().clear();
+    }
+
+
+    @BeforeAll
+    static void setUp() {
+        mockPassengerService = new WireMockServer(WireMockConfiguration.wireMockConfig().dynamicPort());
+        mockPassengerService.start();
+        mockRideService = new WireMockServer(WireMockConfiguration.wireMockConfig().dynamicPort());
+        mockRideService.start();
+    }
+
+    @AfterAll
+    static void tearDown() {
+        mockPassengerService.stop();
+        mockRideService.stop();
+
     }
 
     @Test
