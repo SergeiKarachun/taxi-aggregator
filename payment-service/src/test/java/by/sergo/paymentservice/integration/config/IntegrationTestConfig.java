@@ -31,5 +31,6 @@ public class IntegrationTestConfig {
         registry.add("spring.datasource.username", postgres::getUsername);
         registry.add("spring.datasource.password", postgres::getPassword);
         registry.add("postgresql.driver", postgres::getDriverClassName);
+        registry.add("eureka.client.enabled", () -> false);
     }
 }

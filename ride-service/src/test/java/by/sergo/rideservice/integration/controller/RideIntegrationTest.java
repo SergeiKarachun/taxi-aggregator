@@ -15,10 +15,13 @@ import by.sergo.rideservice.util.ExceptionMessageUtil;
 import by.sergo.rideservice.util.RideTestUtil;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.cloud.client.DefaultServiceInstance;
+import org.springframework.cloud.client.discovery.simple.SimpleDiscoveryProperties;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -28,6 +31,7 @@ import org.springframework.test.context.ContextConfiguration;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -48,12 +52,29 @@ public class RideIntegrationTest extends IntegrationTestConfig {
     private final WireMockServer mockCreditCardService;
     @LocalServerPort
     private int port;
+    @Autowired
+    private SimpleDiscoveryProperties simpleDiscoveryProperties;
 
     @BeforeEach
-    void setUp() throws IOException {
+    void addServiceInstance() throws IOException {
+        DefaultServiceInstance defaultPassengerServiceInstance = new DefaultServiceInstance("passenger-service", "passenger-service", "localhost", mockPassengerService.port(), false);
+        DefaultServiceInstance defaultDriverServiceInstance = new DefaultServiceInstance("driver-service", "driver-service", "localhost", mockDriverService.port(), false);
+        DefaultServiceInstance defaultCardServiceInstance = new DefaultServiceInstance("payment-service", "payment-service", "localhost", mockCreditCardService.port(), false);
+
+        Map<String, List<DefaultServiceInstance>> instances = new HashMap<>();
+        instances.put("passenger-service", Collections.singletonList(defaultPassengerServiceInstance));
+        instances.put("driver-service", Collections.singletonList(defaultDriverServiceInstance));
+        instances.put("payment-service", Collections.singletonList(defaultCardServiceInstance));
+        simpleDiscoveryProperties.setInstances(instances);
+
         setupMockPassengerResponse(mockPassengerService);
         setupMockDriverResponse(mockDriverService);
         setupMockCreditCardResponse(mockCreditCardService);
+    }
+
+    @AfterEach
+    void removeServiceInstance() {
+        simpleDiscoveryProperties.getInstances().clear();
     }
 
     @Test

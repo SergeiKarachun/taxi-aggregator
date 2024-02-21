@@ -23,6 +23,7 @@ kafka:
   replicas:
     count: 1
 mongock:
+  enabled: false
   migration-scan-package: by.sergo.rideservice.config
 server:
   port: 9003
@@ -30,14 +31,60 @@ feign:
   client:
     config:
       driver:
-        name: driver
-        url: http://localhost:9002
+        name: driver-service
         path: /api/v1/drivers
       passenger:
-        name: passenger
-        url: http://localhost:9001
+        name: passenger-service
         path: /api/v1/passengers
       payment:
-        name: payment
-        url: http://localhost:9004
+        name: payment-service
         path: /api/v1/creditcards
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka
+    fetch-registry: true
+    register-with-eureka: true
+management:
+  health:
+    circuit-breakers:
+      enabled: true
+resilience4j:
+  circuitbreaker:
+    instances:
+      driver:
+        register-health-indicator: true
+        sliding-window-size: 10
+        sliding-window-type: COUNT_BASED
+        permitted-number-of-calls-in-half-open-state: 4
+        minimum-number-of-calls: 5
+        wait-duration-in-open-state:
+          seconds: 5
+        slow-call-rate-threshold: 50
+        slow-call-duration-threshold:
+          seconds: 10
+        failure-rate-threshold: 50
+      passenger:
+        register-health-indicator: true
+        sliding-window-size: 10
+        sliding-window-type: COUNT_BASED
+        permitted-number-of-calls-in-half-open-state: 4
+        minimum-number-of-calls: 5
+        wait-duration-in-open-state:
+          seconds: 5
+        slow-call-rate-threshold: 50
+        slow-call-duration-threshold:
+          seconds: 10
+        failure-rate-threshold: 50
+      payment:
+        register-health-indicator: true
+        sliding-window-size: 10
+        sliding-window-type: COUNT_BASED
+        permitted-number-of-calls-in-half-open-state: 4
+        minimum-number-of-calls: 5
+        wait-duration-in-open-state:
+          seconds: 5
+        slow-call-rate-threshold: 50
+        slow-call-duration-threshold:
+          seconds: 10
+        failure-rate-threshold: 50
