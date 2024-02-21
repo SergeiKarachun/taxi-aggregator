@@ -1,11 +1,10 @@
 package by.sergo.driverservice.config;
 
+import by.sergo.driverservice.util.ConstantUtil;
 import feign.Retryer;
 import feign.codec.ErrorDecoder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import static by.sergo.driverservice.util.ConstantUtil.*;
 
 
 @Configuration
@@ -17,6 +16,6 @@ public class FeignClientConfig {
 
     @Bean
     public Retryer retryer() {
-        return new Retryer.Default(RETRYER_PERIOD, RETRYER_MAX_PERIOD, RETRYER_MAX_ATTEMPTS);
+        return new Retryer.Default(ConstantUtil.RETRYER_PERIOD, ConstantUtil.RETRYER_MAX_PERIOD, ConstantUtil.RETRYER_MAX_ATTEMPTS);
     }
 }

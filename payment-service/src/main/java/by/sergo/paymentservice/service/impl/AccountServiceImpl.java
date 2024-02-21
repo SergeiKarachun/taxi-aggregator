@@ -44,6 +44,7 @@ public class AccountServiceImpl implements AccountService {
         checkDriver(dto.getDriverId());
         var account = accountMapper.mapToEntity(dto);
         account.setAccountNumber(generateAccountNumber());
+        account.setId(null);
         return accountMapper.mapToDto(accountRepository.save(account));
     }
 

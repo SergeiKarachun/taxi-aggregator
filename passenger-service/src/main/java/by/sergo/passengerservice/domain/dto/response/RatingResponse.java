@@ -1,12 +1,13 @@
 package by.sergo.passengerservice.domain.dto.response;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@EqualsAndHashCode
 public class RatingResponse {
     private Long id;
     private Integer grade;

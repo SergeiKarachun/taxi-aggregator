@@ -1,20 +1,20 @@
 package by.sergo.driverservice.service.impl;
 
+import by.sergo.driverservice.domain.dto.response.DriverListResponse;
+import by.sergo.driverservice.domain.dto.response.DriverResponse;
+import by.sergo.driverservice.domain.enums.Status;
+import by.sergo.driverservice.mapper.DriverMapper;
+import by.sergo.driverservice.service.DriverService;
+import by.sergo.driverservice.util.ExceptionMessageUtil;
+import by.sergo.driverservice.util.PageRequestUtil;
 import by.sergo.driverservice.domain.dto.request.DriverCreateUpdateRequest;
 import by.sergo.driverservice.domain.dto.request.DriverForRideResponse;
 import by.sergo.driverservice.domain.dto.request.FindDriverForRideRequest;
-import by.sergo.driverservice.domain.dto.response.DriverListResponse;
-import by.sergo.driverservice.domain.dto.response.DriverResponse;
 import by.sergo.driverservice.domain.entity.Driver;
-import by.sergo.driverservice.domain.enums.Status;
 import by.sergo.driverservice.kafka.producer.DriverProducer;
-import by.sergo.driverservice.mapper.DriverMapper;
 import by.sergo.driverservice.repository.DriverRepository;
-import by.sergo.driverservice.service.DriverService;
 import by.sergo.driverservice.service.exception.BadRequestException;
-import by.sergo.driverservice.util.ExceptionMessageUtil;
 import by.sergo.driverservice.service.exception.NotFoundException;
-import by.sergo.driverservice.util.PageRequestUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -22,7 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
-import static by.sergo.driverservice.util.ExceptionMessageUtil.*;
+import static by.sergo.driverservice.util.ExceptionMessageUtil.CAN_NOT_CREATE_DRIVER_MESSAGE;
 
 @Service
 @RequiredArgsConstructor

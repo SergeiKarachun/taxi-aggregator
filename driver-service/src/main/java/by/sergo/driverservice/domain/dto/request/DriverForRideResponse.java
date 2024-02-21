@@ -5,10 +5,12 @@ import lombok.*;
 @Getter
 @Setter
 @ToString
-@NoArgsConstructor
 @Builder
+@NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode
 public class DriverForRideResponse {
     private Long driverId;
     private String rideId;
 }
+

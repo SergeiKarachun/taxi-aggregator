@@ -11,6 +11,7 @@ import by.sergo.driverservice.repository.DriverRepository;
 import by.sergo.driverservice.repository.RatingRepository;
 import by.sergo.driverservice.service.exception.NotFoundException;
 import by.sergo.driverservice.service.impl.RatingServiceImpl;
+import by.sergo.driverservice.util.RatingTestUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -19,7 +20,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
-import static by.sergo.driverservice.util.RatingTestUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -42,23 +42,17 @@ public class RatingServiceImplTest {
 
     @Test
     void rateExistingDriver() {
-        RatingCreateRequest request = getRatingRequest();
-        PassengerResponse passengerResponse = getDefaultPassengerResponse();
-        RideResponse rideResponse = getDefaultRideResponse();
-        Rating ratingToSave = getDefaultRating();
+        RatingCreateRequest request = RatingTestUtils.getRatingRequest();
+        PassengerResponse passengerResponse = RatingTestUtils.getDefaultPassengerResponse();
+        RideResponse rideResponse = RatingTestUtils.getDefaultRideResponse();
+        Rating ratingToSave = RatingTestUtils.getDefaultRating();
         Rating savedRating = ratingToSave;
-        savedRating.setId(DEFAULT_ID);
-        RatingResponse response = getDefaultRatingResponse();
+        savedRating.setId(RatingTestUtils.DEFAULT_ID);
+        RatingResponse response = RatingTestUtils.getDefaultRatingResponse();
 
-        doReturn(passengerResponse)
-                .when(passengerService)
-                .getPassenger(DEFAULT_PASSENGER_ID);
-        doReturn(rideResponse)
-                .when(rideService)
-                .getRide(DEFAULT_RIDE_ID);
-        doReturn(Optional.of(getDefaultDriver()))
+        doReturn(Optional.of(RatingTestUtils.getDefaultDriver()))
                 .when(driverRepository)
-                .findById(DEFAULT_DRIVER_ID);
+                .findById(RatingTestUtils.DEFAULT_DRIVER_ID);
         doReturn(ratingToSave)
                 .when(ratingMapper)
                 .mapToEntity(request);
@@ -68,11 +62,17 @@ public class RatingServiceImplTest {
         doReturn(response)
                 .when(ratingMapper)
                 .mapToDto(savedRating);
+        doReturn(passengerResponse)
+                .when(passengerService)
+                .getPassenger(request.getPassengerId());
+        doReturn(rideResponse)
+                .when(rideService)
+                .getRide(request.getRideId());
 
-        RatingResponse actual = ratingService.createRateOfDriver(request, DEFAULT_DRIVER_ID);
+        RatingResponse actual = ratingService.createRateOfDriver(request, RatingTestUtils.DEFAULT_DRIVER_ID);
 
         assertNotNull(actual);
-        verify(driverRepository).findById(DEFAULT_DRIVER_ID);
+        verify(driverRepository).findById(RatingTestUtils.DEFAULT_DRIVER_ID);
         verify(ratingRepository).save(ratingToSave);
         verify(ratingMapper).mapToDto(savedRating);
         verify(passengerService, times(1)).getPassenger(request.getPassengerId());
@@ -83,23 +83,23 @@ public class RatingServiceImplTest {
     void getDriverRatingWhenDriverNotFound() {
         doReturn(false)
                 .when(driverRepository)
-                .existsById(DEFAULT_DRIVER_ID);
+                .existsById(RatingTestUtils.DEFAULT_DRIVER_ID);
 
-        assertThrows(NotFoundException.class, () -> ratingService.getDriverRating(DEFAULT_DRIVER_ID));
+        assertThrows(NotFoundException.class, () -> ratingService.getDriverRating(RatingTestUtils.DEFAULT_DRIVER_ID));
     }
 
     @Test
     void getDriverRatingWhenDriverExists() {
-        DriverRatingResponse ratingResponse = getDriverRatingResponse();
+        DriverRatingResponse ratingResponse = RatingTestUtils.getDriverRatingResponse();
 
         doReturn(true)
                 .when(driverRepository)
-                .existsById(DEFAULT_DRIVER_ID);
-        doReturn(Optional.of(AVERAGE_GRADE))
+                .existsById(RatingTestUtils.DEFAULT_DRIVER_ID);
+        doReturn(Optional.of(RatingTestUtils.AVERAGE_GRADE))
                 .when(ratingRepository)
-                .getRatingsByDriverId(DEFAULT_DRIVER_ID);
+                .getRatingsByDriverId(RatingTestUtils.DEFAULT_DRIVER_ID);
 
-        DriverRatingResponse driverRatingResponse = ratingService.getDriverRating(DEFAULT_DRIVER_ID);
+        DriverRatingResponse driverRatingResponse = ratingService.getDriverRating(RatingTestUtils.DEFAULT_DRIVER_ID);
 
         assertNotNull(driverRatingResponse);
         verify(ratingRepository).getRatingsByDriverId(ratingResponse.getDriverId());

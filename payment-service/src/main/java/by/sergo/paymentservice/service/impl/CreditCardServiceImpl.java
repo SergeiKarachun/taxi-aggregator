@@ -21,7 +21,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import static by.sergo.paymentservice.domain.enums.Operation.PAYMENT;
@@ -131,7 +130,12 @@ public class CreditCardServiceImpl implements CreditCardService {
         if (!creditCardRepository.existsById(id)) {
             throw new NotFoundException(ExceptionMessageUtil.getNotFoundMessage("Credit card", "id", id));
         }
-        checkUniqueCreditCardAndExpirationDate(dto);
+        if (!creditCardRepository.existsByUserIdAndUserType(dto.getUserId(), UserType.valueOf(dto.getUserType()))) {
+            throw new BadRequestException(ExceptionMessageUtil.getAlreadyExistMessage("Credit Card", "userId", dto.getUserId(), "userType", dto.getUserType()));
+        }
+        if (creditCardRepository.existsByCreditCardNumber(dto.getCreditCardNumber())) {
+            throw new BadRequestException(ExceptionMessageUtil.getAlreadyExistMessage("Credit Card", "card number", dto.getCreditCardNumber()));
+        }
     }
 
     private void checkUniqueCreditCardAndExpirationDate(CreditCardCreateUpdate dto) {
@@ -140,9 +144,6 @@ public class CreditCardServiceImpl implements CreditCardService {
         }
         if (creditCardRepository.existsByCreditCardNumber(dto.getCreditCardNumber())) {
             throw new BadRequestException(ExceptionMessageUtil.getAlreadyExistMessage("Credit Card", "card number", dto.getCreditCardNumber()));
-        }
-        if (dto.getExpDate().isBefore(LocalDate.now())) {
-            throw new BadRequestException(ExceptionMessageUtil.getExpirationCardExceptionMessage("Credit card", "expiration date", dto.getExpDate().toString()));
         }
     }
 

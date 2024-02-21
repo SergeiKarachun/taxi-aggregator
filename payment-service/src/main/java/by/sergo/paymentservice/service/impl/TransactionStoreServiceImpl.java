@@ -34,7 +34,6 @@ public class TransactionStoreServiceImpl implements TransactionStoreService {
 
         return ListTransactionStoreResponse.builder()
                 .transactions(responsePage.getContent())
-                //.page(responsePage.getPageable().getPageNumber() + 1)
                 .totalPages(responsePage.getTotalPages())
                 .size(responsePage.getContent().size())
                 .total((int) responsePage.getTotalElements())

@@ -19,6 +19,7 @@ import static by.sergo.paymentservice.domain.enums.UserType.PASSENGER;
 @UtilityClass
 public class CreditCardTestUtil {
     public final Long DEFAULT_ID = 1L;
+    public final Long NOT_EXIST_ID = 99L;
     public final String DEFAULT_ACCOUNT_NUMBER = "95e6fe3a83c845c5b7a5bffe160e14a4";
     public final Long DEFAULT_DRIVER_ID = 1L;
     public final BigDecimal DEFAULT_BALANCE = BigDecimal.valueOf(10);
@@ -35,6 +36,14 @@ public class CreditCardTestUtil {
     public final String DEFAULT_PHONE = "+375331234567";
     public final Double DEFAULT_RATING = 5.0;
     public final String DEFAULT_RIDE_ID = "ride_id";
+    public final String DEFAULT_PATH = "/api/v1/creditcards";
+    public final String DEFAULT_ID_PATH = "/api/v1/creditcards/{id}";
+    public final String DEFAULT_DRIVER_ID_PATH = "/api/v1/creditcards/driver/{id}";
+    public final String DEFAULT_PASSENGER_ID_PATH = "/api/v1/creditcards/passenger/{id}";
+    public final String DEFAULT_PAYMENT_PATH = "/api/v1/creditcards/payment";
+    public final String ID_PARAM_NAME = "id";
+    public final String WITHDRAWAL_PARAM = "sum";
+    public final BigDecimal WITHDRAWAL_SUM= BigDecimal.valueOf(10);
 
     public Account getAccount() {
         return Account.builder()

@@ -1,14 +1,13 @@
 package by.sergo.passengerservice.domain.dto.response;
 
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
 @Builder
 @EqualsAndHashCode
+@NoArgsConstructor
+@AllArgsConstructor
 public class DriverResponse {
     private Long id;
     private String name;

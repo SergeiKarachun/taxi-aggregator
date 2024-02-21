@@ -1,10 +1,9 @@
 package by.sergo.driverservice.domain.entity;
 
 import by.sergo.driverservice.domain.enums.Status;
+import by.sergo.driverservice.util.ConstantUtil;
 import jakarta.persistence.*;
 import lombok.*;
-
-import static by.sergo.driverservice.util.ConstantUtil.DEFAULT_RATING;
 
 @Data
 @NoArgsConstructor
@@ -30,7 +29,7 @@ public class Driver {
     @Enumerated(EnumType.STRING)
     private Status status = Status.AVAILABLE;
     @Builder.Default
-    private Double rating = DEFAULT_RATING;
+    private Double rating = ConstantUtil.DEFAULT_RATING;
     @OneToOne(mappedBy = "driver", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private Car car;
 }

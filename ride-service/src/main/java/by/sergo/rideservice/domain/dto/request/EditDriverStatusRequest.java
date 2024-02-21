@@ -1,14 +1,13 @@
 package by.sergo.rideservice.domain.dto.request;
 
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
 @Builder
 @EqualsAndHashCode
+@NoArgsConstructor
+@AllArgsConstructor
 public class EditDriverStatusRequest {
     private Long driverId;
 }
