@@ -22,6 +22,7 @@
         <testcontainers.version>1.19.4</testcontainers.version>
         <jackson.core.version>2.16.1</jackson.core.version>
         <wiremock.version>3.3.1</wiremock.version>
+        <cucumber.version>7.15.0</cucumber.version>
     </properties>
     <dependencies>
         <dependency>
@@ -113,8 +114,23 @@
             <artifactId>wiremock-standalone</artifactId>
             <version>${wiremock.version}</version>
         </dependency>
+        <dependency>
+            <groupId>io.cucumber</groupId>
+            <artifactId>cucumber-java</artifactId>
+            <version>${cucumber.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.cucumber</groupId>
+            <artifactId>cucumber-junit</artifactId>
+            <version>${cucumber.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.cucumber</groupId>
+            <artifactId>cucumber-spring</artifactId>
+            <version>${cucumber.version}</version>
+        </dependency>
     </dependencies>
-
     <build>
         <plugins>
             <plugin>

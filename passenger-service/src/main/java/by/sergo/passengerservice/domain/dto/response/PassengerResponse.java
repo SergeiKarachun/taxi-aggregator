@@ -8,6 +8,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode
+@ToString
 public class PassengerResponse {
     private Long id;
     private String name;
