@@ -46,7 +46,7 @@ public class RatingServiceImpl implements RatingService {
 
         var rating = ratingMapper.mapToEntity(dto);
         rating.setDriver(driver);
-        var savedRating = ratingRepository.saveAndFlush(rating);
+        var savedRating = ratingRepository.save(rating);
         driver.setRating(getFloorRating(getAverageRating(driverId)));
         driverRepository.save(driver);
         var response = ratingMapper.mapToDto(savedRating);

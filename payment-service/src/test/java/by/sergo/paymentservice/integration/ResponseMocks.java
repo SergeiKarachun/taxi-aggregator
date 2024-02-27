@@ -14,7 +14,7 @@ import static org.springframework.util.StreamUtils.copyToString;
 
 public class ResponseMocks {
     public static void setupMockPassengerResponse(WireMockServer mockService) throws IOException {
-        mockService.stubFor(WireMock.get(WireMock.urlEqualTo("/api/v1/passengers/" + AccountTestUtil.DEFAULT_ID))
+        mockService.stubFor(WireMock.get(WireMock.urlMatching("/api/v1/passengers/" + AccountTestUtil.DEFAULT_ID))
                 .willReturn(WireMock.aResponse()
                         .withStatus(HttpStatus.OK.value())
                         .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
@@ -24,7 +24,7 @@ public class ResponseMocks {
                                         defaultCharset()))));
     }
     public static void setupMockSecondPassengerResponse(WireMockServer mockService) throws IOException {
-        mockService.stubFor(WireMock.get(WireMock.urlEqualTo("/api/v1/passengers/" + 2L))
+        mockService.stubFor(WireMock.get(WireMock.urlMatching("/api/v1/passengers/" + 2L))
                 .willReturn(WireMock.aResponse()
                         .withStatus(HttpStatus.OK.value())
                         .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
@@ -34,7 +34,7 @@ public class ResponseMocks {
                                         defaultCharset()))));
     }
     public static void setupMockDriverResponse(WireMockServer mockService) throws IOException {
-        mockService.stubFor(WireMock.get(WireMock.urlEqualTo("/api/v1/drivers/" + AccountTestUtil.DEFAULT_ID))
+        mockService.stubFor(WireMock.get(WireMock.urlMatching("/api/v1/drivers/" + AccountTestUtil.DEFAULT_ID))
                 .willReturn(WireMock.aResponse()
                         .withStatus(HttpStatus.OK.value())
                         .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
@@ -45,7 +45,7 @@ public class ResponseMocks {
     }
 
     public static void setupMockSecondDriverResponse(WireMockServer mockService) throws IOException {
-        mockService.stubFor(WireMock.get(WireMock.urlEqualTo("/api/v1/drivers/" + 2L))
+        mockService.stubFor(WireMock.get(WireMock.urlMatching("/api/v1/drivers/" + 2L))
                 .willReturn(WireMock.aResponse()
                         .withStatus(HttpStatus.OK.value())
                         .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
@@ -56,7 +56,7 @@ public class ResponseMocks {
     }
 
     public static void setupMockThirstDriverResponse(WireMockServer mockService) throws IOException {
-        mockService.stubFor(WireMock.get(WireMock.urlEqualTo("/api/v1/drivers/" + 3L))
+        mockService.stubFor(WireMock.get(WireMock.urlMatching("/api/v1/drivers/" + 3L))
                 .willReturn(WireMock.aResponse()
                         .withStatus(HttpStatus.OK.value())
                         .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)

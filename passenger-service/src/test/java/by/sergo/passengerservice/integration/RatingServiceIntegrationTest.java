@@ -16,16 +16,22 @@ import by.sergo.passengerservice.util.PassengerTestUtils;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import io.restassured.http.ContentType;
 import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.cloud.client.DefaultServiceInstance;
+import org.springframework.cloud.client.discovery.simple.SimpleDiscoveryProperties;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlGroup;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static by.sergo.passengerservice.integration.ResponseMocks.setupMockDriverResponse;
 import static by.sergo.passengerservice.integration.ResponseMocks.setupMockRideResponse;
@@ -33,7 +39,6 @@ import static by.sergo.passengerservice.util.ExceptionMessageUtil.getNotFoundMes
 import static by.sergo.passengerservice.util.PassengerTestUtils.*;
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-
 
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @SqlGroup({
@@ -59,11 +64,26 @@ public class RatingServiceIntegrationTest extends IntegrationTestConfig {
     private WireMockServer mockDriverService;
     @Autowired
     private WireMockServer mockRideService;
+    @Autowired
+    private SimpleDiscoveryProperties simpleDiscoveryProperties;
 
     @BeforeEach
-    void setUp() throws IOException {
+    void addServiceInstance() throws IOException {
+        DefaultServiceInstance defaultDriverServiceInstance = new DefaultServiceInstance("driver-service", "driver-service", "localhost", mockDriverService.port(), false);
+        DefaultServiceInstance defaultRideServiceInstance = new DefaultServiceInstance("ride-service", "ride-service", "localhost", mockRideService.port(), false);
+
+        Map<String, List<DefaultServiceInstance>> instances = new HashMap<>();
+        instances.put("driver-service", Collections.singletonList(defaultDriverServiceInstance));
+        instances.put("ride-service", Collections.singletonList(defaultRideServiceInstance));
+        simpleDiscoveryProperties.setInstances(instances);
+
         setupMockDriverResponse(mockDriverService);
         setupMockRideResponse(mockRideService);
+    }
+
+    @AfterEach
+    void removeServiceInstance() {
+        simpleDiscoveryProperties.getInstances().clear();
     }
 
     @Test

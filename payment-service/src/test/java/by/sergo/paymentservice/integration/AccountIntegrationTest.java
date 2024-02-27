@@ -13,10 +13,13 @@ import by.sergo.paymentservice.util.ExceptionMessageUtil;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import io.restassured.http.ContentType;
 import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.cloud.client.DefaultServiceInstance;
+import org.springframework.cloud.client.discovery.simple.SimpleDiscoveryProperties;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.jdbc.Sql;
@@ -25,6 +28,9 @@ import org.springframework.test.context.jdbc.SqlGroup;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static by.sergo.paymentservice.integration.ResponseMocks.setupMockDriverResponse;
 import static by.sergo.paymentservice.integration.ResponseMocks.setupMockSecondDriverResponse;
@@ -48,7 +54,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @ContextConfiguration(classes = {WireMockConfig.class})
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class AccountIntegrationTest extends IntegrationTestConfig {
-
     private final AccountMapper accountMapper;
     private final AccountRepository accountRepository;
     @LocalServerPort
@@ -56,11 +61,24 @@ public class AccountIntegrationTest extends IntegrationTestConfig {
 
     @Autowired
     private WireMockServer mockDriverService;
+    @Autowired
+    private SimpleDiscoveryProperties simpleDiscoveryProperties;
 
     @BeforeEach
-    void setUp() throws IOException {
+    void addServiceInstance() throws IOException {
+        DefaultServiceInstance defaultDriverServiceInstance = new DefaultServiceInstance("driver-service", "driver-service", "localhost", mockDriverService.port(), false);
+
+        Map<String, List<DefaultServiceInstance>> instances = new HashMap<>();
+        instances.put("driver-service", Collections.singletonList(defaultDriverServiceInstance));
+        simpleDiscoveryProperties.setInstances(instances);
+
         setupMockDriverResponse(mockDriverService);
-        setupMockSecondDriverResponse(mockDriverService);
+        setupMockSecondDriverResponse(mockDriverService);    }
+
+
+    @AfterEach
+    void removeServiceInstance() {
+        simpleDiscoveryProperties.getInstances().clear();
     }
 
     @Test
