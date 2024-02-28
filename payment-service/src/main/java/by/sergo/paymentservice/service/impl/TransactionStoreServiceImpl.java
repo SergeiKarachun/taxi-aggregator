@@ -10,14 +10,18 @@ import by.sergo.paymentservice.service.exception.BadRequestException;
 import by.sergo.paymentservice.util.ExceptionMessageUtil;
 import by.sergo.paymentservice.service.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import static by.sergo.paymentservice.domain.enums.UserType.PASSENGER;
+import static by.sergo.paymentservice.util.ConstantUtils.GET_DRIVER_TRANSACTION_LOG;
+import static by.sergo.paymentservice.util.ConstantUtils.GET_PASSENGER_TRANSACTION_LOG;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class TransactionStoreServiceImpl implements TransactionStoreService {
     private final TransactionStoreMapper transactionStoreMapper;
     private final TransactionStoreRepository transactionStoreRepository;
@@ -31,6 +35,7 @@ public class TransactionStoreServiceImpl implements TransactionStoreService {
         var pageRequest = getPageRequest(page, size);
         var responsePage = transactionStoreRepository.findAllByAccountNumber(accountByDriverId.getAccountNumber(), pageRequest)
                 .map(transactionStoreMapper::mapToDto);
+        log.info(GET_DRIVER_TRANSACTION_LOG, driverId);
 
         return ListTransactionStoreResponse.builder()
                 .transactions(responsePage.getContent())
@@ -48,6 +53,7 @@ public class TransactionStoreServiceImpl implements TransactionStoreService {
         var pageRequest = getPageRequest(page, size);
         var responsePage = transactionStoreRepository.findAllByCreditCardNumber(creditCard.getCreditCardNumber(), pageRequest)
                 .map(transactionStoreMapper::mapToDto);
+        log.info(GET_PASSENGER_TRANSACTION_LOG, passengerId);
 
         return ListTransactionStoreResponse.builder()
                 .transactions(responsePage.getContent())

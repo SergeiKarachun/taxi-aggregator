@@ -15,6 +15,7 @@ import by.sergo.paymentservice.service.exception.BadRequestException;
 import by.sergo.paymentservice.service.exception.NotFoundException;
 import by.sergo.paymentservice.util.ExceptionMessageUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,10 +25,12 @@ import java.util.UUID;
 
 import static by.sergo.paymentservice.domain.enums.Operation.WITHDRAWAL;
 import static by.sergo.paymentservice.domain.enums.UserType.DRIVER;
+import static by.sergo.paymentservice.util.ConstantUtils.*;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@Slf4j
 public class AccountServiceImpl implements AccountService {
     private final AccountMapper accountMapper;
     private final AccountRepository accountRepository;
@@ -45,7 +48,9 @@ public class AccountServiceImpl implements AccountService {
         var account = accountMapper.mapToEntity(dto);
         account.setAccountNumber(generateAccountNumber());
         account.setId(null);
-        return accountMapper.mapToDto(accountRepository.save(account));
+        var savedAccount = accountRepository.save(account);
+        log.info(CREATE_ACCOUNT_LOG, savedAccount.getId());
+        return accountMapper.mapToDto(savedAccount);
     }
 
     @Override
@@ -53,6 +58,7 @@ public class AccountServiceImpl implements AccountService {
     public AccountResponse deleteById(Long id) {
         var account = getByIdOrElseThrow(id);
         accountRepository.deleteById(id);
+        log.info(DELETE_ACCOUNT_LOG, id);
         return accountMapper.mapToDto(account);
     }
 
@@ -79,6 +85,8 @@ public class AccountServiceImpl implements AccountService {
                 .operation(WITHDRAWAL)
                 .build();
         transactionStoreRepository.save(transaction);
+        log.info(WITHDRAWAL_MONEY_FROM_ACCOUNT_LOG, driverId, sum);
+
         return accountMapper.mapToDto(accountRepository.save(account));
     }
 
@@ -93,18 +101,24 @@ public class AccountServiceImpl implements AccountService {
     }
 
     private CreditCard getByUserIdAndUserTypeOrElseThrow(Long driverId) {
-        return creditCardRepository.findByUserIdAndUserType(driverId, DRIVER)
+        var creditCard = creditCardRepository.findByUserIdAndUserType(driverId, DRIVER)
                 .orElseThrow(() -> new BadRequestException(ExceptionMessageUtil.getNotFoundMessage("CreditCard", "driverId", driverId)));
+        log.info(GET_CREDIT_CARD_BY_DRIVER_ID_LOG, driverId);
+        return creditCard;
     }
 
     private Account getByIdOrElseThrow(Long id) {
-        return accountRepository.findById(id)
+        var account = accountRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(ExceptionMessageUtil.getNotFoundMessage("Account", "id", id)));
+        log.info(GET_ACCOUNT_LOG, id);
+        return account;
     }
 
     private Account getByDriverIdOrElseThrow(Long driverId) {
-        return accountRepository.findByDriverId(driverId)
+        var account = accountRepository.findByDriverId(driverId)
                 .orElseThrow(() -> new NotFoundException(ExceptionMessageUtil.getNotFoundMessage("Account", "driverId", driverId)));
+        log.info(GET_ACCOUNT_BY_DRIVER_ID_LOG, driverId);
+        return account;
     }
 
     private void checkDriver(Long driverId) {

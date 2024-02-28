@@ -19,6 +19,7 @@ import by.sergo.rideservice.service.exception.BadRequestException;
 import by.sergo.rideservice.util.ExceptionMessageUtil;
 import by.sergo.rideservice.service.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -34,12 +35,12 @@ import java.util.Random;
 
 import static by.sergo.rideservice.domain.enums.PaymentMethod.CARD;
 import static by.sergo.rideservice.domain.enums.Status.*;
-import static by.sergo.rideservice.util.ConstantUtil.MAX_PRICE;
-import static by.sergo.rideservice.util.ConstantUtil.MIN_PRICE;
+import static by.sergo.rideservice.util.ConstantUtil.*;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@Slf4j
 public class RideServiceImpl implements RideService {
 
     private final RideRepository rideRepository;
@@ -64,12 +65,14 @@ public class RideServiceImpl implements RideService {
                 .rideId(savedRide.getId().toString())
                 .build()
         );
+        log.info(CREATE_RIDE_LOG, savedRide.getId());
         return getRideResponse(savedRide);
     }
 
     @Override
     public RideResponse getById(String id) {
         Ride ride = getByIdOrElseThrow(id);
+        log.info(GET_RIDE_LOG, id);
         return getRideResponse(ride);
     }
 
@@ -78,6 +81,7 @@ public class RideServiceImpl implements RideService {
     public RideResponse deleteById(String id) {
         var ride = getByIdOrElseThrow(id);
         rideRepository.deleteById(id);
+        log.info(DELETE_RIDE_LOG, id);
         return rideMapper.mapToDto(ride);
     }
 
@@ -92,6 +96,7 @@ public class RideServiceImpl implements RideService {
         mappedRide.setId(ride.getId());
         mappedRide.setPrice(price);
         var savedRide = rideRepository.save(mappedRide);
+        log.info(UPDATE_RIDE_LOG, id);
         return getRideResponse(savedRide);
     }
 
@@ -106,6 +111,7 @@ public class RideServiceImpl implements RideService {
 
         ride.setDriverId(response.getDriverId());
         ride.setStatus(ACCEPTED);
+        log.info(RIDE_ACCEPTED_LOG, response.getRideId(), response.getDriverId());
         rideRepository.save(ride);
     }
 
@@ -128,6 +134,7 @@ public class RideServiceImpl implements RideService {
 
         ride.setStatus(REJECTED);
         var savedRide = rideRepository.save(ride);
+        log.info(RIDE_REJECTED_LOG, rideId);
         return getRideResponse(savedRide);
     }
 
@@ -142,6 +149,7 @@ public class RideServiceImpl implements RideService {
         ride.setStartTime(LocalDateTime.now());
         ride.setStatus(TRANSPORT);
         var savedRide = rideRepository.save(ride);
+        log.info(RIDE_STARTED_LOG, rideId);
         return getRideResponse(savedRide);
     }
 
@@ -156,6 +164,7 @@ public class RideServiceImpl implements RideService {
         ride.setStatus(FINISHED);
         ride.setEndTime(LocalDateTime.now());
         var savedRide = rideRepository.save(ride);
+        log.info(RIDE_FINISHED_LOG, rideId);
         statusProducer.sendMessage(EditDriverStatusRequest.builder()
                 .driverId(ride.getDriverId())
                 .build());
@@ -170,6 +179,7 @@ public class RideServiceImpl implements RideService {
 
         Page<RideResponse> responsePage = rideRepository.findAllByPassengerIdAndStatus(passengerId, Status.valueOf(status.toUpperCase()), pageRequest)
                 .map(this::getRideResponse);
+        log.info(GET_RIDES_BY_PASSENGER_AND_STATUS, passengerId, status);
         return RideListResponse.builder()
                 .rides(responsePage.getContent())
                 .totalPages(responsePage.getTotalPages())
@@ -187,6 +197,7 @@ public class RideServiceImpl implements RideService {
 
         Page<RideResponse> responsePage = rideRepository.findAllByDriverIdAndStatus(driverId, Status.valueOf(status.toUpperCase()), pageRequest)
                 .map(this::getRideResponse);
+        log.info(GET_RIDES_BY_DRIVER_AND_STATUS, driverId, status);
         return RideListResponse.builder()
                 .rides(responsePage.getContent())
                 .totalPages(responsePage.getTotalPages())
@@ -208,6 +219,8 @@ public class RideServiceImpl implements RideService {
             rideWithoutDriver.setDriverId(driver.getDriverId());
             rideWithoutDriver.setStatus(Status.ACCEPTED);
             rideRepository.save(rideWithoutDriver);
+            log.info(RIDE_ACCEPTED_LOG, rideWithoutDriver.getId(), rideWithoutDriver.getDriverId());
+
             statusProducer.sendMessage(EditDriverStatusRequest.builder()
                     .driverId(driver.getDriverId())
                     .build());

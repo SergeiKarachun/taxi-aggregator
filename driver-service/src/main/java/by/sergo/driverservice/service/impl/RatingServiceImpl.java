@@ -14,16 +14,18 @@ import by.sergo.driverservice.service.RideService;
 import by.sergo.driverservice.service.exception.BadRequestException;
 import by.sergo.driverservice.service.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static by.sergo.driverservice.util.ConstantUtil.DEFAULT_RATING;
+import static by.sergo.driverservice.util.ConstantUtil.*;
 import static by.sergo.driverservice.util.ExceptionMessageUtil.getAlreadyExistMessage;
 import static by.sergo.driverservice.util.ExceptionMessageUtil.getNotFoundMessage;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@Slf4j
 public class RatingServiceImpl implements RatingService {
 
     private final DriverRepository driverRepository;
@@ -52,6 +54,7 @@ public class RatingServiceImpl implements RatingService {
         var response = ratingMapper.mapToDto(savedRating);
         response.setPassenger(passengerResponse);
         response.setRide(rideResponse);
+        log.info(RATE_DRIVER_LOG, driverId);
         return response;
     }
 
@@ -59,6 +62,7 @@ public class RatingServiceImpl implements RatingService {
     public DriverRatingResponse getDriverRating(Long driverId) {
         if (driverRepository.existsById(driverId)) {
             double driverRating = getAverageRating(driverId);
+            log.info(GET_DRIVER_RATING, driverId);
             return DriverRatingResponse.builder()
                     .driverId(driverId)
                     .rating(getFloorRating(driverRating))

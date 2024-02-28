@@ -11,6 +11,7 @@ import by.sergo.passengerservice.service.exception.BadRequestException;
 import by.sergo.passengerservice.util.ExceptionMessageUtil;
 import by.sergo.passengerservice.service.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -21,11 +22,13 @@ import java.lang.reflect.Field;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static by.sergo.passengerservice.util.ConstantUtil.*;
 import static by.sergo.passengerservice.util.ExceptionMessageUtil.*;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@Slf4j
 public class PassengerServiceImpl implements PassengerService {
 
     private final PassengerMapper passengerMapper;
@@ -36,6 +39,7 @@ public class PassengerServiceImpl implements PassengerService {
     public PassengerResponse create(PassengerCreateUpdateRequest dto) {
         checkIsPassengerUnique(dto);
         var savedPassenger = passengerRepository.save(passengerMapper.mapToEntity(dto));
+        log.info(CREATE_NEW_PASSENGER_LOG, savedPassenger.getId());
         return passengerMapper.mapToDto(savedPassenger);
     }
 
@@ -48,6 +52,7 @@ public class PassengerServiceImpl implements PassengerService {
 
         var passenger = passengerMapper.mapToEntity(dto);
         passenger.setId(passengerToUpdate.getId());
+        log.info(UPDATE_PASSENGER_LOG, passenger.getId());
         return passengerMapper.mapToDto(passengerRepository.save(passenger));
     }
 
@@ -56,12 +61,14 @@ public class PassengerServiceImpl implements PassengerService {
     public PassengerResponse delete(Long id) {
         var passenger = getByIdOrElseThrow(id);
         passengerRepository.deleteById(id);
+        log.info(DELETE_PASSENGER_LOG, id);
         return passengerMapper.mapToDto(passenger);
     }
 
     @Override
     public PassengerResponse getById(Long id) {
         var passenger = getByIdOrElseThrow(id);
+        log.info(GET_PASSENGER_LOG, id);
         return passengerMapper.mapToDto(passenger);
     }
 
@@ -69,6 +76,7 @@ public class PassengerServiceImpl implements PassengerService {
     public PassengerResponse getByPhone(String phone) {
         var passenger = passengerRepository.findByPhone(phone)
                 .orElseThrow(() -> new NotFoundException(getNotFoundMessage("Passenger", "phone", phone)));
+        log.info(GET_PASSENGER_BY_PHONE_LOG, phone);
         return passengerMapper.mapToDto(passenger);
     }
 
@@ -77,6 +85,7 @@ public class PassengerServiceImpl implements PassengerService {
         List<PassengerResponse> passengers = passengerRepository.findAll().stream()
                 .map(passengerMapper::mapToDto)
                 .collect(Collectors.toList());
+        log.info(GET_ALL_PASSENGERS_LOG);
 
         return PassengerListResponse.builder()
                 .passengers(passengers)
@@ -87,6 +96,7 @@ public class PassengerServiceImpl implements PassengerService {
 
     @Override
     public PassengerListResponse getAll(Integer page, Integer size, String field) {
+        log.info(GET_PAGEABLE_PASSENGERS_LOG);
         PageRequest pageRequest = getPageRequest(page, size, field);
         Page<Passenger> responsePage = passengerRepository.findAll(pageRequest);
         List<Passenger> passengers = responsePage.getContent();

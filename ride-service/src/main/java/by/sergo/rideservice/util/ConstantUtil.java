@@ -16,4 +16,15 @@ public class ConstantUtil {
     public static final Long DEFAULT_ID = 0L;
     public static final Integer DEFAULT_CAR_YEAR = 0;
     public static final Double DEFAULT_RATING = 5.0;
+    public static final String CREATE_RIDE_LOG = "Ride with id {} created";
+    public static final String GET_RIDE_LOG = "Get ride with id {}";
+    public static final String DELETE_RIDE_LOG = "Ride with id {} deleted";
+    public static final String UPDATE_RIDE_LOG = "Ride with id {} updated";
+    public static final String RIDE_ACCEPTED_LOG = "Ride with id {} accepted and appointed driver with id {}";
+    public static final String RIDE_REJECTED_LOG = "Ride with id {} rejected";
+    public static final String RIDE_STARTED_LOG = "Ride with id {} started";
+    public static final String RIDE_FINISHED_LOG = "Ride with id {} finished";
+    public static final String GET_RIDES_BY_PASSENGER_AND_STATUS = "Get rides with passengerId {} and status {}";
+    public static final String GET_RIDES_BY_DRIVER_AND_STATUS = "Get rides with driverId {} and status {}";
+
 }

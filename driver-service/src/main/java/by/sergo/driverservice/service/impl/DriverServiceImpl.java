@@ -16,17 +16,20 @@ import by.sergo.driverservice.repository.DriverRepository;
 import by.sergo.driverservice.service.exception.BadRequestException;
 import by.sergo.driverservice.service.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
+import static by.sergo.driverservice.util.ConstantUtil.*;
 import static by.sergo.driverservice.util.ExceptionMessageUtil.CAN_NOT_CREATE_DRIVER_MESSAGE;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@Slf4j
 public class DriverServiceImpl implements DriverService {
 
     private final DriverRepository driverRepository;
@@ -39,7 +42,10 @@ public class DriverServiceImpl implements DriverService {
         checkIsDriverUnique(dto);
         return Optional.of(driverMapper.mapToEntity(dto))
                 .map(driverRepository::save)
-                .map(driverMapper::mapToDto)
+                .map(entity -> {
+                    log.info(CREATE_DRIVER_LOG, entity.getId());
+                    return driverMapper.mapToDto(entity);
+                })
                 .orElseThrow(() -> new BadRequestException(CAN_NOT_CREATE_DRIVER_MESSAGE));
     }
 
@@ -50,6 +56,7 @@ public class DriverServiceImpl implements DriverService {
         checkIsDriverForUpdateUnique(dto, existDriver);
         var driverToSave = driverMapper.mapToEntity(dto);
         driverToSave.setId(id);
+        log.info(UPDATE_DRIVER_LOG, id);
         return driverMapper.mapToDto(driverRepository.save(driverToSave));
     }
 
@@ -58,17 +65,20 @@ public class DriverServiceImpl implements DriverService {
     public DriverResponse delete(Long id) {
         var driver = getByIdOrElseThrow(id);
         driverRepository.deleteById(id);
+        log.info(DELETE_DRIVER_LOG, id);
         return driverMapper.mapToDto(driver);
     }
 
     @Override
     public DriverResponse getById(Long id) {
         var driver = getByIdOrElseThrow(id);
+        log.info(GET_DRIVER_LOG, id);
         return driverMapper.mapToDto(driver);
     }
 
     @Override
     public DriverListResponse getAvailableDrivers(Integer page, Integer size, String orderBy) {
+        log.info(GET_AVAILABLE_DRIVERS_LOG);
         PageRequest pageRequest = PageRequestUtil.getPageRequest(page, size, orderBy, DriverResponse.class);
         var responsePage = driverRepository.getAllByStatus(Status.AVAILABLE, pageRequest)
                 .map(driverMapper::mapToDto);
@@ -83,6 +93,7 @@ public class DriverServiceImpl implements DriverService {
 
     @Override
     public DriverListResponse getAll(Integer page, Integer size, String orderBy) {
+        log.info(GET_DRIVERS_LOG);
         PageRequest pageRequest = PageRequestUtil.getPageRequest(page, size, orderBy, DriverResponse.class);
         var responsePage = driverRepository.findAll(pageRequest)
                 .map(driverMapper::mapToDto);
@@ -99,6 +110,7 @@ public class DriverServiceImpl implements DriverService {
     @Transactional
     public DriverResponse changeStatus(Long id) {
         var driver = getByIdOrElseThrow(id);
+        log.info(UPDATE_DRIVER_STATUS_LOG, id);
         if (driver.getStatus().equals(Status.AVAILABLE)) {
             driver.setStatus(Status.UNAVAILABLE);
         } else {
@@ -115,6 +127,7 @@ public class DriverServiceImpl implements DriverService {
     public void handleDriverForRide(FindDriverForRideRequest request) {
         Optional<Driver> driverForRide = driverRepository.findFirstByStatusOrderByRating();
         if (driverForRide.isPresent()) {
+            log.info(FIND_DRIVER_FOR_RIDE_LOG, driverForRide.get().getId());
             DriverForRideResponse driver = DriverForRideResponse.builder()
                     .driverId(driverForRide.get().getId())
                     .rideId(request.getRideId())

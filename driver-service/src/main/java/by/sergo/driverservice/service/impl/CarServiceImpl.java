@@ -12,6 +12,7 @@ import by.sergo.driverservice.service.exception.BadRequestException;
 import by.sergo.driverservice.service.exception.NotFoundException;
 import by.sergo.driverservice.util.PageRequestUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,11 +20,13 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Objects;
 import java.util.Optional;
 
+import static by.sergo.driverservice.util.ConstantUtil.*;
 import static by.sergo.driverservice.util.ExceptionMessageUtil.*;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@Slf4j
 public class CarServiceImpl implements CarService {
 
     private final CarRepository carRepository;
@@ -36,7 +39,10 @@ public class CarServiceImpl implements CarService {
         checkCarForCreate(dto);
         return Optional.of(carMapper.mapToEntity(dto))
                 .map(carRepository::save)
-                .map(carMapper::mapToDto)
+                .map(car -> {
+                    log.info(CREATE_CAR_LOG, car.getId());
+                    return carMapper.mapToDto(car);
+                })
                 .orElseThrow(() -> new BadRequestException(CAN_NOT_CREATE_CAR_MESSAGE));
     }
 
@@ -49,7 +55,10 @@ public class CarServiceImpl implements CarService {
         carToSave.setId(id);
         return Optional.of(carToSave)
                 .map(carRepository::save)
-                .map(carMapper::mapToDto)
+                .map(car -> {
+                    log.info(UPDATE_CAR_LOG, id);
+                    return carMapper.mapToDto(car);
+                })
                 .orElseThrow(() -> new BadRequestException(CAN_NOT_UPDATE_CAR_MESSAGE));
     }
 
@@ -58,12 +67,14 @@ public class CarServiceImpl implements CarService {
     public CarResponse delete(Long id) {
         var car = getByIdOrElseThrow(id);
         carRepository.deleteById(id);
+        log.info(DELETE_CAR_LOG, id);
         return carMapper.mapToDto(car);
     }
 
     @Override
     public CarResponse getById(Long id) {
         var car = getByIdOrElseThrow(id);
+        log.info(GET_CAR_LOG, id);
         return carMapper.mapToDto(car);
     }
 
@@ -72,11 +83,13 @@ public class CarServiceImpl implements CarService {
         var car = carRepository.getCarByDriverId(driverId);
         var existCar = car
                 .orElseThrow(() -> new NotFoundException(getNotFoundMessage("Car", "driverId", driverId)));
+        log.info(GET_CAR_BY_DRIVER_ID_LOG, driverId);
         return carMapper.mapToDto(existCar);
     }
 
     @Override
     public CarListResponse getAll(Integer page, Integer size, String orderBy) {
+        log.info(GET_CARS_LOG);
         PageRequest pageRequest = PageRequestUtil.getPageRequest(page, size, orderBy, Car.class);
         var responsePage = carRepository.findAll(pageRequest)
                 .map(carMapper::mapToDto);
