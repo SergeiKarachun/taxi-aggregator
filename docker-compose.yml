@@ -106,7 +106,7 @@ services:
 
   elasticsearch:
     image: elasticsearch:7.17.17
-    container_name: elasticsearch_springboot
+    container_name: elasticsearch
     environment:
       - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
@@ -121,7 +121,7 @@ services:
 
   kibana:
     image: kibana:7.17.17
-    container_name: kibana_springboot
+    container_name: kibana
     ports:
       - '5601:5601'
     environment:
@@ -134,7 +134,7 @@ services:
 
   logstash:
     image: logstash:7.17.17
-    container_name: logstash_springboot
+    container_name: logstash
     volumes:
       - ./monitoring/logstash/pipeline:/usr/share/logstash/pipeline:ro
       - ./monitoring/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
@@ -146,6 +146,14 @@ services:
       - taxi_aggregator
     depends_on:
       - elasticsearch
+
+  zipkin:
+    image: openzipkin/zipkin:3.0.0
+    container_name: zipkin
+    networks:
+      - taxi_aggregator
+    ports:
+      - '9411:9411'
 
   eureka-server:
     image: eureka-server:0.0.1
@@ -162,6 +170,7 @@ services:
       - taxi_aggregator
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
+      - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
     depends_on:
       - eureka-server
     ports:
@@ -179,6 +188,7 @@ services:
         - SPRING_DATASOURCE_USERNAME=postgres
         - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
         - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
+        - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
     depends_on:
       - postgrestaxi
       - eureka-server
@@ -197,6 +207,7 @@ services:
       - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
       - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
+      - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
     depends_on:
       - eureka-server
       - postgrestaxi
@@ -218,6 +229,7 @@ services:
       - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
       - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
+      - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
     depends_on:
       - eureka-server
       - mongo_db
@@ -235,6 +247,7 @@ services:
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
+      - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
     depends_on:
       - eureka-server
       - postgrestaxi

@@ -81,6 +81,9 @@ resilience4j:
         base-config: default
 
 management:
+  tracing:
+    sampling:
+      probability: 1.0
   endpoints:
     web:
       exposure:
