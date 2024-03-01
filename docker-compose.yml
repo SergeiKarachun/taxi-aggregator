@@ -68,6 +68,17 @@ services:
     depends_on:
       - zookeeper
 
+  kafka-exporter:
+    image: danielqsj/kafka-exporter:v1.7.0
+    container_name: kafka-exporter
+    command: [ "--kafka.server=kafka:29092" ]
+    ports:
+      - '9308:9308'
+    networks:
+      - taxi_aggregator
+    depends_on:
+      - kafka
+
   prometheus:
     image: prom/prometheus:v2.50.1
     container_name: prometheus
@@ -93,6 +104,48 @@ services:
     depends_on:
       - prometheus
 
+  elasticsearch:
+    image: elasticsearch:7.17.17
+    container_name: elasticsearch_springboot
+    environment:
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - "discovery.type=single-node"
+      - xpack.security.enabled=false
+    ports:
+      - '9200:9200'
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    networks:
+      - taxi_aggregator
+
+  kibana:
+    image: kibana:7.17.17
+    container_name: kibana_springboot
+    ports:
+      - '5601:5601'
+    environment:
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+      ELASTICSEARCH_HOSTS: '["http://elasticsearch:9200"]'
+    depends_on:
+      - elasticsearch
+    networks:
+      - taxi_aggregator
+
+  logstash:
+    image: logstash:7.17.17
+    container_name: logstash_springboot
+    volumes:
+      - ./monitoring/logstash/pipeline:/usr/share/logstash/pipeline:ro
+      - ./monitoring/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
+    ports:
+      - '5000:5000'
+    environment:
+      LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+    networks:
+      - taxi_aggregator
+    depends_on:
+      - elasticsearch
 
   eureka-server:
     image: eureka-server:0.0.1
@@ -188,6 +241,8 @@ services:
 
 volumes:
   data: {}
+  elasticsearch_data:
+    driver: local
 
 networks:
   taxi_aggregator:
