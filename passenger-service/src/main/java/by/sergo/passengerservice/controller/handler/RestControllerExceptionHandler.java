@@ -40,6 +40,7 @@ public class RestControllerExceptionHandler {
             String errorMessage = error.getDefaultMessage();
             errors.put(fieldName, errorMessage);
         });
+        log.error(errors.toString());
         var response = ValidationExceptionResponse.builder()
                 .status(HttpStatus.BAD_REQUEST)
                 .errors(errors)
@@ -58,15 +59,17 @@ public class RestControllerExceptionHandler {
     public ResponseEntity<RestErrorResponse> handleFeignException(FeignException feignException) {
         var start = feignException.getMessage().indexOf("[\"");
         var end = feignException.getMessage().indexOf("\"]");
-        String res = feignException.getMessage().substring(start + 2, end);
+        String message = feignException.getMessage().substring(start + 2, end);
+        log.error(message);
         return new ResponseEntity<>(RestErrorResponse.builder()
-                .messages(Collections.singletonList(res))
+                .messages(Collections.singletonList(message))
                 .status(HttpStatus.valueOf(feignException.status()))
                 .time(LocalDateTime.now())
                 .build(), HttpStatus.valueOf(feignException.status()));
     }
 
     private ResponseEntity<RestErrorResponse> createResponse(Exception ex, HttpStatus status) {
+        log.error(ex.getMessage());
         return new ResponseEntity<>(RestErrorResponse.builder()
                 .messages(Collections.singletonList(ex.getMessage()))
                 .status(status)

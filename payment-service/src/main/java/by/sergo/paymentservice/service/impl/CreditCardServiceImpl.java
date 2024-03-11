@@ -18,6 +18,7 @@ import by.sergo.paymentservice.service.exception.BadRequestException;
 import by.sergo.paymentservice.util.ExceptionMessageUtil;
 import by.sergo.paymentservice.service.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,10 +27,12 @@ import java.time.LocalDateTime;
 import static by.sergo.paymentservice.domain.enums.Operation.PAYMENT;
 import static by.sergo.paymentservice.domain.enums.UserType.DRIVER;
 import static by.sergo.paymentservice.domain.enums.UserType.PASSENGER;
+import static by.sergo.paymentservice.util.ConstantUtils.*;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@Slf4j
 public class CreditCardServiceImpl implements CreditCardService {
     private final CreditCardRepository creditCardRepository;
     private final AccountRepository accountRepository;
@@ -48,6 +51,7 @@ public class CreditCardServiceImpl implements CreditCardService {
         var creditCard = creditCardMapper.mapToEntity(dto);
         creditCard.setId(null);
         var savedCreditCard = creditCardRepository.save(creditCard);
+        log.info(CREATE_CREDIT_CARD_LOG, savedCreditCard.getId());
         return getCreditCardResponse(userResponse, savedCreditCard);
     }
 
@@ -60,6 +64,7 @@ public class CreditCardServiceImpl implements CreditCardService {
 
         var creditCard = creditCardMapper.mapToEntity(dto);
         creditCard.setId(id);
+        log.info(CHANGE_CREDIT_CARD_LOG, id);
         return getCreditCardResponse(userResponse, creditCardRepository.save(creditCard));
     }
 
@@ -68,6 +73,7 @@ public class CreditCardServiceImpl implements CreditCardService {
     public CreditCardResponse deleteById(Long id) {
         var creditCard = getByIdOrElseThrow(id);
         creditCardRepository.deleteById(id);
+        log.info(DELETE_CREDIT_CARD_LOG, id);
         return creditCardMapper.mapToDto(creditCard);
     }
 
@@ -77,6 +83,7 @@ public class CreditCardServiceImpl implements CreditCardService {
 
         var creditCard = creditCardRepository.findByUserIdAndUserType(driverId, DRIVER)
                 .orElseThrow(() -> new NotFoundException(ExceptionMessageUtil.getNotFoundMessage("Credit card with type driver", "userId", driverId)));
+        log.info(GET_CREDIT_CARD_BY_DRIVER_ID_LOG, driverId);
         return getCreditCardResponse(userResponse, creditCard);
     }
 
@@ -85,6 +92,7 @@ public class CreditCardServiceImpl implements CreditCardService {
         UserResponse userResponse = getUserResponse(passengerId, PASSENGER.name());
 
         CreditCard creditCard = getPassengerCreditCard(passengerId);
+        log.info(GET_CREDIT_CARD_BY_PASSENGER_ID_LOG, passengerId);
         return getCreditCardResponse(userResponse, creditCard);
     }
 
@@ -113,6 +121,7 @@ public class CreditCardServiceImpl implements CreditCardService {
                 .operation(PAYMENT)
                 .build();
         transactionStoreRepository.save(transaction);
+        log.info(MAKE_PAYMENT_LOG, payment.getRideId());
         return getCreditCardResponse(userResponse, savedCreditCard);
     }
 

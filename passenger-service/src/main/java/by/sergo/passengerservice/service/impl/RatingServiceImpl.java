@@ -12,16 +12,18 @@ import by.sergo.passengerservice.service.RideService;
 import by.sergo.passengerservice.service.exception.BadRequestException;
 import by.sergo.passengerservice.service.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static by.sergo.passengerservice.util.ConstantUtil.DEFAULT_RATING;
+import static by.sergo.passengerservice.util.ConstantUtil.*;
 import static by.sergo.passengerservice.util.ExceptionMessageUtil.getAlreadyExistMessage;
 import static by.sergo.passengerservice.util.ExceptionMessageUtil.getNotFoundMessage;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@Slf4j
 public class RatingServiceImpl implements RatingService {
 
     private final RatingRepository ratingRepository;
@@ -48,12 +50,14 @@ public class RatingServiceImpl implements RatingService {
         var response = ratingMapper.mapToDto(savedRating);
         response.setRide(rideResponse);
         response.setDriver(driverResponse);
+        log.info(RATE_PASSENGER_LOG, passengerId);
         return response;
     }
 
     @Override
     public PassengerRatingResponse getPassengerRating(Long passengerId) {
         if (passengerRepository.existsById(passengerId)) {
+            log.info(GET_PASSENGER_RATING_LOG, passengerId);
             double passengerRating = getAverageRating(passengerId);
             return PassengerRatingResponse.builder()
                     .passengerId(passengerId)

@@ -39,6 +39,7 @@ public class RestControllerExceptionHandler {
         List<String> messages = new ArrayList<>();
         messages.add("Not valid structure of JSON");
         messages.add(ex.getMessage());
+        log.error(messages.toString());
         return new ResponseEntity<>(RestErrorResponse.builder()
                 .messages(messages)
                 .status(HttpStatus.BAD_REQUEST)
@@ -60,6 +61,7 @@ public class RestControllerExceptionHandler {
                 .message("Please check input parameters")
                 .time(LocalDateTime.now())
                 .build();
+        log.error(errors.toString());
         return new ResponseEntity<>(response, response.getStatus());
     }
 
@@ -67,9 +69,10 @@ public class RestControllerExceptionHandler {
     public ResponseEntity<RestErrorResponse> handleFeignException(FeignException feignException) {
         var start = feignException.getMessage().indexOf("[\"");
         var end = feignException.getMessage().indexOf("\"]");
-        String res = feignException.getMessage().substring(start + 2, end);
+        String message = feignException.getMessage().substring(start + 2, end);
+        log.error(message);
         return new ResponseEntity<>(RestErrorResponse.builder()
-                .messages(Collections.singletonList(res))
+                .messages(Collections.singletonList(message))
                 .status(HttpStatus.valueOf(feignException.status()))
                 .time(LocalDateTime.now())
                 .build(), HttpStatus.valueOf(feignException.status()));
@@ -81,6 +84,7 @@ public class RestControllerExceptionHandler {
     }
 
     private ResponseEntity<RestErrorResponse> createResponse(Exception ex, HttpStatus status) {
+        log.error(ex.getMessage());
         return new ResponseEntity<>(RestErrorResponse.builder()
                 .messages(Collections.singletonList(ex.getMessage()))
                 .status(status)

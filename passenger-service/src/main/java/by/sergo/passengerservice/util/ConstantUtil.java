@@ -15,6 +15,14 @@ public class ConstantUtil {
     public static final String DEFAULT_PHONE = "+375290000000";
     public static final Long DEFAULT_ID = 0L;
     public static final Integer DEFAULT_CAR_YEAR = 0;
-
+    public static final String GET_PASSENGER_RATING_LOG = "Get passenger rating with id {} ";
+    public static final String RATE_PASSENGER_LOG = "Passenger with id {} got new grade, rating was updated";
+    public static final String CREATE_NEW_PASSENGER_LOG = "Passenger with id {} created";
+    public static final String UPDATE_PASSENGER_LOG = "Passenger with id {} updated";
+    public static final String DELETE_PASSENGER_LOG = "Passenger with id {} deleted";
+    public static final String GET_PASSENGER_LOG = "Get passenger with id {}";
+    public static final String GET_PASSENGER_BY_PHONE_LOG = "Get passenger with phone {}";
+    public static final String GET_ALL_PASSENGERS_LOG = "Get all passengers";
+    public static final String GET_PAGEABLE_PASSENGERS_LOG = "Get all passengers(pageable)";
 
 }
