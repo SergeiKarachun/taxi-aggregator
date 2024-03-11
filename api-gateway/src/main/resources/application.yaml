@@ -3,6 +3,20 @@ server:
 spring:
   application:
     name: api-gateway
+  security:
+    oauth2:
+      client:
+        provider:
+          keycloak:
+            issuer-uri: http://localhost:8080/realms/taxi-aggregator
+        registration:
+          keycloak:
+            provider: keycloak
+            client-id: taxi-aggregator-client
+            client-secret: ZwCLHfu0Cd1L9MB3zBjQSptsu1Ux3T0r
+            authorization-grant-type: authorization_code
+            scope:
+              - openid
   cloud:
     gateway:
       discovery:
@@ -49,6 +63,7 @@ spring:
               args:
                 name: payment-service
                 fallbackUri: forward:/fallback/payment-service
+      default-filters: TokenRelay=
 
 eureka:
   client:
