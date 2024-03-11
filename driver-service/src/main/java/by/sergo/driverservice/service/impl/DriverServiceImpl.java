@@ -21,7 +21,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 import static by.sergo.driverservice.util.ConstantUtil.*;
 import static by.sergo.driverservice.util.ExceptionMessageUtil.CAN_NOT_CREATE_DRIVER_MESSAGE;
