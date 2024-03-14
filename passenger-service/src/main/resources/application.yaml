@@ -7,7 +7,6 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-#          issuer-uri: http://localhost:8080/realms/taxi-aggregator-realm
           jwk-set-uri: http://keycloak:8080/realms/taxi-aggregator-realm/protocol/openid-connect/certs
   cloud:
     discovery:

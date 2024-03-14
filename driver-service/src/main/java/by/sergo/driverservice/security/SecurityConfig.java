@@ -1,6 +1,5 @@
-package by.sergo.passengerservice.security;
+package by.sergo.driverservice.security;
 
-import by.sergo.passengerservice.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -9,7 +8,6 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.access.AccessDeniedHandler;
 
 @Configuration
 @EnableWebSecurity
@@ -25,13 +23,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/actuator/**").permitAll())
                 .oauth2ResourceServer((oauth2) -> oauth2
                         .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthConverter)))
-                .exceptionHandling(ex -> ex.accessDeniedHandler(accessDeniedHandler()))
         ;
 
         return http.build();
-    }
-    @Bean
-    public AccessDeniedHandler accessDeniedHandler(){
-        return new CustomAccessDeniedHandler();
     }
 }
