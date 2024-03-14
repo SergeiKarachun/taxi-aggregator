@@ -8,21 +8,25 @@ spring:
       client:
         provider:
           keycloak:
-            issuer-uri: http://localhost:8080/realms/taxi-aggregator
+            issuer-uri: http://localhost:8080/realms/taxi-aggregator-realm
         registration:
-          keycloak:
+          taxi-aggregator-client:
             provider: keycloak
             client-id: taxi-aggregator-client
-            client-secret: ZwCLHfu0Cd1L9MB3zBjQSptsu1Ux3T0r
+            client-secret: KlPbiFtJCFELGoOpNDkqzP1uGvDLZi3Z
             authorization-grant-type: authorization_code
-            scope:
-              - openid
+            scope: openid
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://localhost:8080/realms/taxi-aggregator-realm/protocol/openid-connect/certs
   cloud:
     gateway:
       discovery:
         locator:
           enabled: true
           lowerCaseServiceId: true
+      default-filters:
+        - TokenRelay=
       routes:
         - id: passenger-service
           predicates:
@@ -63,7 +67,6 @@ spring:
               args:
                 name: payment-service
                 fallbackUri: forward:/fallback/payment-service
-      default-filters: TokenRelay=
 
 eureka:
   client:
