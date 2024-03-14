@@ -3,6 +3,11 @@ server:
 spring:
   application:
     name: payment-service
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://keycloak:8080/realms/taxi-aggregator-realm/protocol/openid-connect/certs
   cloud:
     discovery:
       client:
@@ -20,6 +25,11 @@ spring:
     change-log: db/changelog/db.changelog-master.xml
   jpa:
     show-sql: true
+jwt:
+  auth:
+    converter:
+      resource-id: taxi-aggregator-client
+      principal-attribute: sub
 feign:
   client:
     config:
