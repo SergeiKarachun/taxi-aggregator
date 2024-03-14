@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -19,6 +20,7 @@ public class RideController {
     private final RideServiceImpl rideService;
 
     @PostMapping
+    @PreAuthorize("hasRole('USER') || hasRole('ADMIN')")
     @Operation(description = "Create a ride.")
     public ResponseEntity<RideResponse> create(@RequestBody @Valid RideCreateUpdateRequest dto) {
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -26,24 +28,28 @@ public class RideController {
     }
 
     @PutMapping("/{id}/reject")
+    @PreAuthorize("hasRole('USER') || hasRole('ADMIN')")
     @Operation(description = "Reject the ride by id.")
     public ResponseEntity<RideResponse> rejectRide(@PathVariable("id") String id) {
         return ResponseEntity.ok(rideService.rejectRide(id));
     }
 
     @PutMapping("/{id}/start")
+    @PreAuthorize("hasRole('USER') || hasRole('ADMIN')")
     @Operation(description = "Start a ride by id.")
     public ResponseEntity<RideResponse> startRide(@PathVariable("id") String id) {
         return ResponseEntity.ok(rideService.startRide(id));
     }
 
     @PutMapping("/{id}/end")
+    @PreAuthorize("hasRole('USER') || hasRole('ADMIN')")
     @Operation(description = "End a ride by id")
     public ResponseEntity<RideResponse> endRide(@PathVariable("id") String id) {
         return ResponseEntity.ok(rideService.endRide(id));
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(description = "Delete a ride by id.")
     public ResponseEntity<RideResponse> deleteById(@PathVariable("id") String id) {
         return ResponseEntity.status(HttpStatus.NO_CONTENT)
@@ -51,12 +57,14 @@ public class RideController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('USER') || hasRole('ADMIN')")
     @Operation(description = "Get a ride by id.")
     public ResponseEntity<RideResponse> getById(@PathVariable("id") String id) {
         return ResponseEntity.ok(rideService.getById(id));
     }
 
     @GetMapping("/passenger/{id}")
+    @PreAuthorize("hasRole('USER') || hasRole('ADMIN')")
     @Operation(description = "Get passenger rides.")
     public ResponseEntity<RideListResponse> getByPassengerId(@PathVariable("id") Long id,
                                                              @RequestParam(value = "status", required = true) String status,
@@ -68,6 +76,7 @@ public class RideController {
     }
 
     @GetMapping("/driver/{id}")
+    @PreAuthorize("hasRole('USER') || hasRole('ADMIN')")
     @Operation(description = "Get driver rides.")
     public ResponseEntity<RideListResponse> getByDriverId(@PathVariable("id") Long id,
                                                           @RequestParam(value = "status", required = true) String status,
@@ -79,6 +88,7 @@ public class RideController {
     }
 
     @PutMapping(value = "/{id}")
+    @PreAuthorize("hasRole('USER') || hasRole('ADMIN')")
     @Operation(description = "Update a ride by id.")
     public ResponseEntity<RideResponse> update(@RequestBody @Valid RideCreateUpdateRequest dto,
                                                @PathVariable("id") String id) {

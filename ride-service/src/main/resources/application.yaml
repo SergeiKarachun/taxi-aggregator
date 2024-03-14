@@ -3,6 +3,11 @@ server:
 spring:
   application:
     name: ride-service
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://keycloak:8080/realms/taxi-aggregator-realm/protocol/openid-connect/certs
   data:
     mongodb:
       authentication-database: admin
@@ -27,6 +32,11 @@ kafka:
     count: 1
   replicas:
     count: 1
+jwt:
+  auth:
+    converter:
+      resource-id: taxi-aggregator-client
+      principal-attribute: sub
 mongock:
   migration-scan-package: by.sergo.rideservice.config
 feign:
