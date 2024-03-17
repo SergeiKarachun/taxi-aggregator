@@ -8,7 +8,7 @@ services:
       - 5433:5432
     environment:
       - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
     volumes:
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
@@ -23,7 +23,7 @@ services:
       - data:/data
     environment:
       - MONGO_INITDB_ROOT_USERNAME=root
-      - MONGO_INITDB_ROOT_PASSWORD=example
+      - MONGO_INITDB_ROOT_PASSWORD=${DB_MONGO_PASSWORD}
     networks:
       - taxi_aggregator
 
@@ -150,6 +150,21 @@ services:
     ports:
       - '8761:8761'
 
+  keycloak:
+    image: quay.io/keycloak/keycloak:21.1.1
+    container_name: keycloak
+    hostname: localhost
+    environment:
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin
+    volumes:
+      - ./keycloak:/opt/keycloak/data/import
+    entrypoint: '/opt/keycloak/bin/kc.sh start-dev --import-realm'
+    ports:
+      - "8080:8080"
+    networks:
+      - taxi_aggregator
+
   api-gateway:
     image: api-gateway:0.0.1
     container_name: api-gateway
@@ -158,6 +173,9 @@ services:
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
       - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
+      - SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_TAXI_AGGREGATOR_CLIENT_SECRET=${KEYCLOAK_SECRET}
+      - SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_ISSUER_URI=http://keycloak:8080/realms/taxi-aggregator-realm
+      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI=http://keycloak:8080/realms/taxi-aggregator-realm/protocol/openid-connect/certs
     depends_on:
       - eureka-server
     ports:
@@ -176,6 +194,7 @@ services:
         - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
         - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
         - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
+        - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI=http://keycloak:8080/realms/taxi-aggregator-realm/protocol/openid-connect/certs
     depends_on:
       - postgrestaxi
       - eureka-server
@@ -195,6 +214,7 @@ services:
       - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
       - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
+      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI=http://keycloak:8080/realms/taxi-aggregator-realm/protocol/openid-connect/certs
     depends_on:
       - eureka-server
       - postgrestaxi
@@ -217,6 +237,7 @@ services:
       - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
       - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
+      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI=http://keycloak:8080/realms/taxi-aggregator-realm/protocol/openid-connect/certs
     depends_on:
       - eureka-server
       - mongo_db
@@ -235,24 +256,10 @@ services:
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
       - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
+      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI=http://keycloak:8080/realms/taxi-aggregator-realm/protocol/openid-connect/certs
     depends_on:
       - eureka-server
       - postgrestaxi
-
-  keycloak:
-    image: quay.io/keycloak/keycloak:21.1.1
-    container_name: keycloak
-    environment:
-      - KEYCLOAK_ADMIN=admin
-      - KEYCLOAK_ADMIN_PASSWORD=admin
-    volumes:
-      - ./keycloak:/opt/keycloak/data/import
-    ports:
-      - "8080:8080"
-    networks:
-      - taxi_aggregator
-    command:
-      - start-dev
 
 volumes:
   data: {}

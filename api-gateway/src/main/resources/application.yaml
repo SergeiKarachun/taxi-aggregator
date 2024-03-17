@@ -13,7 +13,7 @@ spring:
           taxi-aggregator-client:
             provider: keycloak
             client-id: taxi-aggregator-client
-            client-secret: KlPbiFtJCFELGoOpNDkqzP1uGvDLZi3Z
+            client-secret: ${KEYCLOAK_SECRET}
             authorization-grant-type: authorization_code
             scope: openid
       resourceserver:
