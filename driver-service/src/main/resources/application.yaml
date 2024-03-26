@@ -3,6 +3,11 @@ server:
 spring:
   application:
     name: driver-service
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://keycloak:8080/realms/taxi-aggregator-realm/protocol/openid-connect/certs
   cloud:
     discovery:
       client:
@@ -25,6 +30,11 @@ spring:
       group-id:
         ride: ride-creation-group
         status: edit-status-group
+jwt:
+  auth:
+    converter:
+      resource-id: taxi-aggregator-client
+      principal-attribute: sub
 topic:
   name:
     ride: create.ride

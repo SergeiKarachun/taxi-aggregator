@@ -3,12 +3,30 @@ server:
 spring:
   application:
     name: api-gateway
+  security:
+    oauth2:
+      client:
+        provider:
+          keycloak:
+            issuer-uri: http://localhost:8080/realms/taxi-aggregator-realm
+        registration:
+          taxi-aggregator-client:
+            provider: keycloak
+            client-id: taxi-aggregator-client
+            client-secret: ${KEYCLOAK_SECRET}
+            authorization-grant-type: authorization_code
+            scope: openid
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://localhost:8080/realms/taxi-aggregator-realm/protocol/openid-connect/certs
   cloud:
     gateway:
       discovery:
         locator:
           enabled: true
           lowerCaseServiceId: true
+      default-filters:
+        - TokenRelay=
       routes:
         - id: passenger-service
           predicates:

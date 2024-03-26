@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -18,29 +19,34 @@ public class DriverController {
     private final DriverServiceImpl driverService;
 
     @PostMapping
+    @PreAuthorize("hasRole('USER') || hasRole('ADMIN')")
     public ResponseEntity<DriverResponse> create(@RequestBody @Valid DriverCreateUpdateRequest dto) {
         return ResponseEntity.status(HttpStatus.CREATED)
                              .body(driverService.create(dto));
     }
 
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasRole('USER') || hasRole('ADMIN')")
     public ResponseEntity<DriverResponse> update(@RequestBody @Valid DriverCreateUpdateRequest dto,
                                                  @PathVariable("id") Long id) {
         return ResponseEntity.ok(driverService.update(id,dto));
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<DriverResponse> delete(@PathVariable("id") Long id) {
         return ResponseEntity.status(HttpStatus.NO_CONTENT)
                              .body(driverService.delete(id));
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('USER') || hasRole('ADMIN')")
     public ResponseEntity<DriverResponse> getById(@PathVariable("id") Long id) {
         return ResponseEntity.ok(driverService.getById(id));
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<DriverListResponse> getAll(@RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
                                                      @RequestParam(value = "size", required = false, defaultValue = "10") Integer size,
                                                      @RequestParam(value = "orderBy", required = false) String orderBy) {
@@ -49,6 +55,7 @@ public class DriverController {
     }
 
     @GetMapping("/available")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<DriverListResponse> getAllAvailable(@RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
                                                               @RequestParam(value = "size", required = false, defaultValue = "10") Integer size,
                                                               @RequestParam(value = "orderBy", required = false) String orderBy) {
@@ -57,6 +64,7 @@ public class DriverController {
     }
 
     @PutMapping("/{id}/status")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<DriverResponse> changeStatus(@PathVariable("id") Long id) {
         return ResponseEntity.ok(driverService.changeStatus(id));
     }

@@ -5,6 +5,7 @@ import by.sergo.paymentservice.service.impl.TransactionStoreServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -14,6 +15,7 @@ public class TransactionStoreController {
     private final TransactionStoreServiceImpl transactionStoreService;
 
     @GetMapping("/driver/{id}")
+    @PreAuthorize("hasRole('USER') || hasRole('ADMIN')")
     @Operation(summary = "Get all transaction by driverId")
     public ResponseEntity<ListTransactionStoreResponse> getDriverTransaction(@PathVariable("id") Long driverId,
                                                                              @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
@@ -22,6 +24,7 @@ public class TransactionStoreController {
     }
 
     @GetMapping("/passenger/{id}")
+    @PreAuthorize("hasRole('USER') || hasRole('ADMIN')")
     @Operation(summary = "Get all transaction by passengerId")
     public ResponseEntity<ListTransactionStoreResponse> getPassengerTransaction(@PathVariable("id") Long passengerId,
                                                                                 @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,

@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -18,12 +19,14 @@ public class PassengerController {
     private final PassengerServiceImpl passengerServiceImpl;
 
     @PostMapping
+    @PreAuthorize("hasRole('USER') || hasRole('ADMIN')")
     public ResponseEntity<PassengerResponse> create(@RequestBody @Valid PassengerCreateUpdateRequest dto) {
         return ResponseEntity.status(HttpStatus.CREATED)
                              .body(passengerServiceImpl.create(dto));
     }
 
     @PutMapping(value = "/{id}")
+    @PreAuthorize("hasRole('USER') || hasRole('ADMIN')")
     public ResponseEntity<PassengerResponse> update(@RequestBody @Valid PassengerCreateUpdateRequest dto,
                                                     @PathVariable("id") Long id) {
         var passengerResponseDto = passengerServiceImpl.update(id, dto);
@@ -31,18 +34,21 @@ public class PassengerController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('USER') || hasRole('ADMIN')")
     public ResponseEntity<PassengerResponse> getById(@PathVariable("id") Long id) {
         var passengerResponseDto = passengerServiceImpl.getById(id);
         return ResponseEntity.ok(passengerResponseDto);
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<PassengerResponse> deleteById(@PathVariable("id") Long id) {
         return ResponseEntity.status(HttpStatus.NO_CONTENT)
                              .body(passengerServiceImpl.delete(id));
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<PassengerListResponse> getAll(@RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
                                                         @RequestParam(value = "size", required = false, defaultValue = "10") Integer size,
                                                         @RequestParam(value = "orderBy", required = false) String orderBy) {
